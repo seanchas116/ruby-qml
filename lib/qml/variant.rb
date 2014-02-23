@@ -12,6 +12,7 @@ module QML
     TYPE_Q_VARIANT_LIST = 9
     TYPE_Q_VARIANT_MAP = 8
     TYPE_Q_VARIANT_HASH = 28
+    TYPE_Q_DATE_TIME = 16
 
     def self.from_raw_pointer(ptr)
       Variant.new.tap do |variant|
@@ -47,6 +48,11 @@ module QML
         result = {}
         call_c(:get_hash, lambda { |str, ptr| result[str.force_encoding("utf-8").to_sym] = Variant.from_raw_pointer(ptr).value })
         result
+      when TYPE_Q_DATE_TIME
+        ffi_buf = FFI::MemoryPointer.new(:int, 8)
+        call_c(:get_time, ffi_buf)
+        nums = ffi_buf.read_array_of_int(8)
+        Time.new(nums[0], nums[1], nums[2], nums[3], nums[4], nums[5] + nums[6] * Rational(1, 1000), nums[7])
       else
         nil
       end
@@ -65,6 +71,8 @@ module QML
           Variant.call_c(:from_float, val)
         when String
           Variant.call_c(:from_string, val)
+        when Symbol
+          Variant.call_c(:from_string, val.to_s)
         when Array
           ffi_values = val.map { |value| Variant.new(value).pointer }
           ffi_values_array = FFI::MemoryPointer.new(:pointer, val.length).write_array_of_pointer(ffi_values)
@@ -75,6 +83,8 @@ module QML
           ffi_values = val.each_value.map { |v| Variant.new(v).pointer }
           ffi_values_array = FFI::MemoryPointer.new(:pointer, val.length).write_array_of_pointer(ffi_values)
           Variant.call_c(:from_hash, val.length, ffi_keys_array, ffi_values_array)
+        when Time
+          Variant.call_c(:from_time, val.year, val.month, val.day, val.hour, val.min, val.sec, val.nsec / 1_000_000, val.gmt_offset)
         else
           Variant.call_c(:new)
         end

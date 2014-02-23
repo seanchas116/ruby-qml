@@ -13,6 +13,7 @@ module QML
     attach_function :qvariant_from_string, [:string], :pointer
     attach_function :qvariant_from_array, [:int, :pointer], :pointer
     attach_function :qvariant_from_hash, [:int, :pointer, :pointer], :pointer
+    attach_function :qvariant_from_time, [:int, :int, :int, :int, :int, :int, :int, :int], :pointer
 
     attach_function :qvariant_to_int, [:pointer], :int
     attach_function :qvariant_to_float, [:pointer], :double
@@ -24,6 +25,7 @@ module QML
     attach_function :qvariant_get_string, [:pointer, :qvariant_get_string_callback], :void
     attach_function :qvariant_get_array, [:pointer, :qvariant_get_array_callback], :void
     attach_function :qvariant_get_hash, [:pointer, :qvariant_get_hash_callback], :void
+    attach_function :qvariant_get_time, [:pointer, :pointer], :void
 
     attach_function :qvariant_type, [:pointer], :int
     attach_function :qvariant_convert, [:pointer, :int], :pointer

@@ -1,4 +1,5 @@
 #include <QVariant>
+#include <QDateTime>
 #include <QDebug>
 
 extern "C" {
@@ -48,6 +49,13 @@ QVariant *qvariant_from_hash(int count, const char **keys, QVariant **variants)
     return new QVariant(variantHash);
 }
 
+QVariant *qvariant_from_time(int year, int month, int day, int hour, int minute, int second, int msecond, int gmtOffset)
+{
+    QDateTime dateTime(QDate(year, month, day), QTime(hour, minute, second, msecond));
+    dateTime.setUtcOffset(gmtOffset);
+    return new QVariant(dateTime);
+}
+
 int qvariant_to_int(const QVariant *variant)
 {
     return variant->toInt();
@@ -76,6 +84,21 @@ void qvariant_get_hash(const QVariant *variant, void (*callback)(const char *, Q
     for (auto i = hash.begin(); i != hash.end(); ++i) {
         callback(i.key().toUtf8().data(), new QVariant(i.value()));
     }
+}
+
+void qvariant_get_time(const QVariant *variant, int *out)
+{
+    auto dateTime = variant->toDateTime();
+    auto date = dateTime.date();
+    auto time = dateTime.time();
+    out[0] = date.year();
+    out[1] = date.month();
+    out[2] = date.day();
+    out[3] = time.hour();
+    out[4] = time.minute();
+    out[5] = time.second();
+    out[6] = time.msec();
+    out[7] = dateTime.utcOffset();
 }
 
 int qvariant_type(const QVariant *variant)

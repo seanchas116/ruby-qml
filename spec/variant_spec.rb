@@ -27,6 +27,26 @@ describe QML::Variant do
     expect(variant.value).to eq(false)
   end
 
+  it 'can store symbol as string' do
+    variant = QML::Variant.new :hoge
+    expect(variant.value).to eq('hoge')
+  end
+
+  it 'can store time' do
+    time = Time.now
+    variant = QML::Variant.new(time)
+    result = variant.value
+
+    expect(result.year).to eq(time.year)
+    expect(result.month).to eq(time.month)
+    expect(result.day).to eq(time.day)
+    expect(result.hour).to eq(time.hour)
+    expect(result.min).to eq(time.min)
+    expect(result.sec).to eq(time.sec)
+    expect(result.nsec / 1_000_000).to eq(time.nsec / 1_000_000)
+    expect(result.gmt_offset).to eq(result.gmt_offset)
+  end
+
   it 'can store array' do
     array = [1, 'foo', [2, 3]]
     variant = QML::Variant.new array

@@ -1,56 +1,85 @@
-require 'qml/c_library'
+require 'ffi'
 
 module QML
-
   class Variant
+
+    extend FFI::DataConverter
 
     TYPE_VOID = 43
     TYPE_BOOL = 1
     TYPE_INT = 2
     TYPE_DOUBLE = 6
     TYPE_Q_STRING = 10
+    TYPE_Q_VARIANT = 41
     TYPE_Q_VARIANT_LIST = 9
     TYPE_Q_VARIANT_MAP = 8
     TYPE_Q_VARIANT_HASH = 28
     TYPE_Q_DATE_TIME = 16
 
-    def self.from_raw_pointer(ptr)
-      Variant.new.tap do |variant|
-        variant.pointer = ptr
+    attr_reader :pointer
+
+    def self.type_name(type_num)
+      CLib.qvariant_type_name(type_num)
+    end
+
+    def self.new(val)
+      case val
+      when Variant
+        val.dup
+      when FFI::Pointer
+        super(val)
+      when true, false
+        CLib.qvariant_from_boolean(val)
+      when Integer
+        CLib.qvariant_from_int(val)
+      when Float
+        CLib.qvariant_from_float(val)
+      when String
+        CLib.qvariant_from_string(val)
+      when Symbol
+        CLib.qvariant_from_string(val.to_s)
+      when Array
+        CLib.qvariant_from_array(FromArrayStruct.from_array(val))
+      when Hash
+        CLib.qvariant_from_hash(FromHashStruct.from_hash(val))
+      when Time
+        CLib.qvariant_from_time(val.year, val.month, val.day, val.hour, val.min, val.sec, val.nsec / 1_000_000, val.gmt_offset)
+      else
+        CLib.qvariant_new
       end
     end
 
-    def self.call_c(function_name, *arg)
-      CLibrary.send("qvariant_#{function_name}", *arg)
+    def initialize(ptr)
+      fail TypeError, "Null pointer" if ptr.null?
+      @pointer = FFI::AutoPointer.new(ptr, CLib.method(:qvariant_destroy))
     end
 
-    def initialize(val = nil)
-      self.value = val unless val.nil?
-    end
-
+    # TODO: support more types including uint, float
     def value
       case type_number
       when TYPE_BOOL
-        call_c(:to_int) != 0
+        CLib.qvariant_to_int(self) != 0
       when TYPE_INT
-        call_c(:to_int)
+        CLib.qvariant_to_int(self)
       when TYPE_DOUBLE
-        call_c(:to_float)
+        CLib.qvariant_to_float(self)
       when TYPE_Q_STRING
         result = nil
-        call_c(:get_string, lambda { |str| result = str.force_encoding("utf-8") })
+        CLib.qvariant_get_string(self, ->(str) { result = str.force_encoding("utf-8") })
         result
+      when TYPE_Q_VARIANT
+        CLib.qvariant_to_qvariant(self).value
       when TYPE_Q_VARIANT_LIST
         result = []
-        call_c(:get_array, lambda { |ptr| result << Variant.from_raw_pointer(ptr).value })
+        CLib.qvariant_get_array(self, ->(variant) { result << variant.value })
         result
       when TYPE_Q_VARIANT_HASH, TYPE_Q_VARIANT_MAP
         result = {}
-        call_c(:get_hash, lambda { |str, ptr| result[str.force_encoding("utf-8").to_sym] = Variant.from_raw_pointer(ptr).value })
+        CLib.qvariant_get_hash(self, ->(key, variant) { result[key.force_encoding("utf-8").to_sym] = variant.value })
         result
       when TYPE_Q_DATE_TIME
         ffi_buf = FFI::MemoryPointer.new(:int, 8)
-        call_c(:get_time, ffi_buf)
+        CLib.qvariant_get_time(self, ffi_buf)
         nums = ffi_buf.read_array_of_int(8)
         Time.new(nums[0], nums[1], nums[2], nums[3], nums[4], nums[5] + nums[6] * Rational(1, 1000), nums[7])
       else
@@ -58,46 +87,16 @@ module QML
       end
     end
 
-    def value=(val)
-      self.pointer =
-        case val
-        when true
-          Variant.call_c(:from_boolean, 1)
-        when false
-          Variant.call_c(:from_boolean, 0)
-        when Integer
-          Variant.call_c(:from_int, val)
-        when Float
-          Variant.call_c(:from_float, val)
-        when String
-          Variant.call_c(:from_string, val)
-        when Symbol
-          Variant.call_c(:from_string, val.to_s)
-        when Array
-          ffi_values = val.map { |value| Variant.new(value).pointer }
-          ffi_values_array = FFI::MemoryPointer.new(:pointer, val.length).write_array_of_pointer(ffi_values)
-          Variant.call_c(:from_array, val.length, ffi_values_array)
-        when Hash
-          ffi_keys = val.each_key.map { |k| FFI::MemoryPointer::from_string(k.to_s) }
-          ffi_keys_array = FFI::MemoryPointer.new(:pointer, val.length).write_array_of_pointer(ffi_keys)
-          ffi_values = val.each_value.map { |v| Variant.new(v).pointer }
-          ffi_values_array = FFI::MemoryPointer.new(:pointer, val.length).write_array_of_pointer(ffi_values)
-          Variant.call_c(:from_hash, val.length, ffi_keys_array, ffi_values_array)
-        when Time
-          Variant.call_c(:from_time, val.year, val.month, val.day, val.hour, val.min, val.sec, val.nsec / 1_000_000, val.gmt_offset)
-        else
-          Variant.call_c(:new)
-        end
-      val
-    end
-
     def type_number
-      return TYPE_VOID if @pointer.nil?
-      call_c(:type)
+      CLib.qvariant_type(self)
     end
 
     def convert(type_num)
-      Variant.from_raw_pointer(call_c(:convert, type_num))
+      CLib.qvariant_convert(self, type_num)
+    end
+
+    def valid?
+      CLib.qvariant_is_valid(self)
     end
 
     def to_i
@@ -120,22 +119,46 @@ module QML
       value.to_hash
     end
 
-    def pointer
-      @pointer
+    def to_sym
+      value.to_sym
     end
 
-    def pointer=(ptr)
-      raise "Pointer is not a FFI::Pointer" unless ptr.is_a?(FFI::Pointer)
-      raise "Null pointer" if ptr.null?
-      @pointer = FFI::AutoPointer.new(ptr, CLibrary.method(:qvariant_destroy))
+    native_type FFI::Type::POINTER
+
+    def self.to_native(variant, ctx)
+      variant = Variant.new(variant) unless variant.is_a?(Variant)
+      ptr = variant.pointer
+      fail TypeError, "Null pointer" if ptr.null?
+      ptr
     end
 
-    def call_c(function_name, *arg)
-      raise "Uninitialized" if @pointer.nil?
-      raise "Null pointer" if @pointer.null?
-      CLibrary.send("qvariant_#{function_name}", @pointer, *arg)
+    def self.from_native(ptr, ctx)
+      self.new(ptr)
     end
 
+    class FromArrayStruct < FFI::Struct
+      layout :count, :int, :variants, :pointer
+      def self.from_array(array)
+        struct = self.new
+        struct[:count] = array.length
+        values = array.map { |value| Variant.new(value).pointer }
+        struct[:variants] = FFI::MemoryPointer.new(:pointer, array.length).write_array_of_pointer(values)
+        struct
+      end
+    end
+
+    class FromHashStruct < FFI::Struct
+      layout :count, :int, :keys, :pointer, :variants, :pointer
+      def self.from_hash(hash)
+        struct = self.new
+        struct[:count] = hash.length
+        keys = hash.each_key.map { |k| FFI::MemoryPointer::from_string(k.to_s) }
+        struct[:keys] = FFI::MemoryPointer.new(:pointer, hash.length).write_array_of_pointer(keys)
+        values = hash.each_value.map { |v| Variant.new(v).pointer }
+        struct[:variants] = FFI::MemoryPointer.new(:pointer, hash.length).write_array_of_pointer(values)
+        struct
+      end
+    end
   end
 end
 

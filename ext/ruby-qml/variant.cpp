@@ -2,7 +2,25 @@
 #include <QDateTime>
 #include <QDebug>
 
+namespace {
+
+template <typename THashLike>
+void getHashLike(const QVariant &variant, void (*callback)(const char *, QVariant *))
+{
+    auto hash = variant.value<THashLike>();
+    for (auto i = hash.begin(); i != hash.end(); ++i) {
+        callback(i.key().toUtf8().data(), new QVariant(i.value()));
+    }
+}
+
+}
+
 extern "C" {
+
+const char *qvariant_type_name(int typeNum)
+{
+    return QMetaType::typeName(typeNum);
+}
 
 QVariant *qvariant_new()
 {
@@ -29,22 +47,35 @@ QVariant *qvariant_from_string(const char *str)
     return new QVariant(QString(str));
 }
 
-QVariant *qvariant_from_array(int count, QVariant **variants)
+struct VariantArray
+{
+    int count;
+    const QVariant **variants;
+};
+
+QVariant *qvariant_from_array(VariantArray array)
 {
     QVariantList variantList;
-    variantList.reserve(count);
-    for (int i = 0; i < count; ++i) {
-        variantList << *variants[i];
+    variantList.reserve(array.count);
+    for (int i = 0; i < array.count; ++i) {
+        variantList << *array.variants[i];
     }
     return new QVariant(variantList);
 }
 
-QVariant *qvariant_from_hash(int count, const char **keys, QVariant **variants)
+struct StringVariantArray
+{
+    int count;
+    const char **keys;
+    const QVariant **variants;
+};
+
+QVariant *qvariant_from_hash(StringVariantArray array)
 {
     QVariantHash variantHash;
-    variantHash.reserve(count);
-    for (int i = 0; i < count; ++i) {
-        variantHash[keys[i]] = *variants[i];
+    variantHash.reserve(array.count);
+    for (int i = 0; i < array.count; ++i) {
+        variantHash[array.keys[i]] = *array.variants[i];
     }
     return new QVariant(variantHash);
 }
@@ -66,9 +97,23 @@ double qvariant_to_float(const QVariant *variant)
     return variant->toDouble();
 }
 
+QVariant *qvariant_to_qvariant(const QVariant *variant)
+{
+    return new QVariant(variant->value<QVariant>());
+}
+
 void qvariant_get_string(const QVariant *variant, void (*callback)(const char *))
 {
-    callback(variant->toString().toUtf8().data());
+    switch (variant->userType()) {
+    case QMetaType::QString:
+        callback(variant->toString().toUtf8().data());
+        break;
+    case QMetaType::QByteArray:
+        callback(variant->toByteArray().data());
+        break;
+    default:
+        break;
+    }
 }
 
 void qvariant_get_array(const QVariant *variant, void (*callback)(QVariant *))
@@ -80,9 +125,15 @@ void qvariant_get_array(const QVariant *variant, void (*callback)(QVariant *))
 
 void qvariant_get_hash(const QVariant *variant, void (*callback)(const char *, QVariant *))
 {
-    auto hash = variant->toHash();
-    for (auto i = hash.begin(); i != hash.end(); ++i) {
-        callback(i.key().toUtf8().data(), new QVariant(i.value()));
+    switch (variant->userType()) {
+    case QMetaType::QVariantHash:
+        getHashLike<QVariantHash>(*variant, callback);
+        break;
+    case QMetaType::QVariantMap:
+        getHashLike<QVariantMap>(*variant, callback);
+        break;
+    default:
+        break;
     }
 }
 
@@ -108,11 +159,21 @@ int qvariant_type(const QVariant *variant)
 
 QVariant *qvariant_convert(const QVariant *variant, int type)
 {
+    if (type == QMetaType::QVariant) {
+        return new QVariant(QMetaType::QVariant, variant);
+    }
+
     QVariant result = *variant;
+
     if (!result.convert(type)) {
-        return nullptr;
+        return new QVariant();
     }
     return new QVariant(result);
+}
+
+int qvariant_is_valid(const QVariant *variant)
+{
+    return variant->isValid();
 }
 
 QVariant *qvariant_dup(const QVariant *variant)

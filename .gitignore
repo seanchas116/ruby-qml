@@ -32,6 +32,7 @@ tmp
 
 *.pro.user
 *.pro.user.*
+*.moc
 moc_*.cpp
 qrc_*.cpp
 Makefile

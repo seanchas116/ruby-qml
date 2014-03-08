@@ -49,6 +49,13 @@ public slots:
         return "last";
     }
 
+    QString overloadedMethod(const QString &x, int y)
+    {
+        Q_UNUSED(x)
+        Q_UNUSED(y)
+        return "2 params";
+    }
+
     void emitSomeSignal(const QString &arg)
     {
         emit someSignal(arg);

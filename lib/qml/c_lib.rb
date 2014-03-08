@@ -6,7 +6,10 @@ module QML
   module CLib
 
     extend FFI::Library
-    LIBPATH = Pathname(__FILE__) + '../../../ext/ruby-qml/libruby-qml.1.0.0.dylib'
+
+    LIBPATH = %w{so dylib dll}
+        .map { |suffix| Pathname(__FILE__) + "../../../ext/ruby-qml/libruby-qml.1.0.0.#{suffix}"  }
+        .find { |path| path.exist? }
     ffi_lib LIBPATH.to_s
 
     module IntAsBoolean

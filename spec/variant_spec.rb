@@ -14,6 +14,11 @@ describe QML::Variant do
       expect(variant.to_s).to eq('poyopoyo')
     end
 
+    it 'can store non-ascii string' do
+      variant = QML::Variant.new 'ぽよぽよ'
+      expect(variant.to_s).to eq('ぽよぽよ')
+    end
+
     it 'can store float' do
       variant = QML::Variant.new 3.1416
       expect(variant.to_f).to eq(3.1416)
@@ -56,8 +61,14 @@ describe QML::Variant do
     end
 
     it 'can store hash' do
-      hash = { one: 1, two: 2, three: "三" }
+      hash = { one: 1, two: 2, three: "three" }
       variant = QML::Variant.new hash
+      expect(variant.to_hash).to eq(hash)
+    end
+
+    it 'can store hash with non-ascii keys' do
+      hash = { あ: 1, い: 2 }
+      variant = QML::Variant.new(hash)
       expect(variant.to_hash).to eq(hash)
     end
 

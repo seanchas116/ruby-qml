@@ -2,6 +2,87 @@ require 'qml/qt_object_base'
 require 'ropework'
 
 module QML
+
+  class MetaMethod
+    attr_reader :meta_object, :index
+
+    def initialize(metaobj, index)
+      @meta_object = metaobj
+      @index = index
+    end
+
+    def name
+      @name ||= CLib.qmetaobject_method_name(meta_object, index).to_sym
+    end
+
+    def arity
+      @arity ||= arg_names.length
+    end
+
+    def arg_names
+      @arg_names ||= CLib.qmetaobject_method_parameter_names(meta_object, index).to_a.map(&:to_sym)
+    end
+
+    def arg_types
+      @arg_types ||= CLib.qmetaobject_method_parameter_types(meta_object, index).to_a.map(&MetaType.method(:new))
+    end
+
+    def signal?
+      @is_signal = CLib.qmetaobject_method_is_signal(meta_object, index) if @is_signal.nil?
+      @is_signal
+    end
+
+    def invoke(object, *args)
+      unless arity == args.length
+        fail ArgumentError, "wrong number of arguments for Qt method (#{args.length} for #{arity})"
+      end
+
+      args = args.lazy.zip(arg_types).map do |arg, type|
+        arg = Variant.new(arg)
+        arg.convert(type).tap do |converted|
+          unless converted.valid?
+            fail TypeError, "cannot convert #{arg.meta_type.name} to #{type.name}"
+          end
+        end
+      end.to_a
+
+      CLib.qmetaobject_method_invoke(meta_object, object.pointer, index, Variant.new(args)).value
+    end
+
+    def connect_signal(object, &func)
+      fail TypeError, "#{meta_object.name}::#{name} is not a signal" unless signal?
+
+      callback = ->(args) { func.call(*args) }
+      CLib.qmetaobject_signal_connect(meta_object, object.pointer, index, callback)
+      object.gc_protect(callback)
+    end
+  end
+
+  class MetaProperty
+    attr_reader :meta_object, :index
+
+    def initialize(metaobj, index)
+      @meta_object = metaobj
+      @index = index
+    end
+
+    def name
+      @name ||= CLib.qmetaobject_property_name(meta_object, index).to_sym
+    end
+
+    def notify_signal
+      @notify_signal ||= MetaMethod.new(meta_object, CLib.qmetaobject_property_notify_signal(meta_object, index))
+    end
+
+    def set_value(object, value)
+      CLib.qmetaobject_property_set(meta_object, object.pointer, index, Variant.new(value))
+    end
+
+    def get_value(object)
+      CLib.qmetaobject_property_get(meta_object, object.pointer, index).value
+    end
+  end
+
   class MetaObject
 
     extend FFI::DataConverter
@@ -37,81 +118,23 @@ module QML
       self.class.add(self)
     end
 
-    def class_name
-      CLib.qmetaobject_class_name(self).to_sym
+    def name
+      @name ||= CLib.qmetaobject_class_name(self).to_sym
     end
 
-    def method_count
-      CLib.qmetaobject_method_count(self)
+    # @return [Array<QML::MetaMethod>]
+    def meta_methods
+      @meta_methods ||= CLib.qmetaobject_method_count(self).times.map { |i| MetaMethod.new(self, i) }
     end
 
-    def method_name(index)
-      CLib.qmetaobject_method_name(self, index).to_sym
+    # @return [Array<QML::MetaProperty>]
+    def meta_properties
+      @meta_properties ||= CLib.qmetaobject_property_count(self).times.map { |i| MetaProperty.new(self, i) }
     end
 
-    def method_parameter_names(index)
-      CLib.qmetaobject_method_parameter_names(self, index).to_a.map(&:to_sym)
-    end
-
-    def method_parameter_types(index)
-      CLib.qmetaobject_method_parameter_types(self, index).to_a
-    end
-
-    def method_signal?(index)
-      CLib.qmetaobject_method_is_signal(self, index)
-    end
-
-    def invoke_method(object, index, *args)
-      param_names = method_parameter_names(index)
-      param_types = method_parameter_types(index)
-      unless param_types.length == args.length
-        fail ArgumentError, "wrong number of arguments for Qt method (#{args.length} for #{param_types.length})"
-      end
-
-      args = args.lazy.zip(param_names, param_types).map do |arg, name, type|
-        arg = Variant.new(arg)
-        arg.convert(type).tap do |converted|
-          unless converted.valid?
-            fail TypeError, "cannot convert #{Variant.type_name(arg.type_number)} to #{Variant.type_name(type)}"
-          end
-        end
-      end.to_a
-
-      CLib.qmetaobject_method_invoke(self, object.pointer, index, Variant.new(args)).value
-    end
-
-    def connect_signal(object, index, &func)
-      callback = ->(args) { func.call(*args) }
-      CLib.qmetaobject_signal_connect(self, object.pointer, index, callback)
-      object.gc_protect(callback)
-    end
-
-    def property_count
-      CLib.qmetaobject_property_count(self)
-    end
-
-    def property_name(index)
-      CLib.qmetaobject_property_name(self, index).to_sym
-    end
-
-    def property_notify_signal(index)
-      CLib.qmetaobject_property_notify_signal(self, index)
-    end
-
-    def set_property(object, index, value)
-      CLib.qmetaobject_property_set(self, object.pointer, index, Variant.new(value))
-    end
-
-    def get_property(object, index)
-      CLib.qmetaobject_property_get(self, object.pointer, index).value
-    end
-
-    def enum_count
-      CLib.qmetaobject_enum_count(self)
-    end
-
-    def get_enum(index)
-      CLib.qmetaobject_enum_get(self, index).to_hash
+    # @return [Array<Hash{Symbol=>Integer}>]
+    def enums
+      CLib.qmetaobject_enum_count(self).times.map { |i| CLib.qmetaobject_enum_get(self, i).to_hash }
     end
 
     private
@@ -124,27 +147,26 @@ module QML
 
           # define methods
           # TODO: support method overloading by number of arguments
-          metaobj.method_count.times do |i|
-            name = metaobj.method_name(i)
-            if metaobj.method_signal?(i)
-              signal name, metaobj.method_parameter_names(i)
+          metaobj.meta_methods.each do |m|
+            if m.signal?
+              signal(m.name, m.arg_names)
             else
-              define_method(name) do |*args|
-                metaobj.invoke_method(self, i, *args)
+              define_method(m.name) do |*args|
+                m.invoke(self, *args)
               end
             end
           end
 
           # define properties
-          metaobj.property_count.times do |i|
-            property(metaobj.property_name(i))
-              .getter { metaobj.get_property(self, i) }
-              .setter { |newval| metaobj.set_property(self, i, newval) }
+          metaobj.meta_properties.each do |p|
+            property(p.name)
+              .getter { p.get_value(self) }
+              .setter { |newval| p.set_value(self, newval) }
           end
 
           # define enums
-          metaobj.enum_count.times do |i|
-            metaobj.get_enum(i).each do |k, v|
+          metaobj.enums.each do |enum|
+            enum.each do |k, v|
               const_set(k, v)
             end
           end
@@ -153,23 +175,18 @@ module QML
             super(obj_ptr)
 
             # connect properties
-            metaobj.property_count.times do |i|
-              property = properties[metaobj.property_name(i)]
-
-              notify_signal_index = metaobj.property_notify_signal(i)
-
-              signal = signals[metaobj.method_name(notify_signal_index)]
+            metaobj.meta_properties.each do |p|
+              property = properties[p.name]
+              signal = signals[p.notify_signal.name]
               signal.connect do |newval|
                 property.changed.emit(newval)
               end
             end
 
             # connect signals
-            metaobj.method_count.times do |i|
-              next unless metaobj.method_signal?(i)
-
-              signal = signals[metaobj.method_name(i)]
-              metaobj.connect_signal(self, i) do |*args|
+            metaobj.meta_methods.select(&:signal?).each do |s|
+              signal = signals[s.name]
+              s.connect_signal(self) do |*args|
                 signal.emit(*args)
               end
             end

@@ -17,7 +17,7 @@ void getHashLike(const QVariant &variant, void (*callback)(const char *, QVarian
 
 extern "C" {
 
-const char *qvariant_type_name(int typeNum)
+const char *qmetatype_name(int typeNum)
 {
     return QMetaType::typeName(typeNum);
 }
@@ -97,9 +97,15 @@ double qvariant_to_float(const QVariant *variant)
     return variant->toDouble();
 }
 
-QVariant *qvariant_to_qvariant(const QVariant *variant)
+QVariant *qvariant_unnest(const QVariant *variant)
 {
-    return new QVariant(variant->value<QVariant>());
+    auto v = *variant;
+    while (true) {
+        if (v.userType() != QMetaType::QVariant) {
+            return new QVariant(v);
+        }
+        v = v.value<QVariant>();
+    }
 }
 
 void qvariant_get_string(const QVariant *variant, void (*callback)(const char *))

@@ -1,6 +1,19 @@
 require 'ffi'
 
 module QML
+
+  class MetaType
+    attr_reader :id
+
+    def initialize(id)
+      @id = id
+    end
+
+    def name
+      @name ||= CLib.qmetatype_name(@id)
+    end
+  end
+
   class Variant
 
     extend FFI::DataConverter
@@ -17,10 +30,6 @@ module QML
     TYPE_Q_DATE_TIME = 16
 
     attr_reader :pointer
-
-    def self.type_name(type_num)
-      CLib.qvariant_type_name(type_num)
-    end
 
     def self.new(val)
       case val
@@ -56,7 +65,7 @@ module QML
 
     # TODO: support more types including uint, float
     def value
-      case type_number
+      case meta_type.id
       when TYPE_BOOL
         CLib.qvariant_to_int(self) != 0
       when TYPE_INT
@@ -68,7 +77,7 @@ module QML
         CLib.qvariant_get_string(self, ->(str) { result = str.force_encoding("utf-8") })
         result
       when TYPE_Q_VARIANT
-        CLib.qvariant_to_qvariant(self).value
+        CLib.qvariant_unnest(self).value
       when TYPE_Q_VARIANT_LIST
         result = []
         CLib.qvariant_get_array(self, ->(variant) { result << variant.value })
@@ -87,12 +96,12 @@ module QML
       end
     end
 
-    def type_number
-      CLib.qvariant_type(self)
+    def meta_type
+      MetaType.new(CLib.qvariant_type(self))
     end
 
-    def convert(type_num)
-      CLib.qvariant_convert(self, type_num)
+    def convert(metatype)
+      CLib.qvariant_convert(self, metatype.id)
     end
 
     def valid?

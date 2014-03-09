@@ -49,7 +49,7 @@ module QML
     attach_function :qmetaobject_enum_count, [MetaObject], :int
     attach_function :qmetaobject_enum_get, [MetaObject, :int], Variant
 
-    attach_function :qvariant_type_name, [:int], :string
+    attach_function :qmetatype_name, [:int], :string
 
     attach_function :qvariant_new, [], Variant
     attach_function :qvariant_from_int, [:int], Variant
@@ -62,7 +62,7 @@ module QML
 
     attach_function :qvariant_to_int, [Variant], :int
     attach_function :qvariant_to_float, [Variant], :double
-    attach_function :qvariant_to_qvariant, [Variant], Variant
+    attach_function :qvariant_unnest, [Variant], Variant
 
     callback :qvariant_get_string_callback, [:string], :void
     callback :qvariant_get_array_callback, [Variant], :void

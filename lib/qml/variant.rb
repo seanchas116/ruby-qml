@@ -54,7 +54,7 @@ module QML
       when Time
         CLib.qvariant_from_time(val.year, val.month, val.day, val.hour, val.min, val.sec, val.nsec / 1_000_000, val.gmt_offset)
       else
-        CLib.qvariant_new
+        fail TypeError, "Cannot initialize QML::Variant with #{val.class.name}"
       end
     end
 

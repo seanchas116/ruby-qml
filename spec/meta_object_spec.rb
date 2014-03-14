@@ -17,15 +17,17 @@ describe QML::MetaObject do
     end
 
     describe '#meta_methods' do
-      it 'returns the meta methods' do
+      it 'returns a hash of meta method arrays grouped by their names' do
         meta_methods = @metaobj.meta_methods
-        expect(meta_methods.length).to eq(9)
+        expect(meta_methods).to be_a(Hash)
+        expect(meta_methods.length).to eq(7)
       end
     end
 
     describe '#meta_properties' do
-      it 'returns the meta properties' do
+      it 'returns a hash of the meta properties' do
         meta_properties = @metaobj.meta_properties
+        expect(meta_properties).to be_a(Hash)
         expect(meta_properties.length).to eq(1)
       end
     end
@@ -33,11 +35,9 @@ describe QML::MetaObject do
     describe '#enums' do
       it 'returns the enums' do
         enums = @metaobj.enums
-        expected = [
-          {
-            Apple: 0, Banana: 1, Orange: 2
-          }
-        ]
+        expected = {
+          Apple: 0, Banana: 1, Orange: 2
+        }
         expect(enums).to eq(expected)
       end
     end
@@ -57,8 +57,8 @@ describe QML::MetaObject do
     describe 'QML::MetaMethod' do
 
       before do
-        @method = @metaobj.meta_methods.find { |m| m.name == :normalMethod }
-        @signal = @metaobj.meta_methods.find { |m| m.name == :someSignal }
+        @method = @metaobj.meta_methods[:normalMethod].first
+        @signal = @metaobj.meta_methods[:someSignal].first
       end
 
       describe '#name' do
@@ -105,7 +105,7 @@ describe QML::MetaObject do
           prc = ->(str) { received = str }
           @signal.connect_signal(@obj, &prc)
 
-          @metaobj.meta_methods.find { |m| m.name == :emitSomeSignal }.invoke(@obj, 'foo')
+          @metaobj.meta_methods[:emitSomeSignal].first.invoke(@obj, 'foo')
           expect(received).to eq('foo')
         end
       end
@@ -114,7 +114,7 @@ describe QML::MetaObject do
     describe 'QML::MetaProperty' do
 
       before do
-        @property = @metaobj.meta_properties.find { |p| p.name == :name }
+        @property = @metaobj.meta_properties[:name]
       end
 
       describe '#name' do

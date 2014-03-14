@@ -122,44 +122,66 @@ module QML
       @name ||= CLib.qmetaobject_class_name(self).to_sym
     end
 
-    # @return [Array<QML::MetaMethod>]
+    # @return [Hash{Symbol=>Array<QML::MetaMethod>}]
     def meta_methods(include_super: false)
       @meta_methods ||= begin
         count = CLib.qmetaobject_method_count(self)
         offset = CLib.qmetaobject_method_offset(self)
-        range = include_super ? (0 ... count) : (offset ... count)
-        range.map { |i| MetaMethod.new(self, i) }
+        (offset...count).map { |i| MetaMethod.new(self, i) }.group_by(&:name)
+      end
+
+      if include_super && super_meta_object
+        super_meta_object.meta_methods(include_super: true).merge(@meta_methods)
+      else
+        @meta_methods
       end
     end
 
-    # @return [Array<QML::MetaProperty>]
+    # @return [Hash{Symbol=>QML::MetaProperty}]
     def meta_properties(include_super: false)
       @meta_properties ||= begin
         count = CLib.qmetaobject_property_count(self)
         offset = CLib.qmetaobject_property_offset(self)
-        range = include_super ? (0 ... count) : (offset ... count)
-        range.map { |i| MetaProperty.new(self, i) }
+        property_groups = (offset...count).map { |i| MetaProperty.new(self, i) }.group_by(&:name)
+        Hash[property_groups.map { |k, v| [k, v.first] }]
+      end
+
+      if include_super && super_meta_object
+        super_meta_object.meta_properties.merge(@meta_properties)
+      else
+        @meta_properties
       end
     end
 
-    # @return [Array<Hash{Symbol=>Integer}>]
+    # @return [Hash{Symbol=>Integer}]
     def enums(include_super: false)
-      @enum_counts ||= begin
+      @enums ||= begin
         count = CLib.qmetaobject_enum_count(self)
         offset = CLib.qmetaobject_enum_offset(self)
-        range = include_super ? (0 ... count) : (offset ... count)
-        range.map { |i| CLib.qmetaobject_enum_get(self, i).to_hash }
+        (offset...count).map { |i| CLib.qmetaobject_enum_get(self, i).to_hash }.inject({}, &:merge)
+      end
+
+      if include_super && super_meta_object
+        super_meta_object.enums(include_super: true).merge(@enums)
+      else
+        @enums
       end
     end
 
     def super_meta_object
-      CLib.qmetaobject_super(self)
+      @superclass ||= CLib.qmetaobject_super(self)
     end
 
     def ancestors
       s = super_meta_object
       s ? [self] + s.ancestors : [self]
     end
+
+    protected
+
+      def overridden?(ary, item)
+        ary.any? { |each_item| each_item.name == item}
+      end
 
     private
 
@@ -171,7 +193,7 @@ module QML
 
           # define methods
           # TODO: support method overloading
-          metaobj.meta_methods(include_super: true).each do |m|
+          metaobj.meta_methods(include_super: true).each_value.lazy.map(&:last).each do |m|
             if m.signal?
               signal(m.name, m.arg_names)
             else
@@ -181,27 +203,23 @@ module QML
             end
           end
 
-
-
           # define properties
-          metaobj.meta_properties(include_super: true).each do |p|
+          metaobj.meta_properties(include_super: true).each_value do |p|
             property(p.name)
               .getter { p.get_value(self) }
               .setter { |newval| p.set_value(self, newval) }
           end
 
           # define enums
-          metaobj.enums(include_super: true).each do |enum|
-            enum.each do |k, v|
-              const_set(k, v)
-            end
+          metaobj.enums(include_super: true).each do |k, v|
+            const_set(k, v)
           end
 
           define_method(:initialize) do |obj_ptr|
             super(obj_ptr)
 
             # connect properties
-            metaobj.meta_properties.each do |p|
+            metaobj.meta_properties.each_value do |p|
               property = properties[p.name]
               signal = signals[p.notify_signal.name]
               signal.connect do |newval|
@@ -210,7 +228,7 @@ module QML
             end
 
             # connect signals
-            metaobj.meta_methods.select(&:signal?).each do |s|
+            metaobj.meta_methods.values.flatten.select(&:signal?).each do |s|
               signal = signals[s.name]
               s.connect_signal(self) do |*args|
                 signal.emit(*args)

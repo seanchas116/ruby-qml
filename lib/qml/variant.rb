@@ -1,54 +1,11 @@
 require 'ffi'
+require 'qml/meta_type'
 
 module QML
-
-  class MetaType
-    attr_reader :id
-
-    def initialize(id)
-      @id = id
-    end
-
-    def name
-      @name ||= CLib.qmetatype_name(@id)
-    end
-
-    def ruby_class
-      case id
-      when TYPE_BOOL
-        [TrueClass, FalseClass]
-      when TYPE_INT
-        Integer
-      when TYPE_DOUBLE
-        Float
-      when TYPE_Q_STRING
-        String
-      when TYPE_Q_VARIANT_LIST
-        Array
-      when TYPE_Q_VARIANT_HASH, TYPE_Q_VARIANT_MAP
-        Hash
-      when TYPE_Q_DATE_TIME
-        Time
-      else
-        nil
-      end
-    end
-  end
 
   class Variant
 
     extend FFI::DataConverter
-
-    TYPE_VOID = 43
-    TYPE_BOOL = 1
-    TYPE_INT = 2
-    TYPE_DOUBLE = 6
-    TYPE_Q_STRING = 10
-    TYPE_Q_VARIANT = 41
-    TYPE_Q_VARIANT_LIST = 9
-    TYPE_Q_VARIANT_MAP = 8
-    TYPE_Q_VARIANT_HASH = 28
-    TYPE_Q_DATE_TIME = 16
 
     attr_reader :pointer
 
@@ -86,28 +43,28 @@ module QML
 
     # TODO: support more types including uint, float
     def value
-      case meta_type.id
-      when TYPE_BOOL
+      case meta_type
+      when MetaType::BOOL
         CLib.qvariant_to_int(self) != 0
-      when TYPE_INT
+      when MetaType::INT
         CLib.qvariant_to_int(self)
-      when TYPE_DOUBLE
+      when MetaType::DOUBLE
         CLib.qvariant_to_float(self)
-      when TYPE_Q_STRING
+      when MetaType::Q_STRING
         result = nil
         CLib.qvariant_get_string(self, ->(str) { result = str.force_encoding("utf-8") })
         result
-      when TYPE_Q_VARIANT
+      when MetaType::Q_VARIANT
         CLib.qvariant_unnest(self).value
-      when TYPE_Q_VARIANT_LIST
+      when MetaType::Q_VARIANT_LIST
         result = []
         CLib.qvariant_get_array(self, ->(variant) { result << variant.value })
         result
-      when TYPE_Q_VARIANT_HASH, TYPE_Q_VARIANT_MAP
+      when MetaType::Q_VARIANT_HASH, MetaType::Q_VARIANT_MAP
         result = {}
         CLib.qvariant_get_hash(self, ->(key, variant) { result[key.force_encoding("utf-8").to_sym] = variant.value })
         result
-      when TYPE_Q_DATE_TIME
+      when MetaType::Q_DATE_TIME
         ffi_buf = FFI::MemoryPointer.new(:int, 8)
         CLib.qvariant_get_time(self, ffi_buf)
         nums = ffi_buf.read_array_of_int(8)

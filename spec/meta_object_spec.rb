@@ -69,7 +69,7 @@ describe QML::MetaObject do
 
       describe '#arg_types' do
         it 'returns the QMetaType ids of the arguments' do
-          expect(@method.arg_types.map(&:id)).to eq([QML::Variant::TYPE_INT, QML::Variant::TYPE_Q_STRING])
+          expect(@method.arg_types).to eq([QML::MetaType::INT, QML::MetaType::Q_STRING])
         end
       end
 

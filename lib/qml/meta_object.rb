@@ -41,7 +41,7 @@ module QML
         arg = Variant.new(arg)
         arg.convert(type).tap do |converted|
           unless converted.valid?
-            fail TypeError, "cannot convert #{arg.meta_type.name} to #{type.name}"
+            fail TypeError, "cannot convert #{arg.meta_type} to #{type}"
           end
         end
       end.to_a

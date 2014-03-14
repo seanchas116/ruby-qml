@@ -81,16 +81,16 @@ describe QML::Variant do
   describe '#meta_type' do
     it 'returns the MetaType of the storage type' do
       variant = QML::Variant.new 10
-      expect(variant.meta_type.id).to eq(QML::Variant::TYPE_INT)
+      expect(variant.meta_type).to eq(QML::MetaType::INT)
       variant = QML::Variant.new 'abcd'
-      expect(variant.meta_type.id).to eq(QML::Variant::TYPE_Q_STRING)
+      expect(variant.meta_type).to eq(QML::MetaType::Q_STRING)
     end
   end
 
   describe '#convert' do
     it 'returns a new variant which value is converted to the specified type' do
       variant = QML::Variant.new 1234
-      variant = variant.convert(QML::MetaType.new(QML::Variant::TYPE_Q_STRING))
+      variant = variant.convert(QML::MetaType::Q_STRING)
       expect(variant.value).to eq('1234')
     end
   end

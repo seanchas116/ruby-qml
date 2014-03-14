@@ -40,6 +40,11 @@ QVariant *qmetaobject_class_name(const QMetaObject *metaObj)
     return new QVariant(QString(metaObj->className()));
 }
 
+int qmetaobject_method_offset(const QMetaObject *metaObj)
+{
+    return metaObj->methodOffset();
+}
+
 int qmetaobject_method_count(const QMetaObject *metaObj)
 {
     return metaObj->methodCount();
@@ -131,6 +136,11 @@ void qmetaobject_signal_connect(const QMetaObject *metaObj, QObject *obj, int me
     new SignalForwarder(obj, methodSig.data(), callback);
 }
 
+int qmetaobject_property_offset(const QMetaObject *metaObj)
+{
+    return metaObj->propertyOffset();
+}
+
 int qmetaobject_property_count(const QMetaObject *metaObj)
 {
     return metaObj->propertyCount();
@@ -156,6 +166,11 @@ int qmetaobject_property_notify_signal(const QMetaObject *metaObj, int index)
     return metaObj->property(index).notifySignal().methodIndex();
 }
 
+int qmetaobject_enum_offset(const QMetaObject *metaObj)
+{
+    return metaObj->enumeratorOffset();
+}
+
 int qmetaobject_enum_count(const QMetaObject *metaObj)
 {
     return metaObj->enumeratorCount();
@@ -169,6 +184,11 @@ QVariant *qmetaobject_enum_get(const QMetaObject *metaObj, int enumIndex)
         hash[enumerator.key(i)] = enumerator.value(i);
     }
     return new QVariant(hash);
+}
+
+const QMetaObject *qmetaobject_super(const QMetaObject *metaObj)
+{
+    return metaObj->superClass();
 }
 
 }

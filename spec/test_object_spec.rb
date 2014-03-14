@@ -26,7 +26,7 @@ describe QML::TestObject do
   end
   describe '#overloadedMethod' do
     it 'should call the method with the same arity' do
-      expect(@obj.overloadedMethod(1, 'foo')).to eq('2 params')
+      expect(@obj.overloadedMethod('foo', 1)).to eq('2 params')
     end
     context 'when multiple methods with the same arity are provided' do
       it 'should call the method defined last' do

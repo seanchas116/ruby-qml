@@ -34,6 +34,7 @@ module QML
     callback :qmetaobject_signal_callback, [Variant], :void
 
     attach_function :qmetaobject_class_name, [MetaObject], Variant
+    attach_function :qmetaobject_method_offset, [MetaObject], :int
     attach_function :qmetaobject_method_count, [MetaObject], :int
     attach_function :qmetaobject_method_name, [MetaObject, :int], Variant
     attach_function :qmetaobject_method_parameter_names, [MetaObject, :int], Variant
@@ -41,13 +42,16 @@ module QML
     attach_function :qmetaobject_method_is_signal, [MetaObject, :int], IntAsBoolean
     attach_function :qmetaobject_method_invoke, [MetaObject, :pointer, :int, Variant], Variant
     attach_function :qmetaobject_signal_connect, [MetaObject, :pointer, :int, :qmetaobject_signal_callback], :void
+    attach_function :qmetaobject_property_offset, [MetaObject], :int
     attach_function :qmetaobject_property_count, [MetaObject], :int
     attach_function :qmetaobject_property_name, [MetaObject, :int], Variant
     attach_function :qmetaobject_property_get, [MetaObject, :pointer, :int], Variant
     attach_function :qmetaobject_property_set, [MetaObject, :pointer, :int, Variant], :void
     attach_function :qmetaobject_property_notify_signal, [MetaObject, :int], :int
     attach_function :qmetaobject_enum_count, [MetaObject], :int
+    attach_function :qmetaobject_enum_offset, [MetaObject], :int
     attach_function :qmetaobject_enum_get, [MetaObject, :int], Variant
+    attach_function :qmetaobject_super, [MetaObject], MetaObject
 
     attach_function :qmetatype_name, [:int], :string
 

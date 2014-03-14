@@ -12,6 +12,27 @@ module QML
     def name
       @name ||= CLib.qmetatype_name(@id)
     end
+
+    def ruby_class
+      case id
+      when TYPE_BOOL
+        [TrueClass, FalseClass]
+      when TYPE_INT
+        Integer
+      when TYPE_DOUBLE
+        Float
+      when TYPE_Q_STRING
+        String
+      when TYPE_Q_VARIANT_LIST
+        Array
+      when TYPE_Q_VARIANT_HASH, TYPE_Q_VARIANT_MAP
+        Hash
+      when TYPE_Q_DATE_TIME
+        Time
+      else
+        nil
+      end
+    end
   end
 
   class Variant

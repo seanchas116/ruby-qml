@@ -123,18 +123,37 @@ module QML
     end
 
     # @return [Array<QML::MetaMethod>]
-    def meta_methods
-      @meta_methods ||= CLib.qmetaobject_method_count(self).times.map { |i| MetaMethod.new(self, i) }
+    def meta_methods(include_super: false)
+      @meta_methods ||= begin
+        count = CLib.qmetaobject_method_count(self)
+        offset = CLib.qmetaobject_method_offset(self)
+        range = include_super ? (0 ... count) : (offset ... count)
+        range.map { |i| MetaMethod.new(self, i) }
+      end
     end
 
     # @return [Array<QML::MetaProperty>]
-    def meta_properties
-      @meta_properties ||= CLib.qmetaobject_property_count(self).times.map { |i| MetaProperty.new(self, i) }
+    def meta_properties(include_super: false)
+      @meta_properties ||= begin
+        count = CLib.qmetaobject_property_count(self)
+        offset = CLib.qmetaobject_property_offset(self)
+        range = include_super ? (0 ... count) : (offset ... count)
+        range.map { |i| MetaProperty.new(self, i) }
+      end
     end
 
     # @return [Array<Hash{Symbol=>Integer}>]
-    def enums
-      CLib.qmetaobject_enum_count(self).times.map { |i| CLib.qmetaobject_enum_get(self, i).to_hash }
+    def enums(include_super: false)
+      @enum_counts ||= begin
+        count = CLib.qmetaobject_enum_count(self)
+        offset = CLib.qmetaobject_enum_offset(self)
+        range = include_super ? (0 ... count) : (offset ... count)
+        range.map { |i| CLib.qmetaobject_enum_get(self, i).to_hash }
+      end
+    end
+
+    def super_meta_object
+      CLib.qmetaobject_super(self)
     end
 
     private
@@ -146,8 +165,8 @@ module QML
           include Ropework::SignalDef
 
           # define methods
-          # TODO: support method overloading by number of arguments
-          metaobj.meta_methods.each do |m|
+          # TODO: support method overloading
+          metaobj.meta_methods(include_super: true).each do |m|
             if m.signal?
               signal(m.name, m.arg_names)
             else
@@ -158,14 +177,14 @@ module QML
           end
 
           # define properties
-          metaobj.meta_properties.each do |p|
+          metaobj.meta_properties(include_super: true).each do |p|
             property(p.name)
               .getter { p.get_value(self) }
               .setter { |newval| p.set_value(self, newval) }
           end
 
           # define enums
-          metaobj.enums.each do |enum|
+          metaobj.enums(include_super: true).each do |enum|
             enum.each do |k, v|
               const_set(k, v)
             end

@@ -42,9 +42,9 @@ describe QML::MetaObject do
       end
     end
 
-    describe '#super_meta_object' do
+    describe '#superclass' do
       it 'returns the super meta object' do
-        expect(@metaobj.super_meta_object.name).to eq(:QObject)
+        expect(@metaobj.superclass.name).to eq(:QObject)
       end
     end
 

@@ -130,8 +130,8 @@ module QML
         (offset...count).map { |i| MetaMethod.new(self, i) }.group_by(&:name)
       end
 
-      if include_super && super_meta_object
-        super_meta_object.meta_methods(include_super: true).merge(@meta_methods)
+      if include_super && superclass
+        superclass.meta_methods(include_super: true).merge(@meta_methods)
       else
         @meta_methods
       end
@@ -146,8 +146,8 @@ module QML
         Hash[property_groups.map { |k, v| [k, v.first] }]
       end
 
-      if include_super && super_meta_object
-        super_meta_object.meta_properties.merge(@meta_properties)
+      if include_super && superclass
+        superclass.meta_properties.merge(@meta_properties)
       else
         @meta_properties
       end
@@ -161,19 +161,19 @@ module QML
         (offset...count).map { |i| CLib.qmetaobject_enum_get(self, i).to_hash }.inject({}, &:merge)
       end
 
-      if include_super && super_meta_object
-        super_meta_object.enums(include_super: true).merge(@enums)
+      if include_super && superclass
+        superclass.enums(include_super: true).merge(@enums)
       else
         @enums
       end
     end
 
-    def super_meta_object
+    def superclass
       @superclass ||= CLib.qmetaobject_super(self)
     end
 
     def ancestors
-      s = super_meta_object
+      s = superclass
       s ? [self] + s.ancestors : [self]
     end
 

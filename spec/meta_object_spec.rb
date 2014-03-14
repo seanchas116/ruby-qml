@@ -42,6 +42,18 @@ describe QML::MetaObject do
       end
     end
 
+    describe '#super_meta_object' do
+      it 'returns the super meta object' do
+        expect(@metaobj.super_meta_object.name).to eq(:QObject)
+      end
+    end
+
+    describe '#ancestors' do
+      it 'returns the ancestor meta objects' do
+        expect(@metaobj.ancestors.map(&:name)).to eq([:TestObject, :QObject])
+      end
+    end
+
     describe 'QML::MetaMethod' do
 
       before do

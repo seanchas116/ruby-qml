@@ -95,7 +95,7 @@ module QML
     end
 
     def self.from_native(ptr, ctx)
-      self.new(ptr)
+      ptr.null? ? nil : self.new(ptr)
     end
 
     attr_reader :pointer
@@ -156,6 +156,11 @@ module QML
       CLib.qmetaobject_super(self)
     end
 
+    def ancestors
+      s = super_meta_object
+      s ? [self] + s.ancestors : [self]
+    end
+
     private
 
       def create_class
@@ -175,6 +180,8 @@ module QML
               end
             end
           end
+
+
 
           # define properties
           metaobj.meta_properties(include_super: true).each do |p|

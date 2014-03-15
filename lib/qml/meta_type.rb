@@ -44,6 +44,8 @@ module QML
         Hash
       when Q_DATE_TIME
         Time
+      when Q_VARIANT
+        Object
       else
         nil
       end

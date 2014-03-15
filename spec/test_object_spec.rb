@@ -10,7 +10,7 @@ describe QML::TestObject do
     end
     context 'if the arguments are not convertible' do
       it 'should raise error' do
-        expect { @obj.normalMethod([1, 2], 'bar') }.to raise_error(TypeError)
+        expect { @obj.normalMethod([1, 2], 'bar') }.to raise_error(ArgumentError)
       end
     end
     context 'if the number of arguments is wrong' do

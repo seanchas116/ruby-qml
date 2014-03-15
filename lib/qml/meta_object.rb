@@ -192,13 +192,24 @@ module QML
           include Ropework::SignalDef
 
           # define methods
-          # TODO: support method overloading
-          metaobj.meta_methods(include_super: true).each_value.lazy.map(&:last).each do |m|
-            if m.signal?
-              signal(m.name, m.arg_names)
+          metaobj.meta_methods(include_super: true).each do |name, methods|
+            if methods.any?(&:signal?)
+              signal(name)
             else
-              define_method(m.name) do |*args|
-                m.invoke(self, *args)
+              define_method(name) do |*args|
+                classes = args.map(&:class)
+                puts "classes: #{classes}"
+
+                method = methods.find { |method|
+                  next false unless method.arity == args.length
+                  arg_classes = method.arg_types.map(&:ruby_class)
+                  puts "arg_classes: #{arg_classes}"
+                  arg_classes.zip(classes).all? { |arg_class, given_class|
+                    arg_class >= given_class
+                  }
+                }
+                fail ArgumentError, "no matching method for given parameter types #{classes}" unless method
+                method.invoke(self, *args)
               end
             end
           end
@@ -228,10 +239,13 @@ module QML
             end
 
             # connect signals
-            metaobj.meta_methods.values.flatten.select(&:signal?).each do |s|
-              signal = signals[s.name]
-              s.connect_signal(self) do |*args|
-                signal.emit(*args)
+            metaobj.meta_methods(include_super: true).each do |name, methods|
+              signal = signals[name]
+              signal_methods = methods.select(&:signal?)
+              signal_methods.each do |signal_method|
+                signal_method.connect_signal(self) do |*args|
+                  signal.emit(*args)
+                end
               end
             end
           end

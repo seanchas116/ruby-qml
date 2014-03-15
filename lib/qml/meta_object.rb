@@ -193,6 +193,7 @@ module QML
 
           # define methods
           metaobj.meta_methods(include_super: true).each do |name, methods|
+            next if name == :deleteLater # deleteLater must not be called
             if methods.any?(&:signal?)
               signal(name)
             else

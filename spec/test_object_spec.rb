@@ -41,6 +41,11 @@ describe QML::TestObject do
       expect(spy.args.first).to eq(['poyopoyo'])
     end
   end
+  describe '#deleteLater' do
+    it 'cannot be called' do
+      expect(@obj.respond_to?(:deleteLater)).to eq(false)
+    end
+  end
   describe 'name property' do
     it 'should be set' do
       @obj.name = 'abcd'

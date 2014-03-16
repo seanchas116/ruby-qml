@@ -98,6 +98,7 @@ module QML
       ptr.null? ? nil : self.new(ptr)
     end
 
+    attr_accessor :ruby_class
     attr_reader :pointer
 
     def self.find(class_name)
@@ -109,12 +110,9 @@ module QML
       @metaobjects << metaobject
     end
 
-    def created_class
-      @created_class ||= create_class
-    end
-
     def initialize(pointer)
       @pointer = pointer
+      @ruby_class = create_class
       self.class.add(self)
     end
 

@@ -23,7 +23,7 @@ module QML
     end
 
     def inspect
-      "QML::MetaType[#{name}]"
+      "<QML::MetaType:#{name}>"
     end
 
     alias_method :to_s, :name

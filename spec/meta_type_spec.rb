@@ -21,7 +21,7 @@ describe QML::MetaType do
 
   describe '#inspect' do
     it 'returns the detail representation of the meta type' do
-      expect(@metatype.inspect).to eq('QML::MetaType[QString]')
+      expect(@metatype.inspect).to eq('<QML::MetaType:QString>')
     end
   end
 

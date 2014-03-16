@@ -241,7 +241,7 @@ module QML
             super(obj_ptr)
 
             # connect properties
-            metaobj.meta_properties.each_value do |p|
+            metaobj.meta_properties(include_super: true).each_value do |p|
               property = properties[p.name]
               signal = signals[p.notify_signal.name]
               signal.connect do |newval|

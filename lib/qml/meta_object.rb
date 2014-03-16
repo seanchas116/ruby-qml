@@ -187,6 +187,14 @@ module QML
       pointer.to_i.hash
     end
 
+    def to_s
+      name.to_s
+    end
+
+    def inspect
+      "<QML::MetaObject:#{name}>"
+    end
+
     protected
 
       def overridden?(ary, item)

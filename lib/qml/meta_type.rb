@@ -9,7 +9,7 @@ module QML
     end
 
     def name
-      @name ||= CLib.qmetatype_name(@id)
+      @name ||= CLib.qmetatype_name(@id).to_sym
     end
 
     def ==(other)
@@ -22,11 +22,13 @@ module QML
       id.hash
     end
 
+    def to_s
+      name.to_s
+    end
+
     def inspect
       "<QML::MetaType:#{name}>"
     end
-
-    alias_method :to_s, :name
 
     def ruby_class
       case self

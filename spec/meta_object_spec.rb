@@ -10,9 +10,16 @@ describe QML::MetaObject do
       @obj = QML::QtObjectBase.new(QML::CLib.testobject_new)
     end
 
-    describe '#name' do
+    describe '#name, #to_s' do
       it 'should return class name' do
         expect(@metaobj.name).to eq(:TestObject)
+        expect(@metaobj.to_s).to eq('TestObject')
+      end
+    end
+
+    describe '#inspect' do
+      it 'returns the inspection' do
+        expect(@metaobj.inspect).to eq('<QML::MetaObject:TestObject>')
       end
     end
 

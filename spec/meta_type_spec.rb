@@ -14,7 +14,7 @@ describe QML::MetaType do
 
   describe '#name, #to_s' do
     it 'returns the type name' do
-      expect(@metatype.name).to eq('QString')
+      expect(@metatype.name).to eq(:QString)
       expect(@metatype.to_s).to eq('QString')
     end
   end

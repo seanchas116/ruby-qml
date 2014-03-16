@@ -54,6 +54,20 @@ describe QML::MetaObject do
       end
     end
 
+    describe '#==, #eql?' do
+      it 'compares 2 meta objects by its pointer value' do
+        metaobj2 = QML::MetaObject.new(QML::CLib.testobject_static_metaobject)
+        expect(@metaobj == metaobj2).to eq(true)
+        expect(@metaobj.eql?(metaobj2)).to eq(true)
+      end
+    end
+
+    describe '#hash' do
+      it 'generates the hash from its pointer value' do
+        expect(@metaobj.hash).to eq(@metaobj.pointer.to_i.hash)
+      end
+    end
+
     describe 'QML::MetaMethod' do
 
       before do

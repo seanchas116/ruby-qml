@@ -177,6 +177,16 @@ module QML
       s ? [self] + s.ancestors : [self]
     end
 
+    def ==(other)
+      pointer == other.pointer
+    end
+
+    alias_method :eql?, :==
+
+    def hash
+      pointer.to_i.hash
+    end
+
     protected
 
       def overridden?(ary, item)

@@ -3,6 +3,8 @@
 #include <QVariant>
 #include <QDebug>
 
+namespace RubyQml {
+
 class TestObject : public QObject
 {
     Q_OBJECT
@@ -77,16 +79,18 @@ private:
     QString mName;
 };
 
+} // RubyQml
+
 extern "C" {
 
 QObject *testobject_new()
 {
-    return new TestObject();
+    return new RubyQml::TestObject();
 }
 
 const QMetaObject *testobject_static_metaobject()
 {
-    return &TestObject::staticMetaObject;
+    return &RubyQml::TestObject::staticMetaObject;
 }
 
 }

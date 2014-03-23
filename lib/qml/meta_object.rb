@@ -115,7 +115,7 @@ module QML
     end
 
     def name
-      @name ||= CLib.qmetaobject_class_name(self).to_sym
+      @name ||= CLib.qmetaobject_class_name(self).to_s
     end
 
     # @return [Hash{Symbol=>Array<QML::MetaMethod>}]

@@ -12,14 +12,14 @@ describe QML::MetaObject do
 
     describe '#name, #to_s' do
       it 'should return class name' do
-        expect(@metaobj.name).to eq(:TestObject)
-        expect(@metaobj.to_s).to eq('TestObject')
+        expect(@metaobj.name).to eq('RubyQml::TestObject')
+        expect(@metaobj.to_s).to eq('RubyQml::TestObject')
       end
     end
 
     describe '#inspect' do
       it 'returns the inspection' do
-        expect(@metaobj.inspect).to eq('<QML::MetaObject:TestObject>')
+        expect(@metaobj.inspect).to eq('<QML::MetaObject:RubyQml::TestObject>')
       end
     end
 
@@ -51,13 +51,13 @@ describe QML::MetaObject do
 
     describe '#superclass' do
       it 'returns the super meta object' do
-        expect(@metaobj.superclass.name).to eq(:QObject)
+        expect(@metaobj.superclass.name).to eq('QObject')
       end
     end
 
     describe '#ancestors' do
       it 'returns the ancestor meta objects' do
-        expect(@metaobj.ancestors.map(&:name)).to eq([:TestObject, :QObject])
+        expect(@metaobj.ancestors.map(&:name)).to eq(['RubyQml::TestObject', 'QObject'])
       end
     end
 

@@ -1,6 +1,7 @@
 require 'ffi'
 require 'qml/variant'
 require 'qml/meta_object'
+require 'qml/qt_object_base'
 
 module QML
   module CLib
@@ -26,9 +27,9 @@ module QML
     attach_function :testobject_new, [], :pointer
     attach_function :testobject_static_metaobject, [], :pointer
 
-    attach_function :qt_static_metaobject, [], :pointer
-    attach_function :qobject_static_metaobject, [], :pointer
-    attach_function :qobject_metaobject, [:pointer], :pointer
+    attach_function :qt_static_metaobject, [], MetaObject
+    attach_function :qobject_static_metaobject, [], MetaObject
+    attach_function :qobject_metaobject, [QtObjectBase], MetaObject
     attach_function :qobject_destroy, [:pointer], :void
 
     callback :qmetaobject_signal_callback, [Variant], :void
@@ -40,13 +41,13 @@ module QML
     attach_function :qmetaobject_method_parameter_names, [MetaObject, :int], Variant
     attach_function :qmetaobject_method_parameter_types, [MetaObject, :int], Variant
     attach_function :qmetaobject_method_is_signal, [MetaObject, :int], IntAsBoolean
-    attach_function :qmetaobject_method_invoke, [MetaObject, :pointer, :int, Variant], Variant
-    attach_function :qmetaobject_signal_connect, [MetaObject, :pointer, :int, :qmetaobject_signal_callback], :void
+    attach_function :qmetaobject_method_invoke, [MetaObject, QtObjectBase, :int, Variant], Variant
+    attach_function :qmetaobject_signal_connect, [MetaObject, QtObjectBase, :int, :qmetaobject_signal_callback], :void
     attach_function :qmetaobject_property_offset, [MetaObject], :int
     attach_function :qmetaobject_property_count, [MetaObject], :int
     attach_function :qmetaobject_property_name, [MetaObject, :int], Variant
-    attach_function :qmetaobject_property_get, [MetaObject, :pointer, :int], Variant
-    attach_function :qmetaobject_property_set, [MetaObject, :pointer, :int, Variant], :void
+    attach_function :qmetaobject_property_get, [MetaObject, QtObjectBase, :int], Variant
+    attach_function :qmetaobject_property_set, [MetaObject, QtObjectBase, :int, Variant], :void
     attach_function :qmetaobject_property_notify_signal, [MetaObject, :int], :int
     attach_function :qmetaobject_enum_count, [MetaObject], :int
     attach_function :qmetaobject_enum_offset, [MetaObject], :int
@@ -63,9 +64,11 @@ module QML
     attach_function :qvariant_from_array, [Variant::FromArrayStruct.by_value], Variant
     attach_function :qvariant_from_hash, [Variant::FromHashStruct.by_value], Variant
     attach_function :qvariant_from_time, [:int, :int, :int, :int, :int, :int, :int, :int], Variant
+    attach_function :qvariant_from_qobject, [QtObjectBase], Variant
 
     attach_function :qvariant_to_int, [Variant], :int
     attach_function :qvariant_to_float, [Variant], :double
+    attach_function :qvariant_to_qobject, [Variant], QtObjectBase
     attach_function :qvariant_unnest, [Variant], Variant
 
     callback :qvariant_get_string_callback, [:string], :void

@@ -72,6 +72,13 @@ describe QML::Variant do
       expect(variant.to_hash).to eq(hash)
     end
 
+    it 'can store Qt object' do
+      obj = QML::TestObject.new
+      obj.name = 'lorem ipsum'
+      variant = QML::Variant.new(obj)
+      expect(variant.value.name).to eq('lorem ipsum')
+    end
+
     it 'raises error when parameter is not convertible to Variant' do
       expect { QML::Variant.new(Class.new.new) }.to raise_error(TypeError)
     end

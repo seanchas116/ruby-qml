@@ -46,14 +46,14 @@ module QML
         end
       end.to_a
 
-      CLib.qmetaobject_method_invoke(meta_object, object.pointer, index, Variant.new(args)).value
+      CLib.qmetaobject_method_invoke(meta_object, object, index, Variant.new(args)).value
     end
 
     def connect_signal(object, &func)
       fail TypeError, "#{meta_object.name}::#{name} is not a signal" unless signal?
 
       callback = ->(args) { func.call(*args) }
-      CLib.qmetaobject_signal_connect(meta_object, object.pointer, index, callback)
+      CLib.qmetaobject_signal_connect(meta_object, object, index, callback)
       object.gc_protect(callback)
     end
   end
@@ -75,11 +75,11 @@ module QML
     end
 
     def set_value(object, value)
-      CLib.qmetaobject_property_set(meta_object, object.pointer, index, Variant.new(value))
+      CLib.qmetaobject_property_set(meta_object, object, index, Variant.new(value))
     end
 
     def get_value(object)
-      CLib.qmetaobject_property_get(meta_object, object.pointer, index).value
+      CLib.qmetaobject_property_get(meta_object, object, index).value
     end
   end
 
@@ -95,19 +95,17 @@ module QML
     end
 
     def self.from_native(ptr, ctx)
-      ptr.null? ? nil : self.new(ptr)
+      return nil if ptr.null?
+      @metaobjects ||= {}
+      @metaobjects[ptr.to_i] ||= self.new(ptr)
     end
 
     attr_accessor :ruby_class
     attr_reader :pointer
 
-    def self.find(class_name)
-      @metaobjects[class_name]
-    end
-
     def self.add(metaobject)
-      @metaobjects ||= []
-      @metaobjects << metaobject
+      @metaobjects ||= {}
+      @metaobjects[metaobject.pointer.to_i] = metaobject
     end
 
     def initialize(pointer)

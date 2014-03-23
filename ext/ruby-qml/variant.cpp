@@ -47,6 +47,11 @@ QVariant *qvariant_from_string(const char *str)
     return new QVariant(QString(str));
 }
 
+QVariant *qvariant_from_qobject(QObject *obj)
+{
+    return new QVariant(QVariant::fromValue(obj));
+}
+
 struct VariantArray
 {
     int count;
@@ -95,6 +100,11 @@ int qvariant_to_int(const QVariant *variant)
 double qvariant_to_float(const QVariant *variant)
 {
     return variant->toDouble();
+}
+
+QObject *qvariant_to_qobject(const QVariant *variant)
+{
+    return variant->value<QObject *>();
 }
 
 QVariant *qvariant_unnest(const QVariant *variant)

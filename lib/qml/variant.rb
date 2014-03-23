@@ -1,5 +1,6 @@
 require 'ffi'
 require 'qml/meta_type'
+require 'qml/qt_object_base'
 
 module QML
 
@@ -31,6 +32,8 @@ module QML
         CLib.qvariant_from_hash(FromHashStruct.from_hash(val))
       when Time
         CLib.qvariant_from_time(val.year, val.month, val.day, val.hour, val.min, val.sec, val.nsec / 1_000_000, val.gmt_offset)
+      when QtObjectBase
+        CLib.qvariant_from_qobject(val)
       else
         fail TypeError, "Cannot initialize QML::Variant with #{val.class.name}"
       end
@@ -69,6 +72,9 @@ module QML
         CLib.qvariant_get_time(self, ffi_buf)
         nums = ffi_buf.read_array_of_int(8)
         Time.new(nums[0], nums[1], nums[2], nums[3], nums[4], nums[5] + nums[6] * Rational(1, 1000), nums[7])
+      when MetaType::Q_OBJECT_STAR
+        obj = CLib.qvariant_to_qobject(self)
+        obj.meta_object.ruby_class.new(obj.pointer)
       else
         nil
       end

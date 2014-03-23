@@ -63,5 +63,6 @@ module QML
     Q_VARIANT_MAP = new(8)
     Q_VARIANT_HASH = new(28)
     Q_DATE_TIME = new(16)
+    Q_OBJECT_STAR = new(39)
   end
 end

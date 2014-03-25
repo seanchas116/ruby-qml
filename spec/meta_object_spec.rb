@@ -6,8 +6,8 @@ describe QML::MetaObject do
   context 'with TestObject' do
 
     before do
-      @metaobj = QML::MetaObject.new(QML::CLib.testobject_static_metaobject)
-      @obj = QML::QtObjectBase.new(QML::CLib.testobject_new)
+      @metaobj = QML::MetaObject.new(QML::CLib.rbqml_testobject_static_metaobject)
+      @obj = QML::QtObjectBase.new(QML::CLib.rbqml_testobject_new)
     end
 
     describe '#name, #to_s' do
@@ -63,7 +63,7 @@ describe QML::MetaObject do
 
     describe '#==, #eql?' do
       it 'compares 2 meta objects by its pointer value' do
-        metaobj2 = QML::MetaObject.new(QML::CLib.testobject_static_metaobject)
+        metaobj2 = QML::MetaObject.new(QML::CLib.rbqml_testobject_static_metaobject)
         expect(@metaobj == metaobj2).to eq(true)
         expect(@metaobj.eql?(metaobj2)).to eq(true)
       end

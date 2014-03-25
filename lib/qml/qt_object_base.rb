@@ -13,7 +13,7 @@ module QML
     end
 
     def meta_object
-      CLib.qobject_metaobject(self)
+      CLib.rbqml_object_metaobject(self)
     end
 
     def gc_protect(obj)
@@ -31,7 +31,7 @@ module QML
       addr = obj.pointer.to_i
       @refcounts[addr] -= 1
       if @refcounts[addr] == 0
-        CLib.qobject_destroy(obj.pointer)
+        CLib.rbqml_qobject_destroy(obj.pointer)
         @refcounts.delete(addr)
       end
     end

@@ -9,7 +9,7 @@ module QML
     end
 
     def name
-      @name ||= CLib.qmetatype_name(@id).to_sym
+      @name ||= CLib.rbqml_metatype_name(@id).to_sym
     end
 
     def ==(other)

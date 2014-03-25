@@ -35,27 +35,27 @@ private:
 
 extern "C" {
 
-QVariant *qmetaobject_class_name(const QMetaObject *metaObj)
+QVariant *rbqml_metaobject_class_name(const QMetaObject *metaObj)
 {
     return new QVariant(QString(metaObj->className()));
 }
 
-int qmetaobject_method_offset(const QMetaObject *metaObj)
+int rbqml_metaobject_method_offset(const QMetaObject *metaObj)
 {
     return metaObj->methodOffset();
 }
 
-int qmetaobject_method_count(const QMetaObject *metaObj)
+int rbqml_metaobject_method_count(const QMetaObject *metaObj)
 {
     return metaObj->methodCount();
 }
 
-QVariant *qmetaobject_method_name(const QMetaObject *metaObj, int index)
+QVariant *rbqml_metaobject_method_name(const QMetaObject *metaObj, int index)
 {
     return new QVariant(QString(metaObj->method(index).name()));
 }
 
-QVariant *qmetaobject_method_parameter_names(const QMetaObject *metaObj, int index)
+QVariant *rbqml_metaobject_method_parameter_names(const QMetaObject *metaObj, int index)
 {
     QVariantList list;
     for (const auto &byteArray : metaObj->method(index).parameterNames()) {
@@ -64,7 +64,7 @@ QVariant *qmetaobject_method_parameter_names(const QMetaObject *metaObj, int ind
     return new QVariant(list);
 }
 
-QVariant *qmetaobject_method_parameter_types(const QMetaObject *metaObj, int index)
+QVariant *rbqml_metaobject_method_parameter_types(const QMetaObject *metaObj, int index)
 {
     auto method = metaObj->method(index);
     QVariantList list;
@@ -74,12 +74,12 @@ QVariant *qmetaobject_method_parameter_types(const QMetaObject *metaObj, int ind
     return new QVariant(list);
 }
 
-int qmetaobject_method_is_signal(const QMetaObject *metaObj, int index)
+int rbqml_metaobject_method_is_signal(const QMetaObject *metaObj, int index)
 {
     return metaObj->method(index).methodType() == QMetaMethod::Signal;
 }
 
-QVariant *qmetaobject_method_invoke(const QMetaObject *metaObj, QObject *obj, int methodIndex, const QVariant *argvVariant)
+QVariant *rbqml_metaobject_method_invoke(const QMetaObject *metaObj, QObject *obj, int methodIndex, const QVariant *argvVariant)
 {
     auto method = metaObj->method(methodIndex);
     auto argv = argvVariant->toList();
@@ -124,7 +124,7 @@ QVariant *qmetaobject_method_invoke(const QMetaObject *metaObj, QObject *obj, in
     }
 }
 
-void qmetaobject_signal_connect(const QMetaObject *metaObj, QObject *obj, int methodIndex, void (*callback)(const QVariant *args))
+void rbqml_metaobject_signal_connect(const QMetaObject *metaObj, QObject *obj, int methodIndex, void (*callback)(const QVariant *args))
 {
     auto method = metaObj->method(methodIndex);
 
@@ -136,47 +136,47 @@ void qmetaobject_signal_connect(const QMetaObject *metaObj, QObject *obj, int me
     new SignalForwarder(obj, methodSig.data(), callback);
 }
 
-int qmetaobject_property_offset(const QMetaObject *metaObj)
+int rbqml_metaobject_property_offset(const QMetaObject *metaObj)
 {
     return metaObj->propertyOffset();
 }
 
-int qmetaobject_property_count(const QMetaObject *metaObj)
+int rbqml_metaobject_property_count(const QMetaObject *metaObj)
 {
     return metaObj->propertyCount();
 }
 
-QVariant *qmetaobject_property_name(const QMetaObject *metaObj, int index)
+QVariant *rbqml_metaobject_property_name(const QMetaObject *metaObj, int index)
 {
     return new QVariant(QString(metaObj->property(index).name()));
 }
 
-QVariant *qmetaobject_property_get(const QMetaObject *metaObj, QObject *obj, int index)
+QVariant *rbqml_metaobject_property_get(const QMetaObject *metaObj, QObject *obj, int index)
 {
     return new QVariant(metaObj->property(index).read(obj));
 }
 
-void qmetaobject_property_set(const QMetaObject *metaObj, QObject *obj, int index, const QVariant *value)
+void rbqml_metaobject_property_set(const QMetaObject *metaObj, QObject *obj, int index, const QVariant *value)
 {
     metaObj->property(index).write(obj, *value);
 }
 
-int qmetaobject_property_notify_signal(const QMetaObject *metaObj, int index)
+int rbqml_metaobject_property_notify_signal(const QMetaObject *metaObj, int index)
 {
     return metaObj->property(index).notifySignal().methodIndex();
 }
 
-int qmetaobject_enum_offset(const QMetaObject *metaObj)
+int rbqml_metaobject_enum_offset(const QMetaObject *metaObj)
 {
     return metaObj->enumeratorOffset();
 }
 
-int qmetaobject_enum_count(const QMetaObject *metaObj)
+int rbqml_metaobject_enum_count(const QMetaObject *metaObj)
 {
     return metaObj->enumeratorCount();
 }
 
-QVariant *qmetaobject_enum_get(const QMetaObject *metaObj, int enumIndex)
+QVariant *rbqml_metaobject_enum_get(const QMetaObject *metaObj, int enumIndex)
 {
     auto enumerator = metaObj->enumerator(enumIndex);
     QVariantHash hash;
@@ -186,7 +186,7 @@ QVariant *qmetaobject_enum_get(const QMetaObject *metaObj, int enumIndex)
     return new QVariant(hash);
 }
 
-const QMetaObject *qmetaobject_super(const QMetaObject *metaObj)
+const QMetaObject *rbqml_metaobject_super(const QMetaObject *metaObj)
 {
     return metaObj->superClass();
 }

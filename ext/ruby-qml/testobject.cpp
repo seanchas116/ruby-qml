@@ -83,12 +83,12 @@ private:
 
 extern "C" {
 
-QObject *testobject_new()
+QObject *rbqml_testobject_new()
 {
     return new RubyQml::TestObject();
 }
 
-const QMetaObject *testobject_static_metaobject()
+const QMetaObject *rbqml_testobject_static_metaobject()
 {
     return &RubyQml::TestObject::staticMetaObject;
 }

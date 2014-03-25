@@ -24,69 +24,69 @@ module QML
       end
     end
 
-    attach_function :testobject_new, [], :pointer
-    attach_function :testobject_static_metaobject, [], :pointer
+    attach_function :rbqml_testobject_new, [], :pointer
+    attach_function :rbqml_testobject_static_metaobject, [], :pointer
 
-    attach_function :qt_static_metaobject, [], MetaObject
-    attach_function :qobject_static_metaobject, [], MetaObject
-    attach_function :qobject_metaobject, [QtObjectBase], MetaObject
-    attach_function :qobject_destroy, [:pointer], :void
+    attach_function :rbqml_qt_metaobject, [], MetaObject
+    attach_function :rbqml_object_static_metaobject, [], MetaObject
+    attach_function :rbqml_object_metaobject, [QtObjectBase], MetaObject
+    attach_function :rbqml_object_destroy, [:pointer], :void
 
-    callback :qmetaobject_signal_callback, [Variant], :void
+    callback :metaobject_signal_callback, [Variant], :void
 
-    attach_function :qmetaobject_class_name, [MetaObject], Variant
-    attach_function :qmetaobject_method_offset, [MetaObject], :int
-    attach_function :qmetaobject_method_count, [MetaObject], :int
-    attach_function :qmetaobject_method_name, [MetaObject, :int], Variant
-    attach_function :qmetaobject_method_parameter_names, [MetaObject, :int], Variant
-    attach_function :qmetaobject_method_parameter_types, [MetaObject, :int], Variant
-    attach_function :qmetaobject_method_is_signal, [MetaObject, :int], IntAsBoolean
-    attach_function :qmetaobject_method_invoke, [MetaObject, QtObjectBase, :int, Variant], Variant
-    attach_function :qmetaobject_signal_connect, [MetaObject, QtObjectBase, :int, :qmetaobject_signal_callback], :void
-    attach_function :qmetaobject_property_offset, [MetaObject], :int
-    attach_function :qmetaobject_property_count, [MetaObject], :int
-    attach_function :qmetaobject_property_name, [MetaObject, :int], Variant
-    attach_function :qmetaobject_property_get, [MetaObject, QtObjectBase, :int], Variant
-    attach_function :qmetaobject_property_set, [MetaObject, QtObjectBase, :int, Variant], :void
-    attach_function :qmetaobject_property_notify_signal, [MetaObject, :int], :int
-    attach_function :qmetaobject_enum_count, [MetaObject], :int
-    attach_function :qmetaobject_enum_offset, [MetaObject], :int
-    attach_function :qmetaobject_enum_get, [MetaObject, :int], Variant
-    attach_function :qmetaobject_super, [MetaObject], MetaObject
+    attach_function :rbqml_metaobject_class_name, [MetaObject], Variant
+    attach_function :rbqml_metaobject_method_offset, [MetaObject], :int
+    attach_function :rbqml_metaobject_method_count, [MetaObject], :int
+    attach_function :rbqml_metaobject_method_name, [MetaObject, :int], Variant
+    attach_function :rbqml_metaobject_method_parameter_names, [MetaObject, :int], Variant
+    attach_function :rbqml_metaobject_method_parameter_types, [MetaObject, :int], Variant
+    attach_function :rbqml_metaobject_method_is_signal, [MetaObject, :int], IntAsBoolean
+    attach_function :rbqml_metaobject_method_invoke, [MetaObject, QtObjectBase, :int, Variant], Variant
+    attach_function :rbqml_metaobject_signal_connect, [MetaObject, QtObjectBase, :int, :metaobject_signal_callback], :void
+    attach_function :rbqml_metaobject_property_offset, [MetaObject], :int
+    attach_function :rbqml_metaobject_property_count, [MetaObject], :int
+    attach_function :rbqml_metaobject_property_name, [MetaObject, :int], Variant
+    attach_function :rbqml_metaobject_property_get, [MetaObject, QtObjectBase, :int], Variant
+    attach_function :rbqml_metaobject_property_set, [MetaObject, QtObjectBase, :int, Variant], :void
+    attach_function :rbqml_metaobject_property_notify_signal, [MetaObject, :int], :int
+    attach_function :rbqml_metaobject_enum_count, [MetaObject], :int
+    attach_function :rbqml_metaobject_enum_offset, [MetaObject], :int
+    attach_function :rbqml_metaobject_enum_get, [MetaObject, :int], Variant
+    attach_function :rbqml_metaobject_super, [MetaObject], MetaObject
 
-    attach_function :qmetatype_name, [:int], :string
+    attach_function :rbqml_metatype_name, [:int], :string
 
-    attach_function :qvariant_new, [], Variant
-    attach_function :qvariant_from_int, [:int], Variant
-    attach_function :qvariant_from_float, [:double], Variant
-    attach_function :qvariant_from_boolean, [IntAsBoolean], Variant
-    attach_function :qvariant_from_string, [:string], Variant
-    attach_function :qvariant_from_array, [Variant::FromArrayStruct.by_value], Variant
-    attach_function :qvariant_from_hash, [Variant::FromHashStruct.by_value], Variant
-    attach_function :qvariant_from_time, [:int, :int, :int, :int, :int, :int, :int, :int], Variant
-    attach_function :qvariant_from_qobject, [QtObjectBase], Variant
-    attach_function :qvariant_from_voidp, [:pointer], Variant
+    attach_function :rbqml_variant_new, [], Variant
+    attach_function :rbqml_variant_from_int, [:int], Variant
+    attach_function :rbqml_variant_from_float, [:double], Variant
+    attach_function :rbqml_variant_from_boolean, [IntAsBoolean], Variant
+    attach_function :rbqml_variant_from_string, [:string], Variant
+    attach_function :rbqml_variant_from_array, [Variant::FromArrayStruct.by_value], Variant
+    attach_function :rbqml_variant_from_hash, [Variant::FromHashStruct.by_value], Variant
+    attach_function :rbqml_variant_from_time, [:int, :int, :int, :int, :int, :int, :int, :int], Variant
+    attach_function :rbqml_variant_from_qobject, [QtObjectBase], Variant
+    attach_function :rbqml_variant_from_voidp, [:pointer], Variant
 
-    attach_function :qvariant_to_int, [Variant], :int
-    attach_function :qvariant_to_float, [Variant], :double
-    attach_function :qvariant_to_qobject, [Variant], QtObjectBase
-    attach_function :qvariant_to_voidp, [Variant], :pointer
-    attach_function :qvariant_unnest, [Variant], Variant
+    attach_function :rbqml_variant_to_int, [Variant], :int
+    attach_function :rbqml_variant_to_float, [Variant], :double
+    attach_function :rbqml_variant_to_qobject, [Variant], QtObjectBase
+    attach_function :rbqml_variant_to_voidp, [Variant], :pointer
+    attach_function :rbqml_variant_unnest, [Variant], Variant
 
-    callback :qvariant_get_string_callback, [:string], :void
-    callback :qvariant_get_array_callback, [Variant], :void
-    callback :qvariant_get_hash_callback, [:string, Variant], :void
+    callback :variant_get_string_callback, [:string], :void
+    callback :variant_get_array_callback, [Variant], :void
+    callback :variant_get_hash_callback, [:string, Variant], :void
 
-    attach_function :qvariant_get_string, [Variant, :qvariant_get_string_callback], :void
-    attach_function :qvariant_get_array, [Variant, :qvariant_get_array_callback], :void
-    attach_function :qvariant_get_hash, [Variant, :qvariant_get_hash_callback], :void
-    attach_function :qvariant_get_time, [Variant, :pointer], :void
+    attach_function :rbqml_variant_get_string, [Variant, :variant_get_string_callback], :void
+    attach_function :rbqml_variant_get_array, [Variant, :variant_get_array_callback], :void
+    attach_function :rbqml_variant_get_hash, [Variant, :variant_get_hash_callback], :void
+    attach_function :rbqml_variant_get_time, [Variant, :pointer], :void
 
-    attach_function :qvariant_type, [Variant], :int
-    attach_function :qvariant_convert, [Variant, :int], Variant
-    attach_function :qvariant_is_valid, [Variant], IntAsBoolean
+    attach_function :rbqml_variant_type, [Variant], :int
+    attach_function :rbqml_variant_convert, [Variant, :int], Variant
+    attach_function :rbqml_variant_is_valid, [Variant], IntAsBoolean
 
-    attach_function :qvariant_dup, [Variant], Variant
-    attach_function :qvariant_destroy, [:pointer], :void
+    attach_function :rbqml_variant_dup, [Variant], Variant
+    attach_function :rbqml_variant_destroy, [:pointer], :void
   end
 end

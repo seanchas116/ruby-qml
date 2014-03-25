@@ -17,42 +17,42 @@ void getHashLike(const QVariant &variant, void (*callback)(const char *, QVarian
 
 extern "C" {
 
-const char *qmetatype_name(int typeNum)
+const char *rbqml_metatype_name(int typeNum)
 {
     return QMetaType::typeName(typeNum);
 }
 
-QVariant *qvariant_new()
+QVariant *rbqml_variant_new()
 {
     return new QVariant();
 }
 
-QVariant *qvariant_from_int(int value)
+QVariant *rbqml_variant_from_int(int value)
 {
     return new QVariant(value);
 }
 
-QVariant *qvariant_from_float(double value)
+QVariant *rbqml_variant_from_float(double value)
 {
     return new QVariant(value);
 }
 
-QVariant *qvariant_from_boolean(int value)
+QVariant *rbqml_variant_from_boolean(int value)
 {
     return new QVariant(bool(value));
 }
 
-QVariant *qvariant_from_string(const char *str)
+QVariant *rbqml_variant_from_string(const char *str)
 {
     return new QVariant(QString(str));
 }
 
-QVariant *qvariant_from_qobject(QObject *obj)
+QVariant *rbqml_variant_from_qobject(QObject *obj)
 {
     return new QVariant(QVariant::fromValue(obj));
 }
 
-QVariant *qvariant_from_voidp(void *ptr)
+QVariant *rbqml_variant_from_voidp(void *ptr)
 {
     return new QVariant(QVariant::fromValue(ptr));
 }
@@ -63,7 +63,7 @@ struct VariantArray
     const QVariant **variants;
 };
 
-QVariant *qvariant_from_array(VariantArray array)
+QVariant *rbqml_variant_from_array(VariantArray array)
 {
     QVariantList variantList;
     variantList.reserve(array.count);
@@ -80,7 +80,7 @@ struct StringVariantArray
     const QVariant **variants;
 };
 
-QVariant *qvariant_from_hash(StringVariantArray array)
+QVariant *rbqml_variant_from_hash(StringVariantArray array)
 {
     QVariantHash variantHash;
     variantHash.reserve(array.count);
@@ -90,34 +90,34 @@ QVariant *qvariant_from_hash(StringVariantArray array)
     return new QVariant(variantHash);
 }
 
-QVariant *qvariant_from_time(int year, int month, int day, int hour, int minute, int second, int msecond, int gmtOffset)
+QVariant *rbqml_variant_from_time(int year, int month, int day, int hour, int minute, int second, int msecond, int gmtOffset)
 {
     QDateTime dateTime(QDate(year, month, day), QTime(hour, minute, second, msecond));
     dateTime.setUtcOffset(gmtOffset);
     return new QVariant(dateTime);
 }
 
-int qvariant_to_int(const QVariant *variant)
+int rbqml_variant_to_int(const QVariant *variant)
 {
     return variant->toInt();
 }
 
-double qvariant_to_float(const QVariant *variant)
+double rbqml_variant_to_float(const QVariant *variant)
 {
     return variant->toDouble();
 }
 
-QObject *qvariant_to_qobject(const QVariant *variant)
+QObject *rbqml_variant_to_qobject(const QVariant *variant)
 {
     return variant->value<QObject *>();
 }
 
-void *qvariant_to_voidp(const QVariant *variant)
+void *rbqml_variant_to_voidp(const QVariant *variant)
 {
     return variant->value<void *>();
 }
 
-QVariant *qvariant_unnest(const QVariant *variant)
+QVariant *rbqml_variant_unnest(const QVariant *variant)
 {
     auto v = *variant;
     while (true) {
@@ -128,7 +128,7 @@ QVariant *qvariant_unnest(const QVariant *variant)
     }
 }
 
-void qvariant_get_string(const QVariant *variant, void (*callback)(const char *))
+void rbqml_variant_get_string(const QVariant *variant, void (*callback)(const char *))
 {
     switch (variant->userType()) {
     case QMetaType::QString:
@@ -142,14 +142,14 @@ void qvariant_get_string(const QVariant *variant, void (*callback)(const char *)
     }
 }
 
-void qvariant_get_array(const QVariant *variant, void (*callback)(QVariant *))
+void rbqml_variant_get_array(const QVariant *variant, void (*callback)(QVariant *))
 {
     for (const auto &x : variant->toList()) {
         callback(new QVariant(x));
     }
 }
 
-void qvariant_get_hash(const QVariant *variant, void (*callback)(const char *, QVariant *))
+void rbqml_variant_get_hash(const QVariant *variant, void (*callback)(const char *, QVariant *))
 {
     switch (variant->userType()) {
     case QMetaType::QVariantHash:
@@ -163,7 +163,7 @@ void qvariant_get_hash(const QVariant *variant, void (*callback)(const char *, Q
     }
 }
 
-void qvariant_get_time(const QVariant *variant, int *out)
+void rbqml_variant_get_time(const QVariant *variant, int *out)
 {
     auto dateTime = variant->toDateTime();
     auto date = dateTime.date();
@@ -178,12 +178,12 @@ void qvariant_get_time(const QVariant *variant, int *out)
     out[7] = dateTime.utcOffset();
 }
 
-int qvariant_type(const QVariant *variant)
+int rbqml_variant_type(const QVariant *variant)
 {
     return variant->userType();
 }
 
-QVariant *qvariant_convert(const QVariant *variant, int type)
+QVariant *rbqml_variant_convert(const QVariant *variant, int type)
 {
     if (type == QMetaType::QVariant) {
         return new QVariant(QMetaType::QVariant, variant);
@@ -197,17 +197,17 @@ QVariant *qvariant_convert(const QVariant *variant, int type)
     return new QVariant(result);
 }
 
-int qvariant_is_valid(const QVariant *variant)
+int rbqml_variant_is_valid(const QVariant *variant)
 {
     return variant->isValid();
 }
 
-QVariant *qvariant_dup(const QVariant *variant)
+QVariant *rbqml_variant_dup(const QVariant *variant)
 {
     return new QVariant(*variant);
 }
 
-void qvariant_destroy(QVariant *variant)
+void rbqml_variant_destroy(QVariant *variant)
 {
     delete variant;
 }

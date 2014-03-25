@@ -12,7 +12,7 @@ module QML
     end
 
     def name
-      @name ||= CLib.qmetaobject_method_name(meta_object, index).to_sym
+      @name ||= CLib.rbqml_metaobject_method_name(meta_object, index).to_sym
     end
 
     def arity
@@ -20,15 +20,15 @@ module QML
     end
 
     def arg_names
-      @arg_names ||= CLib.qmetaobject_method_parameter_names(meta_object, index).to_a.map(&:to_sym)
+      @arg_names ||= CLib.rbqml_metaobject_method_parameter_names(meta_object, index).to_a.map(&:to_sym)
     end
 
     def arg_types
-      @arg_types ||= CLib.qmetaobject_method_parameter_types(meta_object, index).to_a.map(&MetaType.method(:new))
+      @arg_types ||= CLib.rbqml_metaobject_method_parameter_types(meta_object, index).to_a.map(&MetaType.method(:new))
     end
 
     def signal?
-      @is_signal = CLib.qmetaobject_method_is_signal(meta_object, index) if @is_signal.nil?
+      @is_signal = CLib.rbqml_metaobject_method_is_signal(meta_object, index) if @is_signal.nil?
       @is_signal
     end
 
@@ -46,14 +46,14 @@ module QML
         end
       end.to_a
 
-      CLib.qmetaobject_method_invoke(meta_object, object, index, Variant.new(args)).value
+      CLib.rbqml_metaobject_method_invoke(meta_object, object, index, Variant.new(args)).value
     end
 
     def connect_signal(object, &func)
       fail TypeError, "#{meta_object.name}::#{name} is not a signal" unless signal?
 
       callback = ->(args) { func.call(*args) }
-      CLib.qmetaobject_signal_connect(meta_object, object, index, callback)
+      CLib.rbqml_metaobject_signal_connect(meta_object, object, index, callback)
       object.gc_protect(callback)
     end
   end
@@ -67,19 +67,19 @@ module QML
     end
 
     def name
-      @name ||= CLib.qmetaobject_property_name(meta_object, index).to_sym
+      @name ||= CLib.rbqml_metaobject_property_name(meta_object, index).to_sym
     end
 
     def notify_signal
-      @notify_signal ||= MetaMethod.new(meta_object, CLib.qmetaobject_property_notify_signal(meta_object, index))
+      @notify_signal ||= MetaMethod.new(meta_object, CLib.rbqml_metaobject_property_notify_signal(meta_object, index))
     end
 
     def set_value(object, value)
-      CLib.qmetaobject_property_set(meta_object, object, index, Variant.new(value))
+      CLib.rbqml_metaobject_property_set(meta_object, object, index, Variant.new(value))
     end
 
     def get_value(object)
-      CLib.qmetaobject_property_get(meta_object, object, index).value
+      CLib.rbqml_metaobject_property_get(meta_object, object, index).value
     end
   end
 
@@ -115,14 +115,14 @@ module QML
     end
 
     def name
-      @name ||= CLib.qmetaobject_class_name(self).to_s
+      @name ||= CLib.rbqml_metaobject_class_name(self).to_s
     end
 
     # @return [Hash{Symbol=>Array<QML::MetaMethod>}]
     def meta_methods(include_super: false)
       @meta_methods ||= begin
-        count = CLib.qmetaobject_method_count(self)
-        offset = CLib.qmetaobject_method_offset(self)
+        count = CLib.rbqml_metaobject_method_count(self)
+        offset = CLib.rbqml_metaobject_method_offset(self)
         (offset...count).map { |i| MetaMethod.new(self, i) }.group_by(&:name)
       end
 
@@ -136,8 +136,8 @@ module QML
     # @return [Hash{Symbol=>QML::MetaProperty}]
     def meta_properties(include_super: false)
       @meta_properties ||= begin
-        count = CLib.qmetaobject_property_count(self)
-        offset = CLib.qmetaobject_property_offset(self)
+        count = CLib.rbqml_metaobject_property_count(self)
+        offset = CLib.rbqml_metaobject_property_offset(self)
         property_groups = (offset...count).map { |i| MetaProperty.new(self, i) }.group_by(&:name)
         Hash[property_groups.map { |k, v| [k, v.first] }]
       end
@@ -152,9 +152,9 @@ module QML
     # @return [Hash{Symbol=>Integer}]
     def enums(include_super: false)
       @enums ||= begin
-        count = CLib.qmetaobject_enum_count(self)
-        offset = CLib.qmetaobject_enum_offset(self)
-        (offset...count).map { |i| CLib.qmetaobject_enum_get(self, i).to_hash }.inject({}, &:merge)
+        count = CLib.rbqml_metaobject_enum_count(self)
+        offset = CLib.rbqml_metaobject_enum_offset(self)
+        (offset...count).map { |i| CLib.rbqml_metaobject_enum_get(self, i).to_hash }.inject({}, &:merge)
       end
 
       if include_super && superclass
@@ -165,7 +165,7 @@ module QML
     end
 
     def superclass
-      @superclass ||= CLib.qmetaobject_super(self)
+      @superclass ||= CLib.rbqml_metaobject_super(self)
     end
 
     def ancestors

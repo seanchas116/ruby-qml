@@ -9,6 +9,14 @@ describe QML::Variant do
       expect(variant.to_i).to eq(1234)
     end
 
+    it 'can store void pointer' do
+      ptr = FFI::MemoryPointer.new(:int)
+      variant = QML::Variant.new(ptr)
+      result = variant.value
+      expect(result).to be_a(FFI::Pointer)
+      expect(result).to eq(ptr)
+    end
+
     it 'can store string' do
       variant = QML::Variant.new 'poyopoyo'
       expect(variant.to_s).to eq('poyopoyo')

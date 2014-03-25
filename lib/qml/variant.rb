@@ -10,12 +10,11 @@ module QML
 
     attr_reader :pointer
 
-    def self.new(val)
+    def self.new(val, raw: nil)
+      return super(raw) if raw
       case val
       when Variant
         val.dup
-      when FFI::Pointer
-        super(val)
       when true, false
         CLib.qvariant_from_boolean(val)
       when Integer
@@ -34,6 +33,8 @@ module QML
         CLib.qvariant_from_time(val.year, val.month, val.day, val.hour, val.min, val.sec, val.nsec / 1_000_000, val.gmt_offset)
       when QtObjectBase
         CLib.qvariant_from_qobject(val)
+      when FFI::Pointer
+        CLib.qvariant_from_voidp(val)
       else
         fail TypeError, "Cannot initialize QML::Variant with #{val.class.name}"
       end
@@ -75,6 +76,8 @@ module QML
       when MetaType::Q_OBJECT_STAR
         obj = CLib.qvariant_to_qobject(self)
         obj.meta_object.ruby_class.new(obj.pointer)
+      when MetaType::VOID_STAR
+        CLib.qvariant_to_voidp(self)
       else
         nil
       end
@@ -119,14 +122,14 @@ module QML
     native_type FFI::Type::POINTER
 
     def self.to_native(variant, ctx)
-      variant = Variant.new(variant) unless variant.is_a?(Variant)
+      variant = self.new(variant) unless variant.is_a?(Variant)
       ptr = variant.pointer
       fail TypeError, "Null pointer" if ptr.null?
       ptr
     end
 
     def self.from_native(ptr, ctx)
-      self.new(ptr)
+      self.new(nil, raw: ptr)
     end
 
     class FromArrayStruct < FFI::Struct

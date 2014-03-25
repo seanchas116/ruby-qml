@@ -65,10 +65,12 @@ module QML
     attach_function :qvariant_from_hash, [Variant::FromHashStruct.by_value], Variant
     attach_function :qvariant_from_time, [:int, :int, :int, :int, :int, :int, :int, :int], Variant
     attach_function :qvariant_from_qobject, [QtObjectBase], Variant
+    attach_function :qvariant_from_voidp, [:pointer], Variant
 
     attach_function :qvariant_to_int, [Variant], :int
     attach_function :qvariant_to_float, [Variant], :double
     attach_function :qvariant_to_qobject, [Variant], QtObjectBase
+    attach_function :qvariant_to_voidp, [Variant], :pointer
     attach_function :qvariant_unnest, [Variant], Variant
 
     callback :qvariant_get_string_callback, [:string], :void

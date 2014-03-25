@@ -52,6 +52,11 @@ QVariant *qvariant_from_qobject(QObject *obj)
     return new QVariant(QVariant::fromValue(obj));
 }
 
+QVariant *qvariant_from_voidp(void *ptr)
+{
+    return new QVariant(QVariant::fromValue(ptr));
+}
+
 struct VariantArray
 {
     int count;
@@ -105,6 +110,11 @@ double qvariant_to_float(const QVariant *variant)
 QObject *qvariant_to_qobject(const QVariant *variant)
 {
     return variant->value<QObject *>();
+}
+
+void *qvariant_to_voidp(const QVariant *variant)
+{
+    return variant->value<void *>();
 }
 
 QVariant *qvariant_unnest(const QVariant *variant)

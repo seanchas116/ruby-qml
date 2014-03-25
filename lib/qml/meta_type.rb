@@ -64,5 +64,6 @@ module QML
     Q_VARIANT_HASH = new(28)
     Q_DATE_TIME = new(16)
     Q_OBJECT_STAR = new(39)
+    VOID_STAR = new(31)
   end
 end

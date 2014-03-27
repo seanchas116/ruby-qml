@@ -1,4 +1,5 @@
 require 'qml/qt_object_base'
+require 'qml/class_builder'
 require 'ropework'
 
 module QML
@@ -110,7 +111,7 @@ module QML
 
     def initialize(pointer)
       @pointer = pointer
-      @ruby_class = create_class
+      @ruby_class = ClassBuilder.new(self).create_class
       self.class.add(self)
     end
 
@@ -190,81 +191,5 @@ module QML
     def inspect
       "<QML::MetaObject:#{name}>"
     end
-
-    protected
-
-      def overridden?(ary, item)
-        ary.any? { |each_item| each_item.name == item}
-      end
-
-    private
-
-      def create_class
-        metaobj = self
-        Class.new(QtObjectBase) do
-          include Ropework::PropertyDef
-          include Ropework::SignalDef
-
-          # define methods
-          metaobj.meta_methods(include_super: true).each do |name, methods|
-            next if name == :deleteLater # deleteLater must not be called
-            if methods.any?(&:signal?)
-              signal(name)
-            else
-              define_method(name) do |*args|
-                classes = args.map(&:class)
-                puts "classes: #{classes}"
-
-                method = methods.find { |method|
-                  next false unless method.arity == args.length
-                  arg_classes = method.arg_types.map(&:ruby_class)
-                  puts "arg_classes: #{arg_classes}"
-                  arg_classes.zip(classes).all? { |arg_class, given_class|
-                    arg_class >= given_class
-                  }
-                }
-                fail ArgumentError, "no matching method for given parameter types #{classes}" unless method
-                method.invoke(self, *args)
-              end
-            end
-          end
-
-          # define properties
-          metaobj.meta_properties(include_super: true).each_value do |p|
-            property(p.name)
-              .getter { p.get_value(self) }
-              .setter { |newval| p.set_value(self, newval) }
-          end
-
-          # define enums
-          metaobj.enums(include_super: true).each do |k, v|
-            const_set(k, v)
-          end
-
-          define_method(:initialize) do |obj_ptr|
-            super(obj_ptr)
-
-            # connect properties
-            metaobj.meta_properties(include_super: true).each_value do |p|
-              property = properties[p.name]
-              signal = signals[p.notify_signal.name]
-              signal.connect do |newval|
-                property.changed.emit(newval)
-              end
-            end
-
-            # connect signals
-            metaobj.meta_methods(include_super: true).each do |name, methods|
-              signal = signals[name]
-              signal_methods = methods.select(&:signal?)
-              signal_methods.each do |signal_method|
-                signal_method.connect_signal(self) do |*args|
-                  signal.emit(*args)
-                end
-              end
-            end
-          end
-        end
-      end
   end
 end

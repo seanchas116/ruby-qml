@@ -58,19 +58,17 @@ QVariant *rbqml_metaobject_method_name(const QMetaObject *metaObj, int index)
 QVariant *rbqml_metaobject_method_parameter_names(const QMetaObject *metaObj, int index)
 {
     QVariantList list;
-    for (const auto &byteArray : metaObj->method(index).parameterNames()) {
-        list << QString(byteArray);
-    }
+    auto paramNames = metaObj->method(index).parameterNames();
+    std::transform(paramNames.begin(), paramNames.end(), std::back_inserter(list), &QVariant::fromValue<QString>);
     return new QVariant(list);
 }
 
 QVariant *rbqml_metaobject_method_parameter_types(const QMetaObject *metaObj, int index)
 {
     auto method = metaObj->method(index);
+    auto typeNames = method.parameterTypes();
     QVariantList list;
-    for (int i = 0; i < method.parameterCount(); ++i) {
-        list << method.parameterType(i);
-    }
+    std::transform(typeNames.begin(), typeNames.end(), std::back_inserter(list), QMetaType::type);
     return new QVariant(list);
 }
 

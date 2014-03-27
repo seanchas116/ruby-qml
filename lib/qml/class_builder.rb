@@ -80,8 +80,8 @@ module QML
 
     def define_initialize
       metaobj = @metaobj
-      @klass.send(:define_method, :initialize) do |obj_ptr|
-        super(obj_ptr)
+      @klass.send(:define_method, :initialize) do |obj_ptr, destroy: true|
+        super(obj_ptr, destroy: destroy)
 
         # connect properties
         metaobj.meta_properties(include_super: true).each_value do |p|

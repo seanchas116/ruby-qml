@@ -1,44 +1,66 @@
-require 'ffi'
+require 'qml/c_lib'
 require 'qml/meta_type'
 require 'qml/qt_object_base'
 
 module QML
-
   class Variant
 
-    extend FFI::DataConverter
+    class << self
 
-    attr_reader :pointer
+      def new(val, raw: nil)
+        return super(raw) if raw
+        case val
+        when Variant
+          val.dup
+        when true, false
+          CLib.rbqml_variant_from_boolean(val)
+        when Integer
+          CLib.rbqml_variant_from_int(val)
+        when Float
+          CLib.rbqml_variant_from_float(val)
+        when String
+          CLib.rbqml_variant_from_string(val)
+        when Symbol
+          CLib.rbqml_variant_from_string(val.to_s)
+        when Array
+          from_array(val)
+        when Hash
+          from_hash(val)
+        when Time
+          CLib.rbqml_variant_from_time(val.year, val.month, val.day, val.hour, val.min, val.sec, val.nsec / 1_000_000, val.gmt_offset)
+        when QtObjectBase
+          CLib.rbqml_variant_from_qobject(val)
+        when FFI::Pointer
+          CLib.rbqml_variant_from_voidp(val)
+        when MetaObject
+          CLib::rbqml_variant_from_metaobject(val)
+        else
+          fail TypeError, "Cannot initialize QML::Variant with #{val.class.name}"
+        end
+      end
 
-    def self.new(val, raw: nil)
-      return super(raw) if raw
-      case val
-      when Variant
-        val.dup
-      when true, false
-        CLib.rbqml_variant_from_boolean(val)
-      when Integer
-        CLib.rbqml_variant_from_int(val)
-      when Float
-        CLib.rbqml_variant_from_float(val)
-      when String
-        CLib.rbqml_variant_from_string(val)
-      when Symbol
-        CLib.rbqml_variant_from_string(val.to_s)
-      when Array
-        CLib.rbqml_variant_from_array(FromArrayStruct.from_array(val))
-      when Hash
-        CLib.rbqml_variant_from_hash(FromHashStruct.from_hash(val))
-      when Time
-        CLib.rbqml_variant_from_time(val.year, val.month, val.day, val.hour, val.min, val.sec, val.nsec / 1_000_000, val.gmt_offset)
-      when QtObjectBase
-        CLib.rbqml_variant_from_qobject(val)
-      when FFI::Pointer
-        CLib.rbqml_variant_from_voidp(val)
-      else
-        fail TypeError, "Cannot initialize QML::Variant with #{val.class.name}"
+      private
+
+      def from_array(array)
+        struct = CLib::VariantFromArrayStruct.new
+        struct[:count] = array.length
+        values = array.map { |value| Variant.new(value).pointer }
+        struct[:variants] = FFI::MemoryPointer.new(:pointer, array.length).write_array_of_pointer(values)
+        CLib.rbqml_variant_from_array(struct)
+      end
+
+      def from_hash(hash)
+        struct = CLib::VariantFromHashStruct.new
+        struct[:count] = hash.length
+        keys = hash.each_key.map { |k| FFI::MemoryPointer::from_string(k.to_s) }
+        struct[:keys] = FFI::MemoryPointer.new(:pointer, hash.length).write_array_of_pointer(keys)
+        values = hash.each_value.map { |v| QML::Variant.new(v).pointer }
+        struct[:variants] = FFI::MemoryPointer.new(:pointer, hash.length).write_array_of_pointer(values)
+        CLib.rbqml_variant_from_hash(struct)
       end
     end
+
+    attr_reader :pointer
 
     def initialize(ptr)
       fail TypeError, "Null pointer" if ptr.null?
@@ -78,6 +100,8 @@ module QML
         obj.meta_object.ruby_class.new(obj.pointer)
       when MetaType::VOID_STAR
         CLib.rbqml_variant_to_voidp(self)
+      when MetaType::CONST_Q_META_OBJECT_STAR
+        CLib.rbqml_variant_to_metaobject(self)
       else
         nil
       end
@@ -119,42 +143,5 @@ module QML
       value.to_sym
     end
 
-    native_type FFI::Type::POINTER
-
-    def self.to_native(variant, ctx)
-      variant = self.new(variant) unless variant.is_a?(Variant)
-      ptr = variant.pointer
-      fail TypeError, "Null pointer" if ptr.null?
-      ptr
-    end
-
-    def self.from_native(ptr, ctx)
-      self.new(nil, raw: ptr)
-    end
-
-    class FromArrayStruct < FFI::Struct
-      layout :count, :int, :variants, :pointer
-      def self.from_array(array)
-        struct = self.new
-        struct[:count] = array.length
-        values = array.map { |value| Variant.new(value).pointer }
-        struct[:variants] = FFI::MemoryPointer.new(:pointer, array.length).write_array_of_pointer(values)
-        struct
-      end
-    end
-
-    class FromHashStruct < FFI::Struct
-      layout :count, :int, :keys, :pointer, :variants, :pointer
-      def self.from_hash(hash)
-        struct = self.new
-        struct[:count] = hash.length
-        keys = hash.each_key.map { |k| FFI::MemoryPointer::from_string(k.to_s) }
-        struct[:keys] = FFI::MemoryPointer.new(:pointer, hash.length).write_array_of_pointer(keys)
-        values = hash.each_value.map { |v| Variant.new(v).pointer }
-        struct[:variants] = FFI::MemoryPointer.new(:pointer, hash.length).write_array_of_pointer(values)
-        struct
-      end
-    end
   end
 end
-

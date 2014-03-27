@@ -34,6 +34,12 @@ describe QML::TestObject do
       end
     end
   end
+  describe '#customType' do
+    it 'calls the method with a custom type parameter' do
+      metaobj = QML::CLib.rbqml_testobject_static_metaobject
+      expect(@obj.customType(metaobj)).to eq(metaobj.name)
+    end
+  end
   describe '#emitSomeSignal' do
     it 'should emit the signal' do
       spy = Ropework::SignalSpy.new(@obj.someSignal)

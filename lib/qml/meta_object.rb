@@ -1,6 +1,7 @@
+require 'qml/c_lib'
 require 'qml/qt_object_base'
+require 'qml/variant'
 require 'qml/class_builder'
-require 'ropework'
 
 module QML
 
@@ -85,21 +86,6 @@ module QML
   end
 
   class MetaObject
-
-    extend FFI::DataConverter
-    native_type FFI::Type::POINTER
-
-    def self.to_native(metaobj, ctx)
-      ptr = metaobj.pointer
-      fail TypeError, "Null pointer" if ptr.null?
-      ptr
-    end
-
-    def self.from_native(ptr, ctx)
-      return nil if ptr.null?
-      @metaobjects ||= {}
-      @metaobjects[ptr.to_i] ||= self.new(ptr)
-    end
 
     attr_accessor :ruby_class
     attr_reader :pointer

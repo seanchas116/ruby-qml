@@ -1,3 +1,4 @@
+#include "../util.h"
 #include <QVariant>
 #include <QDateTime>
 #include <QDebug>
@@ -16,11 +17,6 @@ void getHashLike(const QVariant &variant, void (*callback)(const char *, QVarian
 }
 
 extern "C" {
-
-const char *rbqml_metatype_name(int typeNum)
-{
-    return QMetaType::typeName(typeNum);
-}
 
 QVariant *rbqml_variant_new()
 {
@@ -55,6 +51,11 @@ QVariant *rbqml_variant_from_qobject(QObject *obj)
 QVariant *rbqml_variant_from_voidp(void *ptr)
 {
     return new QVariant(QVariant::fromValue(ptr));
+}
+
+QVariant *rbqml_variant_from_metaobject(const QMetaObject *metaobj)
+{
+    return new QVariant(QVariant::fromValue(metaobj));
 }
 
 struct VariantArray
@@ -115,6 +116,11 @@ QObject *rbqml_variant_to_qobject(const QVariant *variant)
 void *rbqml_variant_to_voidp(const QVariant *variant)
 {
     return variant->value<void *>();
+}
+
+const QMetaObject *rbqml_variant_to_metaobject(const QVariant *variant)
+{
+    return variant->value<const QMetaObject *>();
 }
 
 QVariant *rbqml_variant_unnest(const QVariant *variant)

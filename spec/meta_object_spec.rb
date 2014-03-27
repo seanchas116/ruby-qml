@@ -6,7 +6,7 @@ describe QML::MetaObject do
   context 'with TestObject' do
 
     before do
-      @metaobj = QML::MetaObject.new(QML::CLib.rbqml_testobject_static_metaobject)
+      @metaobj = QML::CLib.rbqml_testobject_static_metaobject
       @obj = QML::QtObjectBase.new(QML::CLib.rbqml_testobject_new)
     end
 
@@ -27,7 +27,7 @@ describe QML::MetaObject do
       it 'returns a hash of meta method arrays grouped by their names' do
         meta_methods = @metaobj.meta_methods
         expect(meta_methods).to be_a(Hash)
-        expect(meta_methods.length).to eq(7)
+        expect(meta_methods.length).to eq(8)
       end
     end
 
@@ -63,7 +63,7 @@ describe QML::MetaObject do
 
     describe '#==, #eql?' do
       it 'compares 2 meta objects by its pointer value' do
-        metaobj2 = QML::MetaObject.new(QML::CLib.rbqml_testobject_static_metaobject)
+        metaobj2 = QML::CLib.rbqml_testobject_static_metaobject
         expect(@metaobj == metaobj2).to eq(true)
         expect(@metaobj.eql?(metaobj2)).to eq(true)
       end

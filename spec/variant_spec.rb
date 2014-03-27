@@ -87,6 +87,12 @@ describe QML::Variant do
       expect(variant.value.name).to eq('lorem ipsum')
     end
 
+    it 'can store MetaObject' do
+      metaobj = QML::CLib.rbqml_testobject_static_metaobject
+      variant = QML::Variant.new(metaobj)
+      expect(variant.value).to eq(metaobj)
+    end
+
     it 'raises error when parameter is not convertible to Variant' do
       expect { QML::Variant.new(Class.new.new) }.to raise_error(TypeError)
     end

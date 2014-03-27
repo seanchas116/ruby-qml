@@ -1,7 +1,10 @@
-
 module QML
-
   class MetaType
+
+    def self.from_name(name)
+      new(CLib.rbqml_metatype_from_name(name))
+    end
+
     attr_reader :id
 
     def initialize(id)
@@ -30,6 +33,10 @@ module QML
       "<QML::MetaType:#{name}>"
     end
 
+    def valid?
+      self != UNKNOWN
+    end
+
     def ruby_class
       case self
       when BOOL
@@ -48,11 +55,18 @@ module QML
         Time
       when Q_VARIANT
         Object
+      when Q_OBJECT_STAR
+        QtObjectBase
+      when VOID_STAR
+        FFI::Pointer
+      when CONST_Q_META_OBJECT_STAR
+        MetaObject
       else
         nil
       end
     end
 
+    UNKNOWN = new(0)
     VOID = new(43)
     BOOL = new(1)
     INT = new(2)
@@ -65,5 +79,6 @@ module QML
     Q_DATE_TIME = new(16)
     Q_OBJECT_STAR = new(39)
     VOID_STAR = new(31)
+    CONST_Q_META_OBJECT_STAR = from_name('const QMetaObject *')
   end
 end

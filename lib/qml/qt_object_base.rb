@@ -1,9 +1,12 @@
+require 'qml/c_lib'
+
 module QML
   class QtObjectBase
 
     attr_reader :pointer
 
     def initialize(ptr, destroy: true)
+      ptr = ptr.pointer if ptr.is_a? QtObjectBase
       fail TypeError, 'ptr must be a FFI::Pointer' unless ptr.is_a? FFI::Pointer
       @pointer = ptr
       if destroy
@@ -36,15 +39,5 @@ module QML
       end
     end
 
-    extend FFI::DataConverter
-    native_type FFI::Type::POINTER
-
-    def self.to_native(obj, ctx)
-      obj.pointer
-    end
-
-    def self.from_native(ptr, ctx)
-      ptr.null? ? nil : self.new(ptr)
-    end
   end
 end

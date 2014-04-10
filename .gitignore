@@ -27,6 +27,7 @@ tmp
 *.so
 *.dll
 *.dylib
+*.bundle
 
 # Qt-es
 

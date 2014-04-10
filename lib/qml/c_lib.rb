@@ -62,8 +62,8 @@ module QML
 
     extend FFI::Library
 
-    LIBPATH = %w{so dylib dll}
-        .map { |suffix| Pathname(__FILE__) + "../../../ext/ruby-qml/libruby-qml.1.0.0.#{suffix}"  }
+    LIBPATH = %w{bundle dylib dll}
+        .map { |suffix| Pathname(__FILE__) + "../clib.#{suffix}"  }
         .find { |path| path.exist? }
     ffi_lib LIBPATH.to_s
 

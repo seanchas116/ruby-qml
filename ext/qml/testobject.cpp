@@ -1,7 +1,6 @@
-#include <QObject>
-#include <QTimeLine>
-#include <QVariant>
-#include <QDebug>
+#include <QtCore/QObject>
+#include <QtCore/QVariant>
+#include <QtCore/QDebug>
 
 namespace RubyQml {
 

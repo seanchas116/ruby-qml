@@ -1,6 +1,6 @@
 #include "backendmain.h"
 #include "util.h"
-#include <QDebug>
+#include <QtCore/QDebug>
 
 namespace RubyQml {
 

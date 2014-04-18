@@ -1,7 +1,7 @@
 #ifndef RUBYQML_MAINUTIL_H
 #define RUBYQML_MAINUTIL_H
 
-#include <QObject>
+#include <QtCore/QObject>
 
 namespace RubyQml {
 

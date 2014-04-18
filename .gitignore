@@ -39,3 +39,4 @@ qrc_*.cpp
 Makefile
 *-build-*
 .qmake.stash
+*.autosave

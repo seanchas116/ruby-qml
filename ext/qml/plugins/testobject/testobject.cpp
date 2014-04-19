@@ -1,12 +1,14 @@
-#include <QtCore/QObject>
-#include <QtCore/QVariant>
-#include <QtCore/QDebug>
+#include <QObject>
+#include <QVariant>
+#include <QDebug>
+#include <QtPlugin>
 
 namespace RubyQml {
 
 class TestObject : public QObject
 {
     Q_OBJECT
+    Q_PLUGIN_METADATA(IID "org.ruby-qml.ruby-qml.TestObject")
     Q_PROPERTY(QString name MEMBER mName NOTIFY nameChanged)
 
 public:
@@ -84,19 +86,5 @@ private:
 };
 
 } // RubyQml
-
-extern "C" {
-
-QObject *rbqml_testobject_new()
-{
-    return new RubyQml::TestObject();
-}
-
-const QMetaObject *rbqml_testobject_static_metaobject()
-{
-    return &RubyQml::TestObject::staticMetaObject;
-}
-
-}
 
 #include "testobject.moc"

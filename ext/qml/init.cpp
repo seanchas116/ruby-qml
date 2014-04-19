@@ -1,12 +1,11 @@
-#include "backendmain.h"
+#include "metaobject.h"
+#include "objectbase.h"
+#include "pluginloader.h"
 
-using namespace RubyQml;
-
-extern "C" {
-
-void rbqml_init()
+extern "C"
+void Init_c_lib()
 {
-    new BackendMain();
-}
-
+    RubyQml::MetaObject::defineClass();
+    RubyQml::ObjectBase::defineClass();
+    RubyQml::PluginLoader::defineClass();
 }

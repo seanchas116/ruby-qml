@@ -8,22 +8,37 @@
 
 namespace RubyQml {
 
-
-inline VALUE toRuby(VALUE x) { return x; }
-inline VALUE toRuby(ID x) { return ID2SYM(x); }
+ID idFromValue(VALUE sym);
 
 inline VALUE toRuby(bool b) { return b ? Qtrue : Qfalse; }
-inline VALUE toRuby(qlonglong n) { return LL2NUM(n); }
-inline VALUE toRuby(qulonglong n) { return ULL2NUM(n); }
-inline VALUE toRuby(double x) { return rb_float_new(x); }
 
-inline VALUE toRuby(const QByteArray &str);
-inline VALUE toRuby(const QString &str) { return toRuby(str.toUtf8()); }
+inline VALUE toRuby(char n) { return LL2NUM(n); }
+inline VALUE toRuby(short n) { return LL2NUM(n); }
+inline VALUE toRuby(long n) { return LL2NUM(n); }
+inline VALUE toRuby(long long n) { return LL2NUM(n); }
+
+inline VALUE toRuby(unsigned char n) { return ULL2NUM(n); }
+inline VALUE toRuby(unsigned short n) { return ULL2NUM(n); }
+inline VALUE toRuby(unsigned long n) { return ULL2NUM(n); }
+inline VALUE toRuby(unsigned long long n) { return ULL2NUM(n); }
+
+inline VALUE toRuby(int n) { return LL2NUM(n); }
+inline VALUE toRuby(unsigned int n) { return ULL2NUM(n); }
+
+inline VALUE toRuby(double x) { return rb_float_new(x); }
+inline VALUE toRuby(float x) { return rb_float_new(x); }
+
+VALUE toRuby(const char *str);
+VALUE toRuby(const QByteArray &str);
+VALUE toRuby(const QString &str);
+
+VALUE toRuby(const QDateTime &dateTime);
+VALUE toRuby(const QVariant &variant);
 
 template <class T>
 VALUE qListLikeToRuby(const T &list)
 {
-    return protectedCall([&] {
+    return protect([&] {
         auto ary = rb_ary_new();
         for (const auto &elem : list) {
             rb_ary_push(ary, toRuby(elem));
@@ -35,9 +50,9 @@ VALUE qListLikeToRuby(const T &list)
 template <class T>
 VALUE qHashLikeToRuby(const T &hash)
 {
-    return protectedCall([&] {
+    return protect([&] {
         auto rubyHash = rb_hash_new();
-        for (auto i = hash.begin(); i != hash.end; ++i) {
+        for (auto i = hash.begin(); i != hash.end(); ++i) {
             rb_hash_aset(rubyHash, toRuby(i.key()), toRuby(i.value()));
         }
         return rubyHash;
@@ -53,10 +68,6 @@ inline VALUE toRuby(const QHash<K, V> &hash) { return qHashLikeToRuby(hash); }
 template <typename K, typename V>
 inline VALUE toRuby(const QMap<K, V> &hash) { return qHashLikeToRuby(hash); }
 
-VALUE toRuby(const QDateTime &dateTime);
-inline VALUE toRuby(const QDate &date) { return toRuby(QDateTime(date)); }
-
-VALUE toRuby(const QVariant &variant);
 
 template <typename T, typename Enable = void>
 struct FromRuby;
@@ -68,45 +79,36 @@ inline T fromRuby(VALUE x)
 }
 
 template <>
-ID fromRuby<ID>(VALUE x)
-{
-    return protectedCall([&] {
-        x = rb_check_convert_type(x, T_SYMBOL, "Symbol", "to_sym");
-        return SYM2ID(x);
-    });
-}
-
-template <>
 inline bool fromRuby<bool>(VALUE x) { return RTEST(x); }
 
 template <typename T>
-struct FromRuby<T, std::enable_if<std::is_signed<T>::value>::type>
+struct FromRuby<T, typename std::enable_if<std::is_signed<T>::value && std::is_integral<T>::value>::type>
 {
     static T apply(VALUE x)
     {
-        return protectedCall([&] {
+        return protect([&] {
             return NUM2LL(x);
         });
     }
 };
 
 template <typename T>
-struct FromRuby<T, std::enable_if<std::is_unsigned<T>::value>::type>
+struct FromRuby<T, typename std::enable_if<std::is_unsigned<T>::value && std::is_integral<T>::value>::type>
 {
     static T apply(VALUE x)
     {
-        return protectedCall([&] {
+        return protect([&] {
             return NUM2ULL(x);
         });
     }
 };
 
 template <typename T>
-struct FromRuby<T, std::enable_if<std::is_floating_point<T>::value>::type>
+struct FromRuby<T, typename std::enable_if<std::is_floating_point<T>::value>::type>
 {
     static T apply(VALUE x)
     {
-        return protectedCall([&] {
+        return protect([&] {
             return rb_float_value(x);
         });
     }
@@ -115,7 +117,7 @@ struct FromRuby<T, std::enable_if<std::is_floating_point<T>::value>::type>
 template <>
 QString fromRuby<QString>(VALUE x)
 {
-    protectedCall([&] {
+    protect([&] {
         StringValue(x);
     });
     return QString::fromUtf8(RSTRING_PTR(x), RSTRING_LEN(x));
@@ -124,7 +126,7 @@ QString fromRuby<QString>(VALUE x)
 template <>
 QByteArray fromRuby<QByteArray>(VALUE x)
 {
-    protectedCall([&] {
+    protect([&] {
         StringValue(x);
     });
     return QByteArray(RSTRING_PTR(x), RSTRING_LEN(x));
@@ -133,7 +135,7 @@ QByteArray fromRuby<QByteArray>(VALUE x)
 template <typename T>
 T qListLikeFromRuby(VALUE x)
 {
-    protectedCall([&] {
+    protect([&] {
         x = rb_check_array_type(x);
     });
     int length = RARRAY_LEN(x);
@@ -149,16 +151,19 @@ template <typename T>
 T qHashLikeFromRuby(VALUE x)
 {
     using Key = typename T::key_type;
-    using Value = typename T::value_type;
-    protectedCall([&] {
+    using Value = typename decltype(std::declval<T>().values())::value_type;
+    protect([&] {
         x = rb_check_hash_type(x);
     });
     T hash;
-    protectedCall([&] {
-        rb_hash_foreach(x, [](VALUE key, VALUE value, VALUE arg) {
+    protect([&] {
+        auto each = [](VALUE key, VALUE value, VALUE arg) -> int {
             auto &hash = *reinterpret_cast<T *>(arg);
             hash[fromRuby<Key>(key)] = fromRuby<Value>(value);
-        }, reinterpret_cast<VALUE>(&hash));
+            return ST_CONTINUE;
+        };
+        auto eachPtr = (int (*)(VALUE, VALUE, VALUE))each;
+        rb_hash_foreach(x, (int (*)(...))eachPtr, (VALUE)(&hash));
     });
     return hash;
 }
@@ -187,8 +192,8 @@ struct FromRuby<QMap<K, V>>
 template<>
 QDateTime fromRuby<QDateTime>(VALUE x)
 {
-    return protectedCall([&] {
-        auto at = rb_funcall(x, "to_r", 0);
+    return protect([&] {
+        auto at = rb_funcall(x, rb_intern("to_r"), 0);
         int num = RRATIONAL(at)->num;
         int den = RRATIONAL(at)->den;
         return QDateTime::fromMSecsSinceEpoch(num * 1000 / den);
@@ -196,9 +201,7 @@ QDateTime fromRuby<QDateTime>(VALUE x)
 }
 
 template <>
-QVariant fromVariant<QVariant>(VALUE x)
-{
-}
+QObject *fromRuby<QObject *>(VALUE x);
 
 enum class TypeCategory
 {
@@ -213,8 +216,15 @@ enum class TypeCategory
 };
 
 TypeCategory metaTypeToCategory(int metaType);
+int categoryToMetaType(TypeCategory category);
 TypeCategory rubyValueCategory(VALUE x);
 
 QVariant fromRuby(VALUE x, int type);
+
+template <>
+inline QVariant fromRuby<QVariant>(VALUE x)
+{
+    return fromRuby(x, -1);
+}
 
 } // namespace RubyQml

@@ -2,11 +2,15 @@
 
 #include "rubyclassbase.h"
 #include <QtCore/QMetaObject>
+#include <QtCore/QVector>
+#include <QtCore/QHash>
+#include <QtCore/QObject>
 
 namespace RubyQml {
 
 class MetaObject : public RubyClassBase<MetaObject>
 {
+    friend class RubyClassBase<MetaObject>;
 public:
 
     MetaObject(const QMetaObject *metaObject = &QObject::staticMetaObject);
@@ -29,9 +33,9 @@ public:
 
     VALUE superClass() const;
 
-    static Definition defineClass();
-
 private:
+
+    static Definition createDefinition();
 
     QMetaProperty findProperty(VALUE name) const;
 

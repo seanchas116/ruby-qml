@@ -1,22 +1,32 @@
 #pragma once
 #include "util.h"
+#include "conversion.h"
+
+#define METHOD_TYPE_NAME(name) decltype(name), name
 
 namespace RubyQml {
 
-#define METHOD_TYPE_POINTER(ptr) decltype(ptr), ptr
+enum class MethodAccess
+{
+    Public,
+    Protected,
+    Private
+};
 
 template <typename TDerived>
 class RubyClassBase
 {
 public:
 
+    VALUE self() { return mSelf; }
+
     template <typename ... Args>
     static VALUE newAsRuby(Args && ... args);
 
-    static TDerived *fromRuby(VALUE value)
+    static TDerived *getPointer(VALUE value)
     {
-        protectedCall([&] {
-            if (rb_obj_is_kind_of(value, rubyClass()) == Qfalse) {
+        protect([&] {
+            if (!RTEST(rb_obj_is_kind_of(value, rubyClass()))) {
                 rb_raise(rb_eTypeError, "the value is not a %s", rb_class2name(rubyClass()));
             }
         });
@@ -25,116 +35,25 @@ public:
         return ptr;
     }
 
+    class Definition;
+
     static VALUE rubyClass()
     {
         return definition().rubyClass();
     }
 
-    static Definition &definition()
+    static Definition definition()
     {
-        if (!mDefinition) {
-            mDefinition.reset(TDerived::defineClass());
+        if (mDefinition.rubyClass() == Qnil) {
+            mDefinition = TDerived::createDefinition();
         }
-        return *mDefinition;
+        return mDefinition;
     }
 
-    class Definition
+    static void defineClass()
     {
-    public:
-
-        Definition(const char *outerPath, const char *name)
-        {
-            protectedCall([&] {
-                rb_define_class_under(rb_path2class(outerPath), name, rb_cObject);
-                rb_define_private_method();
-            });
-        }
-
-        VALUE rubyClass() { return mKlass; }
-
-        template <typename TMemberFunction, TMemberFunction memfn>
-        Definition &defineMethod(const char *name)
-        {
-            MethodDefinition<&rb_define_method, TMemberFunction, memfn>::apply(mKlass, name);
-            return *this;
-        }
-        template <typename TMemberFunction, TMemberFunction memfn>
-        Definition &definePrivateMethod(const char *name)
-        {
-            MethodDefinition<&rb_define_private_method, TMemberFunction, memfn>::apply(mKlass, name);
-            return *this;
-        }
-        template <typename TMemberFunction, TMemberFunction memfn>
-        Definition &defineProtectedMethod(const char *name)
-        {
-            MethodDefinition<&rb_define_protected_method, TMemberFunction, memfn>::apply(mKlass, name);
-            return *this;
-        }
-
-    private:
-
-        using DefineFunc = void (*)(VALUE, const char *, VALUE (*func)(...), int);
-
-        template <typename TFunc, TFunc func>
-        struct ExceptionReRaise;
-
-        template <typename ... TArgs, TFunc func>
-        struct ExceptionReRaise<VALUE (*)(TArgs...), func>
-        {
-            static VALUE apply(TArgs ... args)
-            {
-                int excState = 0;
-                try {
-                    return func(args...);
-                } catch (const RubyException &exc) {
-                    excState = exc.state();
-                }
-                rb_jump_tag(excState);
-                return Qnil;
-            }
-        };
-
-        template <DefineFunc define, typename TMemberFunction, TMemberFunction memfn>
-        struct MethodDefinition;
-
-        template <DefineFunc define, typename ... TArgs, VALUE (TDerived::*memfn)(TArgs ...)>
-        struct MethodDefinition<define, decltype(memfn), memfn>
-        {
-            static VALUE callMethod(VALUE self, TArgs ... args)
-            {
-                return getStruct<TDerived>(self)->*memfn(args ...);
-            }
-
-            using ReRaise = ExceptionReRaise<decltype(&callmethod), &callMethod>;
-
-            static void apply(VALUE klass, const char *name)
-            {
-                protectedCall([&] {
-                    define(klass, name, static_cast<VALUE (*)(...)>(&ReRaise::apply), sizeof...(TArgs));
-                });
-            }
-        };
-
-        template <DefineFunc define, VALUE (TDerived::*memfn)(int, VALUE *)>
-        struct MethodDefinition<define, decltype(memfn), memfn>
-        {
-            static VALUE callMethod(int argc, VALUE *argv, VALUE self)
-            {
-                return getStruct<TDerived>(self)->*memfn(argc, argv);
-            }
-
-            using ReRaise = ExceptionReRaise<decltype(&callMethod), &callMethod>;
-
-            static void apply(VALUE klass, const char *name)
-            {
-                protectedCall([&] {
-                    define(klass, name, static_cast<VALUE (*)(...))>(&ReRaise::apply), -1);
-                });
-            }
-        };
-
-        VALUE mKlass;
-    };
+        definition();
+    }
 
 private:
 
@@ -153,13 +72,112 @@ private:
     {
         auto ptr = ruby_xmalloc(sizeof(TDerived));
         new(ptr) TDerived();
-        return Data_Wrap_Struct(klass, &markImpl, &dealloc, ptr);
+        auto self = Data_Wrap_Struct(klass, &markImpl, &dealloc, ptr);
+        static_cast<TDerived *>(ptr)->mSelf = self;
+        return self;
     }
 
-    static std::unique_ptr<Definition> mDefinition;
+    VALUE mSelf;
+
+    static Definition mDefinition;
 };
 
 template <typename TDerived>
-std::unique_ptr<RubyClassBase<TDerived>::Definition> RubyClassBase<TDerived>::mDefinition;
+typename RubyClassBase<TDerived>::Definition RubyClassBase<TDerived>::mDefinition;
+
+template <typename T>
+struct FromRuby<T *, typename std::enable_if<std::is_base_of<RubyClassBase<T>, T>::value>::type>
+{
+    static T *apply(VALUE value)
+    {
+        return T::getPointer(value);
+    }
+};
+
+template <typename TDerived>
+class RubyClassBase<TDerived>::Definition
+{
+public:
+
+    Definition() {}
+
+    Definition(const char *outerPath, const char *name)
+    {
+        mKlass = protect([&] {
+            return rb_define_class_under(rb_path2class(outerPath), name, rb_cObject);
+        });
+    }
+
+    VALUE rubyClass() { return mKlass; }
+
+    template <typename TMemberFunction, TMemberFunction memfn>
+    Definition &defineMethod(const char *name, MethodAccess access = MethodAccess::Public)
+    {
+        switch (access) {
+        case MethodAccess::Public:
+            MethodDefinition<TMemberFunction, memfn>::apply(&rb_define_method, mKlass, name);
+            break;
+        case MethodAccess::Protected:
+            MethodDefinition<TMemberFunction, memfn>::apply(&rb_define_protected_method, mKlass, name);
+            break;
+        case MethodAccess::Private:
+            MethodDefinition<TMemberFunction, memfn>::apply(&rb_define_private_method, mKlass, name);
+            break;
+        }
+        return *this;
+    }
+
+private:
+
+    using DefineFunc = void (*)(VALUE, const char *, VALUE (*)(...), int);
+
+    template <typename TMemberFunction, TMemberFunction memfn, typename ... TArgs>
+    struct MethodImpl
+    {
+        static VALUE apply(VALUE self, TArgs ... args)
+        {
+            int excState = 0;
+            try {
+                return (fromRuby<TDerived *>(self)->*memfn)(args ...);
+            } catch (const RubyException &exc) {
+                excState = exc.state();
+            }
+            rb_jump_tag(excState);
+            return Qnil;
+        }
+    };
+
+    template <typename TMemberFunction, TMemberFunction memfn>
+    struct MethodDefinition;
+
+    template <typename ... TArgs, VALUE (TDerived::*memfn)(TArgs ...)>
+    struct MethodDefinition<VALUE (TDerived::*)(TArgs ...), memfn>
+    {
+        using Impl = MethodImpl<VALUE (TDerived::*)(TArgs ...), memfn, TArgs ...>;
+
+        static void apply(DefineFunc define, VALUE klass, const char *name)
+        {
+            protect([&] {
+                define(klass, name, (VALUE (*)(...))(&Impl::apply), sizeof...(TArgs));
+            });
+        }
+    };
+
+    template <typename ... TArgs, VALUE (TDerived::*memfn)(TArgs ...) const>
+    struct MethodDefinition<VALUE (TDerived::*)(TArgs ...) const, memfn>
+    {
+        using Impl = MethodImpl<VALUE (TDerived::*)(TArgs ...) const, memfn, TArgs ...>;
+
+        static void apply(DefineFunc define, VALUE klass, const char *name)
+        {
+            protect([&] {
+                define(klass, name, (VALUE (*)(...))(&Impl::apply), sizeof...(TArgs));
+            });
+        }
+    };
+
+
+    VALUE mKlass = Qnil;
+};
 
 }

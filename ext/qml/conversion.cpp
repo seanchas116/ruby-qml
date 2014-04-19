@@ -4,24 +4,44 @@
 
 namespace RubyQml {
 
+ID idFromValue(VALUE sym)
+{
+    ID id;
+    protect([&] {
+        sym = rb_convert_type(sym, T_SYMBOL, "Symbol", "to_sym");
+        id = SYM2ID(sym);
+    });
+    return id;
+}
+
+VALUE toRuby(const char *str)
+{
+    return protect([&] {
+        return rb_enc_str_new_cstr(str, rb_utf8_encoding());
+    });
+}
+
 VALUE toRuby(const QByteArray &str)
 {
-    return protectedCall([&] {
-        return rb_enc_str_new_cstr(str.data(), rb_utf8_encoding());
-    });
+    return toRuby(str.data());
+}
+
+VALUE toRuby(const QString &str)
+{
+    return toRuby(str.toUtf8().data());
 }
 
 VALUE toRuby(const QDateTime &dateTime)
 {
-    return protectedCall([&] {
+    return protect([&] {
         auto at = rb_rational_new(INT2FIX(dateTime.toMSecsSinceEpoch()), INT2FIX(1000));
-        return rb_funcall(rb_cTime, "at", at);
+        return rb_funcall(rb_cTime, rb_intern("at"), at);
     });
 }
 
 struct ConverterHash
 {
-    using FromRuby = QVairiant (*)(VALUE);
+    using FromRuby = QVariant (*)(VALUE);
     using ToRuby = VALUE (*)(const QVariant &);
 
     ConverterHash()
@@ -79,34 +99,43 @@ struct ConverterHash
     }
 
     template <typename T>
-    void addFromRuby(int metaType)
+    void addFromRuby()
     {
-        fromRuby[qMetaTypeId<T>()] = [](VALUE value) {
+        fromRubyHash[qMetaTypeId<T>()] = [](VALUE value) {
             return QVariant::fromValue(fromRuby<T>(value));
         };
     }
     template <typename T>
-    void addToRuby(int metaType)
+    void addToRuby()
     {
-        toRuby[qMetaTypeId<T>()] = [](const QVariant &variant) {
+        toRubyHash[qMetaTypeId<T>()] = [](const QVariant &variant) {
             return toRuby(variant.value<T>());
         };
     }
 
-    QHash<int, FromRuby> fromRuby;
-    QHash<int, ToRuby> toRuby;
+    QHash<int, FromRuby> fromRubyHash;
+    QHash<int, ToRuby> toRubyHash;
 };
 
 Q_GLOBAL_STATIC(ConverterHash, converterHash)
 
 VALUE toRuby(const QVariant &variant)
 {
-    return converterHash->toRuby[variant.userType()](variant);
+    return converterHash->toRubyHash[variant.userType()](variant);
+}
+
+template <>
+QObject *fromRuby<QObject *>(VALUE x)
+{
+    return fromRuby<ObjectBase *>(x)->qObject();
 }
 
 QVariant fromRuby(VALUE x, int type)
 {
-    return converterHash->fromRuby[type](x);
+    if (type < 0) {
+        type = categoryToMetaType(rubyValueCategory(x));
+    }
+    return converterHash->fromRubyHash[type](x);
 }
 
 TypeCategory metaTypeToCategory(int metaType)
@@ -153,9 +182,31 @@ TypeCategory metaTypeToCategory(int metaType)
     }
 }
 
+int categoryToMetaType(TypeCategory category)
+{
+    switch (category) {
+    case TypeCategory::Integer:
+        return QMetaType::Int;
+    case TypeCategory::Float:
+        return QMetaType::Double;
+    case TypeCategory::String:
+        return QMetaType::QString;
+    case TypeCategory::Array:
+        return QMetaType::QVariantList;
+    case TypeCategory::Hash:
+        return QMetaType::QVariantHash;
+    case TypeCategory::Time:
+        return QMetaType::QDateTime;
+    case TypeCategory::QtObject:
+        return QMetaType::QObjectStar;
+    default:
+        return QMetaType::UnknownType;
+    }
+}
+
 TypeCategory rubyValueCategory(VALUE x)
 {
-    return protectedCall([&] {
+    return protect([&] {
         switch (BUILTIN_TYPE(x)) {
         case T_FIXNUM:
         case T_BIGNUM:

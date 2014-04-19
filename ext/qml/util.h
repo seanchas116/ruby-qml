@@ -5,8 +5,7 @@
 #include <QtCore/QMetaType>
 #include <functional>
 #include <tuple>
-
-Q_DECLARE_METATYPE(const QMetaObject*)
+#include <type_traits>
 
 namespace RubyQml {
 
@@ -19,70 +18,84 @@ private:
     int mState = 0;
 };
 
-void fail(const char *errorClassName, const QString &message)
+namespace detail {
+
+template <
+    typename TData,
+    typename TSection,
+    typename TCallback
+>
+auto sectionCall(const TSection &section, const TCallback &callback)
+-> typename std::enable_if<std::is_same<decltype(callback()), void>::value, void>::type
 {
-    auto msg = message.toUtf8();
-    protectedCall([&] {
-        rb_raise(rb_path2class(errorClassName), "%s", msg);
-    });
+    auto sectionCallback = [](TData callbackData) {
+        auto callback = *(TCallback *)callbackData;
+        callback();
+        return TData();
+    };
+    section(sectionCallback, (TData)(&callback));
 }
 
-template <typename TSection, typename TCallback>
-typename std::result_of<TCallback>::type sectionCall(const TSection &section, const TCallback &callback)
+template <
+    typename TData,
+    typename TSection,
+    typename TCallback
+>
+auto sectionCall(const TSection &section, const TCallback &callback)
+-> typename std::enable_if<!std::is_same<decltype(callback()), void>::value, decltype(callback())>::type
 {
-    using Result = typename std::result_of<TCallback>::type;
-    using Tuple = decltype(std::forward_as_tuple(callback()));
-    using Medium = typename std::result_of<TSection>::type; // void*, VALUE or something
+    using Result = decltype(callback());
 
-    auto sectionCallback = [](Medium callbackData) {
-        auto callback = *reinterpret_cast<TCallback *>(callbackData);
-        auto tuple = new Tuple(std::forward_as_tuple(callback()));
-        return reinterpret_cast<Medium>(tuple);
+    auto sectionCallback = [](TData callbackData) {
+        auto callback = *(TCallback *)callbackData;
+        auto result = new Result(callback());
+        return (TData)result;
     };
-    auto callbackData = reinterpret_cast<Medium>(&callback);
-    auto resultData = section(sectionCallback, callbackData);
+    auto resultData = section(sectionCallback, (TData)(&callback));
+    auto resultPtr = (Result *)resultData;
+    return Result(std::move(*resultPtr));
+}
 
-    auto tuplePtr = reinterpret_cast<Tuple *>(resultData);
-    auto tuple = std::move(*tuplePtr);
-    delete tuplePtr;
-    return std::get<0>(tuple);
+} // namespace detail
+
+template <typename TCallback>
+auto protect(const TCallback &callback) -> decltype(callback())
+{
+    auto section = [](VALUE (*callback)(VALUE), VALUE data) {
+        int state;
+        auto result = rb_protect(callback, data, &state);
+        if (state) {
+            throw RubyException(state);
+        }
+        return result;
+    };
+    return detail::sectionCall<VALUE>(section, callback);
 }
 
 template <typename TCallback>
-std::result_of<TCallback> protectedCall(const TCallback &callback)
-{
-    int state;
-    auto section = [&](VALUE (*callback)(VALUE), VALUE data) {
-        return rb_protect(callback, data, &state);
-    };
-    auto result = sectionCall(section, callback);
-    if (state) {
-        throw RubyException(state);
-    }
-    return result;
-}
-
-template <typename TCallback>
-std::result_of<TCallback>::type callWithoutGvl(const TCallback &callback)
+auto withoutGvl(const TCallback &callback) -> decltype(callback())
 {
     auto section = [](void *(*func)(void *), void *data) {
         // NOTE: is it OK to use RUBY_UBF_IO here?
         return rb_thread_call_without_gvl(func, data, RUBY_UBF_IO, nullptr);
     };
-    return sectionCall(section, callback);
+    return detail::sectionCall<void *>(section, callback);
 }
 
 template <typename TCallback>
-std::result_of<TCallback>::type callWithGvl(const TCallback &callback)
+auto withGvl(const TCallback &callback) -> decltype(callback())
 {
-    return sectionCall(&rb_thread_call_with_gvl, callback);
+    return detail::sectionCall<void *>(&rb_thread_call_with_gvl, callback);
 }
 
-template <typename T>
-inline T *getStruct(VALUE value)
+template <typename ... TArgs>
+VALUE send(VALUE self, const char *method, TArgs && ... args)
 {
-    T *ptr;
-    Data_Get_Struct(value, T, ptr);
-    return ptr;
+    return protect([&] {
+        return rb_funcall(self, rb_intern(method), sizeof...(args), args...);
+    });
 }
-}
+
+void fail(const char *errorClassName, const QString &message);
+
+} // namespace RubyQml

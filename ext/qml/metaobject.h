@@ -33,6 +33,11 @@ public:
 
     VALUE superClass() const;
 
+    VALUE isEqual(VALUE other) const;
+    VALUE hash() const;
+
+    void setMetaObject(const QMetaObject *metaObject);
+
 private:
 
     static Definition createDefinition();

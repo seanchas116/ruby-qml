@@ -9,10 +9,10 @@ class ObjectBase : public RubyClassBase<ObjectBase>
 
 public:
     ObjectBase();
-    ObjectBase(QObject *object, bool hasOwnership = true);
     ~ObjectBase();
 
     QObject *qObject() { return mObject; }
+    void setQObject(QObject *obj, bool hasOwnership = true);
 
 private:
 

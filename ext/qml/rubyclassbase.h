@@ -20,9 +20,6 @@ public:
 
     VALUE self() { return mSelf; }
 
-    template <typename ... Args>
-    static VALUE newAsRuby(Args && ... args);
-
     static TDerived *getPointer(VALUE value)
     {
         protect([&] {
@@ -33,6 +30,13 @@ public:
         TDerived *ptr;
         Data_Get_Struct(value, TDerived, ptr);
         return ptr;
+    }
+
+    static VALUE newAsRuby()
+    {
+        return protect([&] {
+            return rb_obj_alloc(rubyClass());
+        });
     }
 
     class Definition;
@@ -85,14 +89,18 @@ private:
 template <typename TDerived>
 typename RubyClassBase<TDerived>::Definition RubyClassBase<TDerived>::mDefinition;
 
+namespace detail {
+
 template <typename T>
-struct FromRuby<T *, typename std::enable_if<std::is_base_of<RubyClassBase<T>, T>::value>::type>
+struct Conversion<T *, typename std::enable_if<std::is_base_of<RubyClassBase<T>, T>::value>::type>
 {
-    static T *apply(VALUE value)
+    static T *from(VALUE value)
     {
         return T::getPointer(value);
     }
 };
+
+}
 
 template <typename TDerived>
 class RubyClassBase<TDerived>::Definition
@@ -124,6 +132,14 @@ public:
             MethodDefinition<TMemberFunction, memfn>::apply(&rb_define_private_method, mKlass, name);
             break;
         }
+        return *this;
+    }
+
+    Definition &aliasMethod(const char *newName, const char *oldName)
+    {
+        protect([&] {
+            rb_alias(mKlass, rb_intern(newName), rb_intern(oldName));
+        });
         return *this;
     }
 

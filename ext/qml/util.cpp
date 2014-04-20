@@ -1,4 +1,5 @@
 #include "util.h"
+#include <QtCore/QString>
 
 namespace RubyQml {
 

@@ -22,6 +22,6 @@ end
 
 # build extension itself
 
-$CPPFLAGS += ' -std=c++11'
+$CPPFLAGS += ' -std=c++11 -Wall'
 
 create_makefile "qml/c_lib"

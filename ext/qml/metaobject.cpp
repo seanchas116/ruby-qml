@@ -88,6 +88,9 @@ public:
         for (int i = 0; i < count; ++i) {
             auto paramCategory = metaTypeToCategory(mMethod.parameterType(i));
             auto argCategory = rubyValueCategory(RARRAY_AREF(mArgs, i));
+            if (argCategory == TypeCategory::Invalid) {
+                return false;
+            }
             if (paramCategory != argCategory) {
                 return false;
             }
@@ -266,7 +269,24 @@ VALUE MetaObject::enumerators() const
 
 VALUE MetaObject::superClass() const
 {
-    return newAsRuby(mMetaObject->superClass());
+    auto value = newAsRuby();
+    fromRuby<MetaObject *>(value)->setMetaObject(mMetaObject->superClass());
+    return value;
+}
+
+VALUE MetaObject::isEqual(VALUE other) const
+{
+    return toRuby(mMetaObject == fromRuby<MetaObject *>(other)->mMetaObject);
+}
+
+VALUE MetaObject::hash() const
+{
+    return toRuby(reinterpret_cast<size_t>(mMetaObject));
+}
+
+void MetaObject::setMetaObject(const QMetaObject *metaObject)
+{
+    mMetaObject = metaObject;
 }
 
 MetaObject::Definition MetaObject::createDefinition()
@@ -275,21 +295,25 @@ MetaObject::Definition MetaObject::createDefinition()
 
         .defineMethod<METHOD_TYPE_NAME(&MetaObject::className)>("name")
 
-        .defineMethod<METHOD_TYPE_NAME(&MetaObject::publicMethodNames)>("public_method_names");
-        .defineMethod<METHOD_TYPE_NAME(&MetaObject::protectedMethodNames)>("protected_method_names");
+        .defineMethod<METHOD_TYPE_NAME(&MetaObject::publicMethodNames)>("public_method_names")
+        .defineMethod<METHOD_TYPE_NAME(&MetaObject::protectedMethodNames)>("protected_method_names")
 
-        .defineMethod<METHOD_TYPE_NAME(&MetaObject::signalNames)>("signal_names");
-        .defineMethod<METHOD_TYPE_NAME(&MetaObject::invokeMethod)>("invoke_method");
-        .defineMethod<METHOD_TYPE_NAME(&MetaObject::connectSignal)>("connect_signal");
+        .defineMethod<METHOD_TYPE_NAME(&MetaObject::signalNames)>("signal_names")
+        .defineMethod<METHOD_TYPE_NAME(&MetaObject::invokeMethod)>("invoke_method")
+        .defineMethod<METHOD_TYPE_NAME(&MetaObject::connectSignal)>("connect_signal")
 
-        .defineMethod<METHOD_TYPE_NAME(&MetaObject::propertyNames)>("property_names");
-        .defineMethod<METHOD_TYPE_NAME(&MetaObject::getProperty)>("get_property");
-        .defineMethod<METHOD_TYPE_NAME(&MetaObject::setProperty)>("set_property");
-        .defineMethod<METHOD_TYPE_NAME(&MetaObject::notifySignal)>("notify_signal");
+        .defineMethod<METHOD_TYPE_NAME(&MetaObject::propertyNames)>("property_names")
+        .defineMethod<METHOD_TYPE_NAME(&MetaObject::getProperty)>("get_property")
+        .defineMethod<METHOD_TYPE_NAME(&MetaObject::setProperty)>("set_property")
+        .defineMethod<METHOD_TYPE_NAME(&MetaObject::notifySignal)>("notify_signal")
 
-        .defineMethod<METHOD_TYPE_NAME(&MetaObject::enumerators)>("enumerators");
+        .defineMethod<METHOD_TYPE_NAME(&MetaObject::enumerators)>("enumerators")
 
-        .defineMethod<METHOD_TYPE_NAME(&MetaObject::superClass)>("super_class");
+        .defineMethod<METHOD_TYPE_NAME(&MetaObject::superClass)>("super_class")
+
+        .defineMethod<METHOD_TYPE_NAME(&MetaObject::isEqual)>("==")
+        .defineMethod<METHOD_TYPE_NAME(&MetaObject::hash)>("hash")
+        .aliasMethod("eql?", "==");
 }
 
 

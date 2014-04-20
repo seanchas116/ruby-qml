@@ -29,7 +29,9 @@ VALUE PluginLoader::load()
 
 VALUE PluginLoader::instance()
 {
-    return ObjectBase::newAsRuby(mPluginLoader->instance(), false);
+    auto value = ObjectBase::newAsRuby();
+    fromRuby<ObjectBase *>(value)->setQObject(mPluginLoader->instance(), false);
+    return value;
 }
 
 PluginLoader::Definition PluginLoader::createDefinition()

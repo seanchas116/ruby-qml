@@ -1,43 +1,65 @@
 #include "conversion.h"
 #include "objectbase.h"
+#include "metaobject.h"
 #include <ruby/intern.h>
 
 namespace RubyQml {
 
-ID idFromValue(VALUE sym)
-{
-    ID id;
-    protect([&] {
-        sym = rb_convert_type(sym, T_SYMBOL, "Symbol", "to_sym");
-        id = SYM2ID(sym);
-    });
-    return id;
-}
 
-VALUE toRuby(const char *str)
+namespace detail {
+
+VALUE Conversion<const char *>::to(const char *str)
 {
     return protect([&] {
         return rb_enc_str_new_cstr(str, rb_utf8_encoding());
     });
 }
 
-VALUE toRuby(const QByteArray &str)
+QByteArray Conversion<QByteArray>::from(VALUE x)
 {
-    return toRuby(str.data());
+    protect([&] {
+        StringValue(x);
+    });
+    return QByteArray(RSTRING_PTR(x), RSTRING_LEN(x));
 }
 
-VALUE toRuby(const QString &str)
+VALUE Conversion<QByteArray>::to(const QByteArray &str)
 {
-    return toRuby(str.toUtf8().data());
+    return toRuby(str.constData());
 }
 
-VALUE toRuby(const QDateTime &dateTime)
+QString Conversion<QString>::from(VALUE x)
+{
+    protect([&] {
+        StringValue(x);
+    });
+    return QString::fromUtf8(RSTRING_PTR(x), RSTRING_LEN(x));
+}
+
+VALUE Conversion<QString>::to(const QString &str)
+{
+    return toRuby(str.toUtf8().constData());
+}
+
+QDateTime Conversion<QDateTime>::from(VALUE x)
+{
+    return protect([&] {
+        auto at = rb_funcall(x, rb_intern("to_r"), 0);
+        int num = RRATIONAL(at)->num;
+        int den = RRATIONAL(at)->den;
+        return QDateTime::fromMSecsSinceEpoch(num * 1000 / den);
+    });
+}
+
+VALUE Conversion<QDateTime>::to(const QDateTime &dateTime)
 {
     return protect([&] {
         auto at = rb_rational_new(INT2FIX(dateTime.toMSecsSinceEpoch()), INT2FIX(1000));
         return rb_funcall(rb_cTime, rb_intern("at"), at);
     });
 }
+
+namespace {
 
 struct ConverterHash
 {
@@ -119,24 +141,32 @@ struct ConverterHash
 
 Q_GLOBAL_STATIC(ConverterHash, converterHash)
 
-VALUE toRuby(const QVariant &variant)
+} // unnamed namespace
+
+QVariant Conversion<QVariant>::from(VALUE x)
+{
+    return fromRuby(x, -1);
+}
+
+VALUE Conversion<QVariant>::to(const QVariant &variant)
 {
     return converterHash->toRubyHash[variant.userType()](variant);
 }
 
-template <>
-QObject *fromRuby<QObject *>(VALUE x)
+QObject *Conversion<QObject *>::from(VALUE x)
 {
     return fromRuby<ObjectBase *>(x)->qObject();
 }
 
-QVariant fromRuby(VALUE x, int type)
+VALUE Conversion<QObject *>::to(QObject *obj)
 {
-    if (type < 0) {
-        type = categoryToMetaType(rubyValueCategory(x));
-    }
-    return converterHash->fromRubyHash[type](x);
+    auto klass = send(MetaObject::rubyClass(), "object_class");
+    auto value = send(klass, "new");
+    fromRuby<ObjectBase *>(value)->setQObject(obj);
+    return value;
 }
+
+} // namespace detail
 
 TypeCategory metaTypeToCategory(int metaType)
 {
@@ -230,6 +260,24 @@ TypeCategory rubyValueCategory(VALUE x)
         }
         return TypeCategory::Invalid;
     });
+}
+
+QVariant fromRuby(VALUE x, int type)
+{
+    if (type < 0) {
+        type = categoryToMetaType(rubyValueCategory(x));
+    }
+    return detail::converterHash->fromRubyHash[type](x);
+}
+
+ID idFromValue(VALUE sym)
+{
+    ID id;
+    protect([&] {
+        sym = rb_convert_type(sym, T_SYMBOL, "Symbol", "to_sym");
+        id = SYM2ID(sym);
+    });
+    return id;
 }
 
 } // namespace RubyQml

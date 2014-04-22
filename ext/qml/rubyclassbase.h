@@ -66,7 +66,7 @@ private:
         ptr->mark();
     }
 
-    static void *dealloc(TDerived *ptr)
+    static void dealloc(TDerived *ptr)
     {
         ptr->~TDerived();
         ruby_xfree(ptr);
@@ -111,8 +111,9 @@ public:
 
     Definition(const char *outerPath, const char *name)
     {
-        mKlass = protect([&] {
-            return rb_define_class_under(rb_path2class(outerPath), name, rb_cObject);
+        protect([&] {
+            mKlass = rb_define_class_under(rb_path2class(outerPath), name, rb_cObject);
+            rb_define_alloc_func(mKlass, &alloc);
         });
     }
 

@@ -160,7 +160,8 @@ QObject *Conversion<QObject *>::from(VALUE x)
 
 VALUE Conversion<QObject *>::to(QObject *obj)
 {
-    auto klass = send(MetaObject::rubyClass(), "object_class");
+    auto metaObject = MetaObject::fromObject(obj);
+    auto klass = send(metaObject, "object_class");
     auto value = send(klass, "new");
     fromRuby<ObjectBase *>(value)->setQObject(obj);
     return value;
@@ -237,7 +238,7 @@ int categoryToMetaType(TypeCategory category)
 TypeCategory rubyValueCategory(VALUE x)
 {
     return protect([&] {
-        switch (BUILTIN_TYPE(x)) {
+        switch (rb_type(x)) {
         case T_FIXNUM:
         case T_BIGNUM:
             return TypeCategory::Integer;

@@ -1,4 +1,7 @@
 require 'spec_helper'
+
+=begin
+
 require 'qml/meta_object'
 
 describe QML::MetaObject do
@@ -75,87 +78,7 @@ describe QML::MetaObject do
       end
     end
 
-    describe 'QML::MetaMethod' do
-
-      before do
-        @method = @metaobj.meta_methods[:normalMethod].first
-        @signal = @metaobj.meta_methods[:someSignal].first
-      end
-
-      describe '#name' do
-        it 'returns the name of the method' do
-          expect(@method.name).to eq(:normalMethod)
-        end
-      end
-
-      describe '#arity' do
-        it 'returns the number of arguments' do
-          expect(@method.arity).to eq(2)
-        end
-      end
-
-      describe '#arg_names' do
-        it 'returns the names of the arguments' do
-          expect(@method.arg_names).to eq([:x, :y])
-        end
-      end
-
-      describe '#arg_types' do
-        it 'returns the QMetaType ids of the arguments' do
-          expect(@method.arg_types).to eq([QML::MetaType::INT, QML::MetaType::Q_STRING])
-        end
-      end
-
-      describe '#signal?' do
-        it 'returns whether the method is a signal' do
-          expect(@method.signal?).to be(false)
-          expect(@signal.signal?).to be(true)
-        end
-      end
-
-      describe '#invoke' do
-        it 'should invoke method' do
-          result = @method.invoke(@obj, 2, '345')
-          expect(result).to eq(347)
-        end
-      end
-
-      describe '#connect_signal' do
-        it 'should connect proc to the signal' do
-          received = nil
-          prc = ->(str) { received = str }
-          @signal.connect_signal(@obj, &prc)
-
-          @metaobj.meta_methods[:emitSomeSignal].first.invoke(@obj, 'foo')
-          expect(received).to eq('foo')
-        end
-      end
-    end
-
-    describe 'QML::MetaProperty' do
-
-      before do
-        @property = @metaobj.meta_properties[:name]
-      end
-
-      describe '#name' do
-        it 'returns the property name' do
-          expect(@property.name).to eq(:name)
-        end
-      end
-
-      describe '#notify_signal' do
-        it 'returns the notification signal for the property' do
-          expect(@property.notify_signal.name).to eq(:nameChanged)
-        end
-      end
-
-      describe '#set_value, #get_value' do
-        it 'should set and get the property value' do
-          @property.set_value(@obj, 'foobar')
-          expect(@property.get_value(@obj)).to eq('foobar')
-        end
-      end
-    end
   end
 end
+
+=end

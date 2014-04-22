@@ -5,13 +5,13 @@
 
 namespace RubyQml {
 
-SignalForwarder::SignalForwarder(QObject *obj, const char *signal, VALUE proc) :
-    QSignalSpy(obj, signal),
+SignalForwarder::SignalForwarder(QObject *obj, const QMetaMethod &signal, VALUE proc) :
+    QObject(obj),
+    mSignal(signal),
     mProc(proc)
 {
-    setParent(obj);
-    connect(obj, signal, this, SLOT(onSignal()));
     rb_gc_register_address(&mProc);
+    QMetaObject::connect(obj, signal.methodIndex(), this, QObject::staticMetaObject.methodCount());
 }
 
 SignalForwarder::~SignalForwarder()
@@ -19,11 +19,41 @@ SignalForwarder::~SignalForwarder()
     rb_gc_unregister_address(&mProc);
 }
 
-void SignalForwarder::onSignal()
+int SignalForwarder::qt_metacall(QMetaObject::Call call, int id, void **args)
 {
-    auto args = toRuby(takeFirst());
+    id = QObject::qt_metacall(call, id, args);
+    if (id < 0) {
+        return id;
+    }
+    if (call == QMetaObject::InvokeMetaMethod) {
+        if (id == 0) {
+            forwardArgs(args);
+        }
+        --id;
+    }
+    return id;
+}
+
+void SignalForwarder::forwardArgs(void **args)
+{
+    QVariantList list;
+    list.reserve(mSignal.parameterCount());
+    for (int i = 0; i < mSignal.parameterCount(); ++i) {
+        auto type = mSignal.parameterType(i);
+        if (type == QMetaType::QVariant) {
+            list << *static_cast<QVariant *>(args[i + 1]);
+        } else {
+            list << QVariant(type, args[i + 1]);
+        }
+    }
+    callProc(list);
+}
+
+void SignalForwarder::callProc(const QVariantList &list)
+{
     withGvl([&] {
         try {
+            auto args = toRuby(list);
             protect([&] {
                 rb_funcallv(mProc, rb_intern("call"), RARRAY_LEN(args), RARRAY_PTR(args));
             });
@@ -32,7 +62,6 @@ void SignalForwarder::onSignal()
             qWarning() << "unhandled Ruby exception in signal";
         }
     });
-    clear();
 }
 
 } // namespace RubyQml

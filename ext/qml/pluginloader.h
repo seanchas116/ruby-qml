@@ -19,6 +19,7 @@ public:
     VALUE instance();
 
 private:
+    void mark() {}
     static Definition createDefinition();
     std::unique_ptr<QPluginLoader> mPluginLoader;
 };

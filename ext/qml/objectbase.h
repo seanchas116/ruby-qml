@@ -1,5 +1,6 @@
 #pragma once
 #include "rubyclassbase.h"
+#include <QtCore/QPointer>
 
 namespace RubyQml {
 
@@ -11,16 +12,22 @@ public:
     ObjectBase();
     ~ObjectBase();
 
-    QObject *qObject() { return mObject; }
-    void setQObject(QObject *obj, bool hasOwnership = true);
+    QObject *qObject();
+    void setQObject(QObject *obj, bool hasOwnership = false);
+    void setOwnership(bool ownership);
+
+    VALUE hasOwnership() const;
+    VALUE withOwnership() const;
+    VALUE isNull() const;
+    VALUE toString() const;
 
 private:
 
+    void mark() {}
     static Definition createDefinition();
 
     bool mHasOwnership = false;
-    QObject *mObject = nullptr;
-    static QHash<QObject *, int> mObjRefCount;
+    QPointer<QObject> mObject;
 };
 
 } // namespace RubyQml

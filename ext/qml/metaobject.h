@@ -13,7 +13,7 @@ class MetaObject : public RubyClassBase<MetaObject>
     friend class RubyClassBase<MetaObject>;
 public:
 
-    MetaObject(const QMetaObject *metaObject = &QObject::staticMetaObject);
+    MetaObject();
 
     VALUE className() const;
 
@@ -38,18 +38,23 @@ public:
 
     void setMetaObject(const QMetaObject *metaObject);
 
+    static VALUE fromObject(QObject *obj);
+
 private:
 
+    void mark() {}
     static Definition createDefinition();
 
     QMetaProperty findProperty(VALUE name) const;
 
     const QMetaObject *mMetaObject = nullptr;
-    QHash<ID, QVector<int>> mMethodHash;
+    QMultiHash<ID, int> mMethodHash;
     QVector<ID> mPublicMethods;
     QVector<ID> mProtectedMethods;
     QVector<ID> mSignals;
     QHash<ID, int> mPropertyHash;
+
+    static VALUE metaObjectHash;
 };
 
 

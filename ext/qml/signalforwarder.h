@@ -1,20 +1,23 @@
 #pragma once
-#include <QtTest/QSignalSpy>
+#include <QtCore/QObject>
+#include <QtCore/QMetaMethod>
 #include <ruby.h>
 
 namespace RubyQml {
 
-class SignalForwarder : public QSignalSpy
+class SignalForwarder : public QObject
 {
-    Q_OBJECT
 public:
-    SignalForwarder(QObject *obj, const char *signal, VALUE proc);
+    SignalForwarder(QObject *obj, const QMetaMethod &signal, VALUE proc);
     ~SignalForwarder();
 
-private slots:
-    void onSignal();
+    int qt_metacall(QMetaObject::Call call, int id, void **args) override;
 
 private:
+    void forwardArgs(void **args);
+    void callProc(const QVariantList &list);
+
+    QMetaMethod mSignal;
     VALUE mProc;
 };
 

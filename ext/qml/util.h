@@ -98,4 +98,6 @@ VALUE send(VALUE self, const char *method, TArgs && ... args)
 
 void fail(const char *errorClassName, const QString &message);
 
+bool isKindOf(VALUE obj, VALUE klass);
+
 } // namespace RubyQml

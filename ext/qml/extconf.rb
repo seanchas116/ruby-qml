@@ -24,4 +24,7 @@ end
 
 $CPPFLAGS += ' -std=c++11 -Wall'
 
-create_makefile "qml/c_lib"
+# TODO: add support for other platforms than Mac
+$LDFLAGS += " -F#{qt_lib} -framework QtCore -framework QtTest"
+
+create_makefile "qml/qml"

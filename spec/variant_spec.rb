@@ -1,5 +1,6 @@
 require 'spec_helper'
 
+=begin
 describe QML::Variant do
 
   describe '.new' do
@@ -117,4 +118,5 @@ describe QML::Variant do
   end
 
 end
+=end
 

@@ -22,9 +22,10 @@ public:
 
     static TDerived *getPointer(VALUE value)
     {
+        auto klass = rubyClass();
         protect([&] {
-            if (!RTEST(rb_obj_is_kind_of(value, rubyClass()))) {
-                rb_raise(rb_eTypeError, "the value is not a %s", rb_class2name(rubyClass()));
+            if (!RTEST(rb_obj_is_kind_of(value, klass))) {
+                rb_raise(rb_eTypeError, "the value is not a %s", rb_class2name(klass));
             }
         });
         TDerived *ptr;
@@ -34,8 +35,9 @@ public:
 
     static VALUE newAsRuby()
     {
+        auto klass = rubyClass();
         return protect([&] {
-            return rb_obj_alloc(rubyClass());
+            return rb_obj_alloc(klass);
         });
     }
 
@@ -153,14 +155,9 @@ private:
     {
         static VALUE apply(VALUE self, TArgs ... args)
         {
-            int excState = 0;
-            try {
+            return unprotect([&] {
                 return (fromRuby<TDerived *>(self)->*memfn)(args ...);
-            } catch (const RubyException &exc) {
-                excState = exc.state();
-            }
-            rb_jump_tag(excState);
-            return Qnil;
+            });
         }
     };
 

@@ -8,8 +8,6 @@ namespace RubyQml {
 
 namespace {
 
-auto refCountProperty = "rubyqml_refcount";
-
 void destroyObject(QObject *obj)
 {
     // owned by JS

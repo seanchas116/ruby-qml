@@ -73,6 +73,19 @@ auto protect(const TCallback &callback) -> decltype(callback())
 }
 
 template <typename TCallback>
+auto unprotect(const TCallback &callback) -> decltype(callback())
+{
+    int state = 0;
+    try {
+        return callback();
+    }
+    catch (const RubyException &ex) {
+        state = ex.state();
+    }
+    rb_jump_tag(state);
+}
+
+template <typename TCallback>
 auto withoutGvl(const TCallback &callback) -> decltype(callback())
 {
     auto section = [](void *(*func)(void *), void *data) {

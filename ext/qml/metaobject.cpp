@@ -24,17 +24,31 @@ VALUE MetaObject::className() const
 {
     return rb_str_new_cstr(mMetaObject->className());
 }
-VALUE MetaObject::publicMethodNames() const
+
+VALUE MetaObject::methodNames() const
 {
-    return toRuby(mPublicMethods);
+    return toRuby(mMethodHash.keys());
 }
-VALUE MetaObject::protectedMethodNames() const
+
+VALUE MetaObject::isPublic(VALUE name) const
 {
-    return toRuby(mProtectedMethods);
+    auto methods = findMethods(name);
+    return toRuby(mMetaObject->method(methods.first()).access() == QMetaMethod::Public);
 }
-VALUE MetaObject::signalNames() const
+VALUE MetaObject::isProtected(VALUE name) const
 {
-    return toRuby(mSignals);
+    auto methods = findMethods(name);
+    return toRuby(mMetaObject->method(methods.first()).access() == QMetaMethod::Protected);
+}
+VALUE MetaObject::isPrivate(VALUE name) const
+{
+    auto methods = findMethods(name);
+    return toRuby(mMetaObject->method(methods.first()).access() == QMetaMethod::Private);
+}
+VALUE MetaObject::isSignal(VALUE name) const
+{
+    auto methods = findMethods(name);
+    return toRuby(mMetaObject->method(methods.first()).methodType() == QMetaMethod::Signal);
 }
 
 class MethodInvoker
@@ -112,20 +126,11 @@ private:
 
 VALUE MetaObject::invokeMethod(VALUE object, VALUE methodName, VALUE args) const
 {
-    auto id = idFromValue(methodName);
+    auto methodIndexes = findMethods(methodName);
 
     protect([&] {
         args = rb_check_array_type(args);
     });
-    auto methodIndexes = mMethodHash.values(id);
-    if (methodIndexes.size() == 0) {
-        protect([&] {
-            rb_raise(rb_path2class("QML::MethodError"),
-                     "method not found (%s in %s)",
-                     rb_id2name(id),
-                     mMetaObject->className());
-        });
-    }
     for (int i : methodIndexes) {
         MethodInvoker invoker(args, mMetaObject->method(i));
         if (invoker.isArgsCompatible()) {
@@ -136,7 +141,7 @@ VALUE MetaObject::invokeMethod(VALUE object, VALUE methodName, VALUE args) const
         auto classes = rb_funcall(args, rb_intern("map"), 1, SYM2ID(rb_intern("class")));
         rb_raise(rb_path2class("QML::MethodError"),
                  "method mismatch (%s with params %s in %s)",
-                 rb_id2name(id),
+                 mMetaObject->method(methodIndexes.first()).name().data(),
                  StringValueCStr(classes),
                  mMetaObject->className());
     });
@@ -148,12 +153,7 @@ VALUE MetaObject::connectSignal(VALUE object, VALUE signalName, VALUE proc) cons
     auto id = idFromValue(signalName);
     auto obj = fromRuby<ObjectBase *>(object)->qObject();
 
-    protect([&] {
-        if (!rb_respond_to(proc, rb_intern("call"))) {
-            rb_raise(rb_eTypeError,
-                     "connecting non-callable object");
-        }
-    });
+    proc = send(proc, "to_proc");
 
     auto methodIndexes = mMethodHash.values(id);
     std::reverse(methodIndexes.begin(), methodIndexes.end());
@@ -181,7 +181,7 @@ VALUE MetaObject::propertyNames() const
 
 VALUE MetaObject::getProperty(VALUE object, VALUE name) const
 {
-    auto metaProperty = findProperty(name);
+    auto metaProperty = mMetaObject->property(findProperty(name));
 
     auto qobj = fromRuby<ObjectBase *>(object)->qObject();
     auto result = withoutGvl([&] {
@@ -192,7 +192,7 @@ VALUE MetaObject::getProperty(VALUE object, VALUE name) const
 
 VALUE MetaObject::setProperty(VALUE object, VALUE name, VALUE newValue) const
 {
-    auto metaProperty = findProperty(name);
+    auto metaProperty = mMetaObject->property(findProperty(name));
     if (rubyValueCategory(newValue) != metaTypeToCategory(metaProperty.userType())) {
         protect([&] {
             rb_raise(rb_path2class("QML::PropertyError"),
@@ -212,11 +212,26 @@ VALUE MetaObject::setProperty(VALUE object, VALUE name, VALUE newValue) const
 
 VALUE MetaObject::notifySignal(VALUE name) const
 {
-    auto metaProperty = findProperty(name);
+    auto metaProperty = mMetaObject->property(findProperty(name));
     return ID2SYM(rb_intern(metaProperty.notifySignal().name()));
 }
 
-QMetaProperty MetaObject::findProperty(VALUE name) const
+QList<int> MetaObject::findMethods(VALUE name) const
+{
+    auto id = idFromValue(name);
+    auto methodIndexes = mMethodHash.values(id);
+    if (methodIndexes.size() == 0) {
+        protect([&] {
+            rb_raise(rb_path2class("QML::MethodError"),
+                     "method not found (%s in %s)",
+                     rb_id2name(id),
+                     mMetaObject->className());
+        });
+    }
+    return methodIndexes;
+}
+
+int MetaObject::findProperty(VALUE name) const
 {
     auto id = idFromValue(name);
 
@@ -227,7 +242,7 @@ QMetaProperty MetaObject::findProperty(VALUE name) const
                      rb_id2name(id), mMetaObject->className());
         });
     }
-    return mMetaObject->property(mPropertyHash[id]);
+    return mPropertyHash[id];
 }
 
 VALUE MetaObject::enumerators() const
@@ -267,7 +282,6 @@ void MetaObject::setMetaObject(const QMetaObject *metaObject)
     int methodCount = metaObject->methodCount() - metaObject->methodOffset();
 
     QMultiHash<ID, int> methodHash;
-    QVector<ID> publicMethodNames, protectedMethodNames, signalNames;
     QHash<ID, int> propertyHash;
 
     for (int i = 0; i < methodCount; ++i) {
@@ -279,22 +293,10 @@ void MetaObject::setMetaObject(const QMetaObject *metaObject)
             continue;
         }
 
-        auto name = rb_intern(method.name());
-
-        methodHash.insert(name, index);
-
-        if (method.access() == QMetaMethod::Public) {
-            publicMethodNames << name;
-        } else if (method.access() == QMetaMethod::Protected) {
-            protectedMethodNames << name;
-        }
-
-        if (method.methodType() == QMetaMethod::Signal) {
-            signalNames << name;
-        }
+        methodHash.insert(rb_intern(method.name()), index);
     }
 
-    int propertyCount = metaObject->methodCount() - metaObject->methodOffset();
+    int propertyCount = metaObject->propertyCount() - metaObject->propertyOffset();
 
     for (int i = 0; i < propertyCount; ++i) {
         auto index = i + metaObject->propertyOffset();
@@ -304,9 +306,6 @@ void MetaObject::setMetaObject(const QMetaObject *metaObject)
 
     mMetaObject = metaObject;
     mMethodHash = methodHash;
-    mPublicMethods = publicMethodNames;
-    mProtectedMethods = protectedMethodNames;
-    mSignals = signalNames;
     mPropertyHash = propertyHash;
 }
 
@@ -334,10 +333,12 @@ MetaObject::Definition MetaObject::createDefinition()
 
     def.defineMethod<METHOD_TYPE_NAME(&MetaObject::className)>("name");
 
-    def.defineMethod<METHOD_TYPE_NAME(&MetaObject::publicMethodNames)>("public_method_names");
-    def.defineMethod<METHOD_TYPE_NAME(&MetaObject::protectedMethodNames)>("protected_method_names");
+    def.defineMethod<METHOD_TYPE_NAME(&MetaObject::methodNames)>("method_names");
+    def.defineMethod<METHOD_TYPE_NAME(&MetaObject::isPublic)>("public?");
+    def.defineMethod<METHOD_TYPE_NAME(&MetaObject::isProtected)>("protected?");
+    def.defineMethod<METHOD_TYPE_NAME(&MetaObject::isPrivate)>("private?");
+    def.defineMethod<METHOD_TYPE_NAME(&MetaObject::isSignal)>("signal?");
 
-    def.defineMethod<METHOD_TYPE_NAME(&MetaObject::signalNames)>("signal_names");
     def.defineMethod<METHOD_TYPE_NAME(&MetaObject::invokeMethod)>("invoke_method");
     def.defineMethod<METHOD_TYPE_NAME(&MetaObject::connectSignal)>("connect_signal");
 

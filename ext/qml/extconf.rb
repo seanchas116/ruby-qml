@@ -22,7 +22,7 @@ end
 
 # build extension itself
 
-$CPPFLAGS += ' -std=c++11 -Wall'
+$CPPFLAGS += ' -std=c++11 -Wall -g'
 
 # TODO: add support for other platforms than Mac
 $LDFLAGS += " -F#{qt_lib} -framework QtCore -framework QtTest"

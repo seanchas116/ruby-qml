@@ -2,6 +2,7 @@
 #include "objectbase.h"
 #include "metaobject.h"
 #include <ruby/intern.h>
+#include <QtCore/QDebug>
 
 namespace RubyQml {
 
@@ -18,7 +19,7 @@ VALUE Conversion<const char *>::to(const char *str)
 QByteArray Conversion<QByteArray>::from(VALUE x)
 {
     protect([&] {
-        StringValue(x);
+        x = rb_check_convert_type(x, T_STRING, "String", "to_s");
     });
     return QByteArray(RSTRING_PTR(x), RSTRING_LEN(x));
 }
@@ -31,6 +32,7 @@ VALUE Conversion<QByteArray>::to(const QByteArray &str)
 QString Conversion<QString>::from(VALUE x)
 {
     protect([&] {
+        x = rb_check_convert_type(x, T_STRING, "String", "to_s");
         StringValue(x);
     });
     return QString::fromUtf8(RSTRING_PTR(x), RSTRING_LEN(x));
@@ -68,58 +70,49 @@ struct ConverterHash
 
     ConverterHash()
     {
-        addFromRuby<char>();
-        addFromRuby<short>();
-        addFromRuby<long>();
-        addFromRuby<long long>();
-        addFromRuby<unsigned char>();
-        addFromRuby<unsigned short>();
-        addFromRuby<unsigned long>();
-        addFromRuby<unsigned long long>();
+        add<bool>();
 
-        addFromRuby<int>();
-        addFromRuby<unsigned int>();
+        add<char>();
+        add<short>();
+        add<long>();
+        add<long long>();
+        add<unsigned char>();
+        add<unsigned short>();
+        add<unsigned long>();
+        add<unsigned long long>();
 
-        addFromRuby<float>();
-        addFromRuby<double>();
+        add<int>();
+        add<unsigned int>();
 
-        addFromRuby<QString>();
-        addFromRuby<QByteArray>();
+        add<float>();
+        add<double>();
 
-        addFromRuby<QVariant>();
-        addFromRuby<QVariantList>();
-        addFromRuby<QVariantHash>();
-        addFromRuby<QVariantMap>();
+        add<QString>();
+        add<QByteArray>();
 
-        addFromRuby<QDateTime>();
+        add<QVariant>();
+        add<QVariantList>();
+        add<QVariantHash>();
+        add<QVariantMap>();
 
-        addFromRuby<QObject *>();
+        add<QDateTime>();
 
-        addToRuby<char>();
-        addToRuby<short>();
-        addToRuby<long>();
-        addToRuby<long long>();
+        add<QObject *>();
 
-        addToRuby<unsigned char>();
-        addToRuby<unsigned short>();
-        addToRuby<unsigned long>();
-        addToRuby<unsigned long long>();
-
-        addToRuby<float>();
-        addToRuby<double>();
-
-        addToRuby<QByteArray>();
-        addToRuby<QString>();
-
-        addToRuby<QVariant>();
-        addToRuby<QVariantList>();
-        addToRuby<QVariantHash>();
-        addToRuby<QVariantMap>();
-
-        addToRuby<QDateTime>();
-        addToRuby<QObject *>();
+        fromRubyHash[QMetaType::UnknownType] = [](VALUE value) {
+            return QVariant();
+        };
+        toRubyHash[QMetaType::UnknownType] = [](const QVariant &variant) {
+            return Qnil;
+        };
     }
 
+    template <typename T>
+    void add()
+    {
+        addFromRuby<T>();
+        addToRuby<T>();
+    }
     template <typename T>
     void addFromRuby()
     {
@@ -150,7 +143,13 @@ QVariant Conversion<QVariant>::from(VALUE x)
 
 VALUE Conversion<QVariant>::to(const QVariant &variant)
 {
-    return converterHash->toRubyHash[variant.userType()](variant);
+    auto &hash = converterHash->toRubyHash;
+    auto type = variant.userType();
+    if (!hash.contains(type)) {
+        qWarning() << __PRETTY_FUNCTION__ << ": unsupported meta type" << type;
+        return Qnil;
+    }
+    return hash[type](variant);
 }
 
 QObject *Conversion<QObject *>::from(VALUE x)
@@ -172,6 +171,9 @@ VALUE Conversion<QObject *>::to(QObject *obj)
 TypeCategory metaTypeToCategory(int metaType)
 {
     switch (metaType) {
+
+    case QMetaType::Bool:
+        return TypeCategory::Boolean;
 
     case QMetaType::Char:
     case QMetaType::Short:
@@ -216,6 +218,8 @@ TypeCategory metaTypeToCategory(int metaType)
 int categoryToMetaType(TypeCategory category)
 {
     switch (category) {
+    case TypeCategory::Boolean:
+        return QMetaType::Bool;
     case TypeCategory::Integer:
         return QMetaType::Int;
     case TypeCategory::Float:
@@ -237,13 +241,18 @@ int categoryToMetaType(TypeCategory category)
 
 TypeCategory rubyValueCategory(VALUE x)
 {
+    auto objectBaseClass = ObjectBase::rubyClass();
     return protect([&] {
         switch (rb_type(x)) {
+        case T_TRUE:
+        case T_FALSE:
+            return TypeCategory::Boolean;
         case T_FIXNUM:
         case T_BIGNUM:
             return TypeCategory::Integer;
         case T_FLOAT:
             return TypeCategory::Float;
+        case T_SYMBOL:
         case T_STRING:
             return TypeCategory::String;
         case T_ARRAY:
@@ -256,7 +265,7 @@ TypeCategory rubyValueCategory(VALUE x)
         if (rb_obj_is_kind_of(x, rb_cTime)) {
             return TypeCategory::Time;
         }
-        if (rb_obj_is_kind_of(x, ObjectBase::rubyClass())) {
+        if (rb_obj_is_kind_of(x, objectBaseClass)) {
             return TypeCategory::QtObject;
         }
         return TypeCategory::Invalid;
@@ -268,17 +277,28 @@ QVariant fromRuby(VALUE x, int type)
     if (type < 0) {
         type = categoryToMetaType(rubyValueCategory(x));
     }
-    return detail::converterHash->fromRubyHash[type](x);
+    auto &hash = detail::converterHash->fromRubyHash;
+    if (!hash.contains(type)) {
+        qWarning() << __PRETTY_FUNCTION__ << ": unsupported Ruby type" << type;
+        return QVariant();
+    }
+    return hash[type](x);
 }
 
 ID idFromValue(VALUE sym)
 {
     ID id;
     protect([&] {
-        sym = rb_convert_type(sym, T_SYMBOL, "Symbol", "to_sym");
+        sym = rb_check_convert_type(sym, T_SYMBOL, "Symbol", "to_sym");
         id = SYM2ID(sym);
     });
     return id;
+}
+
+VALUE echoConversion(VALUE value)
+{
+    auto variant = fromRuby<QVariant>(value);
+    return toRuby(variant);
 }
 
 } // namespace RubyQml

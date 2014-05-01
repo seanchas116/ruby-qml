@@ -32,9 +32,7 @@ VALUE PluginLoader::instance()
     send(self(), "load");
     auto instance = mPluginLoader->instance();
     if (instance) {
-        auto value = ObjectBase::newAsRuby();
-        fromRuby<ObjectBase *>(value)->setQObject(instance, false);
-        return value;
+        return toRuby<QObject *>(instance);
     } else {
         return Qnil;
     }

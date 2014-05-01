@@ -17,9 +17,11 @@ public:
 
     VALUE className() const;
 
-    VALUE publicMethodNames() const;
-    VALUE protectedMethodNames() const;
-    VALUE signalNames() const;
+    VALUE methodNames() const;
+    VALUE isPublic(VALUE name) const;
+    VALUE isProtected(VALUE name) const;
+    VALUE isPrivate(VALUE name) const;
+    VALUE isSignal(VALUE name) const;
 
     VALUE invokeMethod(VALUE object, VALUE methodName, VALUE args) const;
     VALUE connectSignal(VALUE object, VALUE signalName, VALUE proc) const;
@@ -45,13 +47,11 @@ private:
     void mark() {}
     static Definition createDefinition();
 
-    QMetaProperty findProperty(VALUE name) const;
+    QList<int> findMethods(VALUE name) const;
+    int findProperty(VALUE name) const;
 
     const QMetaObject *mMetaObject = nullptr;
     QMultiHash<ID, int> mMethodHash;
-    QVector<ID> mPublicMethods;
-    QVector<ID> mProtectedMethods;
-    QVector<ID> mSignals;
     QHash<ID, int> mPropertyHash;
 
     static VALUE metaObjectHash;

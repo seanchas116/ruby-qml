@@ -1,23 +1,36 @@
 require 'ropework'
+require 'qml/qml'
 
 module QML
 
-  class QtPropertyHolder < Ropework::AbstractHolder
-    def initialize(obj, metap)
-      super()
+  class QtProperty < Ropework::Property
+    def initialize(obj, metaobj, name)
       @obj = obj
-      @metap = metap
-      signal = @obj.signals[metap.notify_signal.name]
-      signal.connect(&changed.method(:emit)) if signal
+      @metaobj = metaobj
+      @name = name
+      signal = @metaobj.notify_signal(name)
+      metaobj.connect_signal(obj, signal, method(:set_value_orig)) if signal
     end
 
-    def value
-      @metap.get_value(@obj)
-    end
+    alias_method :set_value_orig, :value=
 
     def value=(newval)
-      @metap.set_value(@obj, newval)
-      value
+      @metaobj.set_property(@obj, @name, newval)
+    end
+  end
+
+  class QtSignal < Ropework::Signal
+    def initialize(obj, metaobj, name)
+      @obj = obj
+      @metaobj = metaobj
+      @name = name
+      metaobj.connect_signal(obj, name, method(:emit_orig))
+    end
+
+    alias_method :emit_orig, :emit
+
+    def emit(*args)
+      @metaobj.invoke(@name, args)
     end
   end
 
@@ -28,81 +41,39 @@ module QML
     end
 
     def create_class
-      @klass = Class.new(QtObjectBase) do
+      @klass = Class.new(ObjectBase) do
         include Ropework::PropertyDef
         include Ropework::SignalDef
       end
-      define_methods
-      define_properties
-      define_enums
-      define_initialize
+      @metaobj.method_names.each do |name|
+        define_method(name)
+      end
+      @metaobj.property_names.each do |name|
+        define_property(name)
+      end
+      @metaobj.enumerators.each do |k, v|
+        const_set(k, v)
+      end
+
       @klass
     end
 
     private
 
-    def define_methods
-      @metaobj.meta_methods(include_super: true).each do |name, methods|
-        next if name == :deleteLater # deleteLater must not be called
-        if methods.any?(&:signal?)
-          @klass.signal(name)
-        else
-          @klass.send(:define_method, name) do |*args|
-            classes = args.map(&:class)
-            puts "classes: #{classes}"
-
-            method = methods.find { |method|
-              next false unless method.arity == args.length
-              arg_classes = method.arg_types.map(&:ruby_class)
-              puts "arg_classes: #{arg_classes}"
-              arg_classes.zip(classes).all? { |arg_class, given_class|
-                arg_class >= given_class
-              }
-            }
-            fail ArgumentError, "no matching method for given parameter types #{classes}" unless method
-            method.invoke(self, *args)
-          end
-        end
-      end
-    end
-
-    def define_properties
-      @metaobj.meta_properties(include_super: true).each_value do |p|
-        @klass.property(p.name, holder: ->(obj) { QtPropertyHolder.new(obj, p) })
-      end
-    end
-
-    def define_enums
-      @metaobj.enums(include_super: true).each do |k, v|
-        @klass.const_set(k, v)
-      end
-    end
-
-    def define_initialize
+    def define_method(name)
       metaobj = @metaobj
-      @klass.send(:define_method, :initialize) do |obj_ptr, destroy: true|
-        super(obj_ptr, destroy: destroy)
-
-        # connect properties
-        metaobj.meta_properties(include_super: true).each_value do |p|
-          property = properties[p.name]
-          signal = signals[p.notify_signal.name]
-          signal.connect do |newval|
-            property.changed.emit(newval)
-          end
+      if @metaobj.signal?(name)
+        @klass.class_eval { signal name, signal: proc { QtSignal.new(self, metaobj, name) } }
+      else
+        @klass.define_method(name) do |*args|
+          metaobj.invoke(name, args)
         end
-
-        # connect signals
-        metaobj.meta_methods(include_super: true).each do |name, methods|
-          signal = signals[name]
-          signal_methods = methods.select(&:signal?)
-          signal_methods.each do |signal_method|
-            signal_method.connect_signal(self) do |*args|
-              signal.emit(*args)
-            end
-          end
-        end
+        @klass.class_eval { private name } if @metaobj.protected?(name)
       end
+    end
+
+    def define_property(name)
+      @klass.class_eval { property name, property: proc { QtSignal.new(self, metaobj, name) } }
     end
   end
 end

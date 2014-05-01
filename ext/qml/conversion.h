@@ -82,13 +82,16 @@ struct Conversion<T<V>, typename std::enable_if<IsQListLike<T<V>>::value>::type>
     }
     static VALUE to(const T<V> &list)
     {
-        return protect([&] {
-            auto ary = rb_ary_new();
-            for (const auto &elem : list) {
-                rb_ary_push(ary, toRuby(elem));
-            }
-            return ary;
+        VALUE ary = protect([&] {
+            return rb_ary_new();
         });
+        for (const auto &elem : list) {
+            auto x = toRuby(elem);
+            protect([&] {
+                rb_ary_push(ary, x);
+            });
+        }
+        return ary;
     }
 };
 
@@ -108,7 +111,9 @@ struct Conversion<T<K, V>, typename std::enable_if<IsQHashLike<T<K, V>>::value>:
         protect([&] {
             auto each = [](VALUE key, VALUE value, VALUE arg) -> int {
                 auto &hash = *reinterpret_cast<T<K, V> *>(arg);
-                hash[fromRuby<K>(key)] = fromRuby<V>(value);
+                unprotect([&] {
+                    hash[fromRuby<K>(key)] = fromRuby<V>(value);
+                });
                 return ST_CONTINUE;
             };
             auto eachPtr = (int (*)(VALUE, VALUE, VALUE))each;
@@ -118,13 +123,18 @@ struct Conversion<T<K, V>, typename std::enable_if<IsQHashLike<T<K, V>>::value>:
     }
     static VALUE to(const T<K, V> &hash)
     {
-        return protect([&] {
-            auto rubyHash = rb_hash_new();
-            for (auto i = hash.begin(); i != hash.end(); ++i) {
-                rb_hash_aset(rubyHash, toRuby(i.key()), toRuby(i.value()));
-            }
-            return rubyHash;
+        VALUE rubyHash;
+        protect([&] {
+            rubyHash = rb_hash_new();
         });
+        for (auto i = hash.begin(); i != hash.end(); ++i) {
+            auto k = toRuby(i.key());
+            auto v = toRuby(i.value());
+            protect([&] {
+                rb_hash_aset(rubyHash, k, v);
+            });
+        }
+        return rubyHash;
     }
 };
 
@@ -193,6 +203,7 @@ inline VALUE toRuby(const T &value)
 enum class TypeCategory
 {
     Invalid,
+    Boolean,
     Integer,
     Float,
     String,
@@ -209,5 +220,7 @@ TypeCategory rubyValueCategory(VALUE x);
 QVariant fromRuby(VALUE x, int type);
 
 ID idFromValue(VALUE sym);
+
+VALUE echoConversion(VALUE value);
 
 } // namespace RubyQml

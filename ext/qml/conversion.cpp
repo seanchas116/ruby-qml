@@ -16,11 +16,23 @@ VALUE Conversion<const char *>::to(const char *str)
     });
 }
 
+namespace {
+
+VALUE convertToString(VALUE x)
+{
+    return protect([&] {
+        if (rb_type(x) == T_SYMBOL) {
+            x = rb_sym_to_s(x);
+        }
+        return rb_convert_type(x, T_STRING, "String", "to_str");
+    });
+}
+
+}
+
 QByteArray Conversion<QByteArray>::from(VALUE x)
 {
-    protect([&] {
-        x = rb_check_convert_type(x, T_STRING, "String", "to_s");
-    });
+    x = convertToString(x);
     return QByteArray(RSTRING_PTR(x), RSTRING_LEN(x));
 }
 
@@ -31,10 +43,7 @@ VALUE Conversion<QByteArray>::to(const QByteArray &str)
 
 QString Conversion<QString>::from(VALUE x)
 {
-    protect([&] {
-        x = rb_check_convert_type(x, T_STRING, "String", "to_s");
-        StringValue(x);
-    });
+    x = convertToString(x);
     return QString::fromUtf8(RSTRING_PTR(x), RSTRING_LEN(x));
 }
 
@@ -289,7 +298,7 @@ ID idFromValue(VALUE sym)
 {
     ID id;
     protect([&] {
-        sym = rb_check_convert_type(sym, T_SYMBOL, "Symbol", "to_sym");
+        sym = rb_convert_type(sym, T_SYMBOL, "Symbol", "to_sym");
         id = SYM2ID(sym);
     });
     return id;

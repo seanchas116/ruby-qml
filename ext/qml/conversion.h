@@ -70,7 +70,7 @@ struct Conversion<T<V>, typename std::enable_if<IsQListLike<T<V>>::value>::type>
     static T<V> from(VALUE x)
     {
         protect([&] {
-            x = rb_check_array_type(x);
+            x = rb_convert_type(x, T_ARRAY, "Array", "to_ary");
         });
         int length = RARRAY_LEN(x);
         T<V> list;
@@ -105,7 +105,7 @@ struct Conversion<T<K, V>, typename std::enable_if<IsQHashLike<T<K, V>>::value>:
     static T<K, V> from(VALUE x)
     {
         protect([&] {
-            x = rb_check_hash_type(x);
+            x = rb_convert_type(x, T_HASH, "Hash", "to_hash");
         });
         T<K, V> hash;
         protect([&] {

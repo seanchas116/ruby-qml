@@ -38,9 +38,9 @@ VALUE PluginLoader::instance()
     }
 }
 
-PluginLoader::Definition PluginLoader::createDefinition()
+PluginLoader::ClassBuilder PluginLoader::buildClass()
 {
-    return Definition("QML", "PluginLoader")
+    return ClassBuilder("QML", "PluginLoader")
         .defineMethod<METHOD_TYPE_NAME(&PluginLoader::initialize)>("initialize", MethodAccess::Private)
         .defineMethod<METHOD_TYPE_NAME(&PluginLoader::load)>("load")
         .defineMethod<METHOD_TYPE_NAME(&PluginLoader::instance)>("instance");

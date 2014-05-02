@@ -154,7 +154,7 @@ VALUE Conversion<QVariant>::to(const QVariant &variant)
 
 QObject *Conversion<QObject *>::from(VALUE x)
 {
-    return fromRuby<ObjectBase *>(x)->qObject();
+    return ObjectBase::getPointer(x)->qObject();
 }
 
 VALUE Conversion<QObject *>::to(QObject *obj)
@@ -162,7 +162,7 @@ VALUE Conversion<QObject *>::to(QObject *obj)
     auto metaObject = MetaObject::fromObject(obj);
     auto klass = send(metaObject, "object_class");
     auto value = send(klass, "new");
-    fromRuby<ObjectBase *>(value)->setQObject(obj);
+    ObjectBase::getPointer(value)->setQObject(obj);
     return value;
 }
 

@@ -20,7 +20,7 @@ public:
 
 private:
     void mark() {}
-    static Definition createDefinition();
+    static ClassBuilder buildClass();
     std::unique_ptr<QPluginLoader> mPluginLoader;
 };
 

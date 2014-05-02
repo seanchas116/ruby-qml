@@ -64,7 +64,7 @@ VALUE ObjectBase::hasOwnership() const
 VALUE ObjectBase::withOwnership() const
 {
     auto other = send(rubyClass(), "new");
-    fromRuby<ObjectBase *>(other)->setOwnership(true);
+    ObjectBase::getPointer(other)->setOwnership(true);
     return other;
 }
 
@@ -80,15 +80,15 @@ VALUE ObjectBase::toString() const
     return toRuby(name);
 }
 
-ObjectBase::Definition ObjectBase::createDefinition()
+ObjectBase::ClassBuilder ObjectBase::buildClass()
 {
-    Definition def("QML", "ObjectBase");
-    def.defineMethod<METHOD_TYPE_NAME(&ObjectBase::hasOwnership)>("has_ownership?");
-    def.defineMethod<METHOD_TYPE_NAME(&ObjectBase::withOwnership)>("with_ownership");
-    def.defineMethod<METHOD_TYPE_NAME(&ObjectBase::isNull)>("null?");
-    def.defineMethod<METHOD_TYPE_NAME(&ObjectBase::toString)>("to_s");
-    def.aliasMethod("to_s", "inspect");
-    return def;
+    ClassBuilder builder("QML", "ObjectBase");
+    builder.defineMethod<METHOD_TYPE_NAME(&ObjectBase::hasOwnership)>("has_ownership?");
+    builder.defineMethod<METHOD_TYPE_NAME(&ObjectBase::withOwnership)>("with_ownership");
+    builder.defineMethod<METHOD_TYPE_NAME(&ObjectBase::isNull)>("null?");
+    builder.defineMethod<METHOD_TYPE_NAME(&ObjectBase::toString)>("to_s");
+    builder.aliasMethod("to_s", "inspect");
+    return builder;
 }
 
 } // namespace RubyQml

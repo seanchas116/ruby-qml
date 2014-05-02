@@ -24,7 +24,7 @@ public:
 private:
 
     void mark() {}
-    static Definition createDefinition();
+    static ClassBuilder buildClass();
 
     bool mHasOwnership = false;
     QPointer<QObject> mObject;

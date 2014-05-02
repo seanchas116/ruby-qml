@@ -45,7 +45,7 @@ public:
 private:
 
     void mark() {}
-    static Definition createDefinition();
+    static ClassBuilder buildClass();
 
     QList<int> findMethods(VALUE name) const;
     int findProperty(VALUE name) const;

@@ -78,7 +78,7 @@ public:
 
     VALUE invoke(VALUE object)
     {
-        auto obj = fromRuby<ObjectBase *>(object)->qObject();
+        auto obj = ObjectBase::getPointer(object)->qObject();
         std::array<QVariant, 10> argVariants;
         std::array<QGenericArgument, 10> args;
         for (int i = 0; i < mMethod.parameterCount(); ++i) {
@@ -110,7 +110,7 @@ public:
             auto ret = toRuby(QVariant(returnType, returnBuffer));
             // add ownership to ObjectBase unless it has parent or is owned by QML engine
             if (isKindOf(ret, ObjectBase::rubyClass())) {
-                auto objectBase = fromRuby<ObjectBase *>(ret);
+                auto objectBase = ObjectBase::getPointer(ret);
                 auto obj = objectBase->qObject();
                 if (QQmlEngine::objectOwnership(obj) == QQmlEngine::CppOwnership && !obj->parent()) {
                     objectBase->setOwnership(true);
@@ -151,7 +151,7 @@ VALUE MetaObject::invokeMethod(VALUE object, VALUE methodName, VALUE args) const
 VALUE MetaObject::connectSignal(VALUE object, VALUE signalName, VALUE proc) const
 {
     auto id = idFromValue(signalName);
-    auto obj = fromRuby<ObjectBase *>(object)->qObject();
+    auto obj = ObjectBase::getPointer(object)->qObject();
 
     proc = send(proc, "to_proc");
 
@@ -183,7 +183,7 @@ VALUE MetaObject::getProperty(VALUE object, VALUE name) const
 {
     auto metaProperty = mMetaObject->property(findProperty(name));
 
-    auto qobj = fromRuby<ObjectBase *>(object)->qObject();
+    auto qobj = ObjectBase::getPointer(object)->qObject();
     auto result = withoutGvl([&] {
         return metaProperty.read(qobj);
     });
@@ -201,7 +201,7 @@ VALUE MetaObject::setProperty(VALUE object, VALUE name, VALUE newValue) const
         });
     }
 
-    auto qobj = fromRuby<ObjectBase *>(object)->qObject();
+    auto qobj = ObjectBase::getPointer(object)->qObject();
     auto variant = fromRuby<QVariant>(newValue);
     auto result = withoutGvl([&] {
         metaProperty.write(qobj, variant);
@@ -263,13 +263,13 @@ VALUE MetaObject::enumerators() const
 VALUE MetaObject::superClass() const
 {
     auto value = newAsRuby();
-    fromRuby<MetaObject *>(value)->setMetaObject(mMetaObject->superClass());
+    MetaObject::getPointer(value)->setMetaObject(mMetaObject->superClass());
     return value;
 }
 
 VALUE MetaObject::isEqual(VALUE other) const
 {
-    return toRuby(mMetaObject == fromRuby<MetaObject *>(other)->mMetaObject);
+    return toRuby(mMetaObject == MetaObject::getPointer(other)->mMetaObject);
 }
 
 VALUE MetaObject::hash() const
@@ -318,44 +318,44 @@ VALUE MetaObject::fromObject(QObject *obj)
         return send(metaObjectHash, "fetch", address);
     } else {
         auto metaObject = send(rubyClass(), "new");
-        fromRuby<MetaObject *>(metaObject)->setMetaObject(metaObj);
+        MetaObject::getPointer(metaObject)->setMetaObject(metaObj);
         send(metaObjectHash, "[]=", address, metaObject);
         return metaObject;
     }
 }
 
-MetaObject::Definition MetaObject::createDefinition()
+MetaObject::ClassBuilder MetaObject::buildClass()
 {
     metaObjectHash = rb_hash_new();
     rb_gc_register_mark_object(metaObjectHash);
 
-    Definition def("QML", "MetaObject");
+    ClassBuilder builder("QML", "MetaObject");
 
-    def.defineMethod<METHOD_TYPE_NAME(&MetaObject::className)>("name");
+    builder.defineMethod<METHOD_TYPE_NAME(&MetaObject::className)>("name");
 
-    def.defineMethod<METHOD_TYPE_NAME(&MetaObject::methodNames)>("method_names");
-    def.defineMethod<METHOD_TYPE_NAME(&MetaObject::isPublic)>("public?");
-    def.defineMethod<METHOD_TYPE_NAME(&MetaObject::isProtected)>("protected?");
-    def.defineMethod<METHOD_TYPE_NAME(&MetaObject::isPrivate)>("private?");
-    def.defineMethod<METHOD_TYPE_NAME(&MetaObject::isSignal)>("signal?");
+    builder.defineMethod<METHOD_TYPE_NAME(&MetaObject::methodNames)>("method_names");
+    builder.defineMethod<METHOD_TYPE_NAME(&MetaObject::isPublic)>("public?");
+    builder.defineMethod<METHOD_TYPE_NAME(&MetaObject::isProtected)>("protected?");
+    builder.defineMethod<METHOD_TYPE_NAME(&MetaObject::isPrivate)>("private?");
+    builder.defineMethod<METHOD_TYPE_NAME(&MetaObject::isSignal)>("signal?");
 
-    def.defineMethod<METHOD_TYPE_NAME(&MetaObject::invokeMethod)>("invoke_method");
-    def.defineMethod<METHOD_TYPE_NAME(&MetaObject::connectSignal)>("connect_signal");
+    builder.defineMethod<METHOD_TYPE_NAME(&MetaObject::invokeMethod)>("invoke_method");
+    builder.defineMethod<METHOD_TYPE_NAME(&MetaObject::connectSignal)>("connect_signal");
 
-    def.defineMethod<METHOD_TYPE_NAME(&MetaObject::propertyNames)>("property_names");
-    def.defineMethod<METHOD_TYPE_NAME(&MetaObject::getProperty)>("get_property");
-    def.defineMethod<METHOD_TYPE_NAME(&MetaObject::setProperty)>("set_property");
-    def.defineMethod<METHOD_TYPE_NAME(&MetaObject::notifySignal)>("notify_signal");
+    builder.defineMethod<METHOD_TYPE_NAME(&MetaObject::propertyNames)>("property_names");
+    builder.defineMethod<METHOD_TYPE_NAME(&MetaObject::getProperty)>("get_property");
+    builder.defineMethod<METHOD_TYPE_NAME(&MetaObject::setProperty)>("set_property");
+    builder.defineMethod<METHOD_TYPE_NAME(&MetaObject::notifySignal)>("notify_signal");
 
-    def.defineMethod<METHOD_TYPE_NAME(&MetaObject::enumerators)>("enumerators");
+    builder.defineMethod<METHOD_TYPE_NAME(&MetaObject::enumerators)>("enumerators");
 
-    def.defineMethod<METHOD_TYPE_NAME(&MetaObject::superClass)>("super_class");
+    builder.defineMethod<METHOD_TYPE_NAME(&MetaObject::superClass)>("super_class");
 
-    def.defineMethod<METHOD_TYPE_NAME(&MetaObject::isEqual)>("==");
-    def.defineMethod<METHOD_TYPE_NAME(&MetaObject::hash)>("hash");
-    def.aliasMethod("eql?", "==");
+    builder.defineMethod<METHOD_TYPE_NAME(&MetaObject::isEqual)>("==");
+    builder.defineMethod<METHOD_TYPE_NAME(&MetaObject::hash)>("hash");
+    builder.aliasMethod("eql?", "==");
 
-    return def;
+    return builder;
 }
 
 VALUE MetaObject::metaObjectHash = Qnil;

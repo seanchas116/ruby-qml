@@ -108,14 +108,16 @@ public:
 
         int returnType = mMethod.returnType();
         bool voidReturning = (returnType == QMetaType::Void);
-        auto returnBuffer = voidReturning ? nullptr : QMetaType::create(returnType);
+        QVariant returnValue;
+        if (!voidReturning) {
+            returnValue = QVariant(returnType, QMetaType::create(returnType));
+        }
 
         bool result;
-
         withoutGvl([&] {
             result = mMethod.invoke(
                         obj,
-                        QGenericReturnArgument(QMetaType::typeName(returnType), returnBuffer),
+                        QGenericReturnArgument(QMetaType::typeName(returnType), returnValue.data()),
                         args[0],args[1],args[2],args[3],args[4],
                         args[5],args[6],args[7],args[8],args[9]);
         });
@@ -123,14 +125,12 @@ public:
         if (!result) {
             QString error;
             QDebug(&error) << "failed to call method" << mMethod.methodSignature();
-            protect([&] {
-                rb_raise(rb_path2class("QML::MethodError"), "%s", error.toUtf8().data());
-            });
+            fail("QML::MethodError", error);
         }
         if (voidReturning) {
             return Qnil;
         } else {
-            auto ret = toRuby(QVariant(returnType, returnBuffer));
+            auto ret = toRuby(returnValue);
             // add ownership to ObjectBase unless it has parent or is owned by QML engine
             if (isKindOf(ret, ObjectPointer::rubyClass())) {
                 auto objectBase = ObjectPointer::getPointer(ret);

@@ -47,20 +47,18 @@ describe "test object" do
     end
   end
 
-  describe '#customType' do
-
-    it 'calls the method with a custom type parameter' do
-      metaobj = QML::CLib.rbqml_testobject_static_metaobject
-      expect(@obj.customType(metaobj)).to eq(metaobj.name)
-    end
-  end
-
   describe '#emitSomeSignal' do
 
     it 'should emit the signal' do
-      spy = Ropework::SignalSpy.new(@obj.someSignal)
+      result = nil
+      @obj.someSignal.connect do |str|
+        result = str
+      end
       @obj.emitSomeSignal('poyopoyo')
-      expect(spy.args.first).to eq(['poyopoyo'])
+      expect(result).to eq 'poyopoyo'
+      # spy = Ropework::SignalSpy.new(@obj.someSignal)
+      # @obj.emitSomeSignal('poyopoyo')
+      # expect(spy.args.first).to eq(['poyopoyo'])
     end
   end
 
@@ -95,9 +93,10 @@ describe "test object" do
   describe 'enums' do
     
     it 'should be set' do
-      expect(QML::TestObject::Apple).to eq(0)
-      expect(QML::TestObject::Banana).to eq(1)
-      expect(QML::TestObject::Orange).to eq(2)
+      k = @obj.class
+      expect(k::Apple).to eq(0)
+      expect(k::Banana).to eq(1)
+      expect(k::Orange).to eq(2)
     end
   end
 end

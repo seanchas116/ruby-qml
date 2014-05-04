@@ -1,5 +1,5 @@
 #include "conversion.h"
-#include "objectbase.h"
+#include "objectpointer.h"
 #include "metaobject.h"
 #include <ruby/intern.h>
 #include <QtCore/QDebug>
@@ -55,7 +55,7 @@ VALUE Conversion<QString>::to(const QString &str)
 QDateTime Conversion<QDateTime>::from(VALUE x)
 {
     return protect([&] {
-        auto at = rb_funcall(x, rb_intern("to_r"), 0);
+        auto at = rb_convert_type(x, T_RATIONAL, "Rational", "to_r");
         int num = RRATIONAL(at)->num;
         int den = RRATIONAL(at)->den;
         return QDateTime::fromMSecsSinceEpoch(num * 1000 / den);
@@ -163,16 +163,24 @@ VALUE Conversion<QVariant>::to(const QVariant &variant)
 
 QObject *Conversion<QObject *>::from(VALUE x)
 {
-    return ObjectBase::getPointer(x)->qObject();
+    VALUE objptr;
+    protect([&] {
+        if (!rb_obj_is_kind_of(x, ObjectPointer::objectBaseClass())) {
+            rb_raise(rb_eTypeError, "expected QML::ObjectBase, got %s", rb_obj_classname(x));
+        }
+        objptr = rb_ivar_get(x, rb_intern("@objptr"));
+    });
+    return ObjectPointer::getPointer(objptr)->qObject();
 }
 
 VALUE Conversion<QObject *>::to(QObject *obj)
 {
     auto metaObject = MetaObject::fromObject(obj);
-    auto klass = send(metaObject, "object_class");
-    auto value = send(klass, "new");
-    ObjectBase::getPointer(value)->setQObject(obj);
-    return value;
+
+    auto objptr = ObjectPointer::newAsRuby();
+    ObjectPointer::getPointer(objptr)->setQObject(obj);
+
+    return send(send(metaObject, "object_class"), "new", objptr);
 }
 
 } // namespace detail
@@ -250,7 +258,7 @@ int categoryToMetaType(TypeCategory category)
 
 TypeCategory rubyValueCategory(VALUE x)
 {
-    auto objectBaseClass = ObjectBase::rubyClass();
+    auto objectBaseClass = ObjectPointer::rubyClass();
     return protect([&] {
         switch (rb_type(x)) {
         case T_TRUE:

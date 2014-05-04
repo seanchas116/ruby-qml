@@ -4,13 +4,13 @@
 
 namespace RubyQml {
 
-class ObjectBase : public RubyClassBase<ObjectBase>
+class ObjectPointer : public RubyClassBase<ObjectPointer>
 {
-    friend class RubyClassBase<ObjectBase>;
+    friend class RubyClassBase<ObjectPointer>;
 
 public:
-    ObjectBase();
-    ~ObjectBase();
+    ObjectPointer();
+    ~ObjectPointer();
 
     QObject *qObject();
     void setQObject(QObject *obj, bool hasOwnership = false);
@@ -21,6 +21,8 @@ public:
     VALUE isNull() const;
     VALUE toString() const;
 
+    static VALUE objectBaseClass() { return mObjectBaseClass; }
+
 private:
 
     void mark() {}
@@ -28,6 +30,8 @@ private:
 
     bool mHasOwnership = false;
     QPointer<QObject> mObject;
+
+    static VALUE mObjectBaseClass;
 };
 
 } // namespace RubyQml

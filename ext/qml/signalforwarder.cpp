@@ -52,15 +52,10 @@ void SignalForwarder::forwardArgs(void **args)
 void SignalForwarder::callProc(const QVariantList &list)
 {
     withGvl([&] {
-        try {
-            auto args = toRuby(list);
-            protect([&] {
-                rb_funcallv(mProc, rb_intern("call"), RARRAY_LEN(args), RARRAY_PTR(args));
-            });
-        }
-        catch (const RubyException &) {
-            qWarning() << "unhandled Ruby exception in signal";
-        }
+        auto args = toRuby(list);
+        protect([&] {
+            rb_funcallv(mProc, rb_intern("call"), RARRAY_LEN(args), RARRAY_PTR(args));
+        });
     });
 }
 

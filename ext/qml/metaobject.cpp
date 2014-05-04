@@ -1,7 +1,7 @@
 #include "metaobject.h"
 #include "conversion.h"
 #include "util.h"
-#include "objectbase.h"
+#include "objectpointer.h"
 #include "rubyclassbase.h"
 #include "signalforwarder.h"
 #include <QtCore/QMetaObject>
@@ -15,6 +15,21 @@
 
 namespace RubyQml {
 
+namespace {
+
+VALUE idListToArray(const QList<ID> &xs)
+{
+    return protect([&] {
+        auto ary = rb_ary_new();
+        for (ID id : xs) {
+            rb_ary_push(ary, ID2SYM(id));
+        }
+        return ary;
+    });
+}
+
+}
+
 MetaObject::MetaObject()
 {
     setMetaObject(&QObject::staticMetaObject);
@@ -27,7 +42,7 @@ VALUE MetaObject::className() const
 
 VALUE MetaObject::methodNames() const
 {
-    return toRuby(mMethodHash.keys());
+    return idListToArray(mMethodHash.keys());
 }
 
 VALUE MetaObject::isPublic(VALUE name) const
@@ -64,7 +79,11 @@ public:
             return false;
         }
         for (int i = 0; i < count; ++i) {
-            auto paramCategory = metaTypeToCategory(mMethod.parameterType(i));
+            auto metaType = mMethod.parameterType(i);
+            if (metaType == QMetaType::QVariant) {
+                return true;
+            }
+            auto paramCategory = metaTypeToCategory(metaType);
             auto argCategory = rubyValueCategory(RARRAY_AREF(mArgs, i));
             if (argCategory == TypeCategory::Invalid) {
                 return false;
@@ -78,7 +97,7 @@ public:
 
     VALUE invoke(VALUE object)
     {
-        auto obj = ObjectBase::getPointer(object)->qObject();
+        auto obj = ObjectPointer::getPointer(object)->qObject();
         std::array<QVariant, 10> argVariants;
         std::array<QGenericArgument, 10> args;
         for (int i = 0; i < mMethod.parameterCount(); ++i) {
@@ -91,11 +110,15 @@ public:
         bool voidReturning = (returnType == QMetaType::Void);
         auto returnBuffer = voidReturning ? nullptr : QMetaType::create(returnType);
 
-        auto result = mMethod.invoke(
-            obj,
-            QGenericReturnArgument(QMetaType::typeName(returnType), returnBuffer),
-            args[0],args[1],args[2],args[3],args[4],
-            args[5],args[6],args[7],args[8],args[9]);
+        bool result;
+
+        withoutGvl([&] {
+            result = mMethod.invoke(
+                        obj,
+                        QGenericReturnArgument(QMetaType::typeName(returnType), returnBuffer),
+                        args[0],args[1],args[2],args[3],args[4],
+                        args[5],args[6],args[7],args[8],args[9]);
+        });
 
         if (!result) {
             QString error;
@@ -109,8 +132,8 @@ public:
         } else {
             auto ret = toRuby(QVariant(returnType, returnBuffer));
             // add ownership to ObjectBase unless it has parent or is owned by QML engine
-            if (isKindOf(ret, ObjectBase::rubyClass())) {
-                auto objectBase = ObjectBase::getPointer(ret);
+            if (isKindOf(ret, ObjectPointer::rubyClass())) {
+                auto objectBase = ObjectPointer::getPointer(ret);
                 auto obj = objectBase->qObject();
                 if (QQmlEngine::objectOwnership(obj) == QQmlEngine::CppOwnership && !obj->parent()) {
                     objectBase->setOwnership(true);
@@ -138,11 +161,14 @@ VALUE MetaObject::invokeMethod(VALUE object, VALUE methodName, VALUE args) const
         }
     }
     protect([&] {
-        auto classes = rb_funcall(args, rb_intern("map"), 1, SYM2ID(rb_intern("class")));
+        auto to_class = rb_funcall(ID2SYM(rb_intern("class")), rb_intern("to_proc"), 0);
+        auto classes = rb_funcall_with_block(args, rb_intern("map"), 0, nullptr, to_class);
+        auto classes_str = rb_funcall(classes, rb_intern("to_s"), 0);
+
         rb_raise(rb_path2class("QML::MethodError"),
                  "method mismatch (%s with params %s in %s)",
                  mMetaObject->method(methodIndexes.first()).name().data(),
-                 StringValueCStr(classes),
+                 StringValueCStr(classes_str),
                  mMetaObject->className());
     });
     return Qnil;
@@ -151,7 +177,7 @@ VALUE MetaObject::invokeMethod(VALUE object, VALUE methodName, VALUE args) const
 VALUE MetaObject::connectSignal(VALUE object, VALUE signalName, VALUE proc) const
 {
     auto id = idFromValue(signalName);
-    auto obj = ObjectBase::getPointer(object)->qObject();
+    auto obj = ObjectPointer::getPointer(object)->qObject();
 
     proc = send(proc, "to_proc");
 
@@ -176,14 +202,14 @@ VALUE MetaObject::connectSignal(VALUE object, VALUE signalName, VALUE proc) cons
 
 VALUE MetaObject::propertyNames() const
 {
-    return toRuby(mPropertyHash.keys());
+    return idListToArray(mPropertyHash.keys());
 }
 
 VALUE MetaObject::getProperty(VALUE object, VALUE name) const
 {
     auto metaProperty = mMetaObject->property(findProperty(name));
 
-    auto qobj = ObjectBase::getPointer(object)->qObject();
+    auto qobj = ObjectPointer::getPointer(object)->qObject();
     auto result = withoutGvl([&] {
         return metaProperty.read(qobj);
     });
@@ -201,7 +227,7 @@ VALUE MetaObject::setProperty(VALUE object, VALUE name, VALUE newValue) const
         });
     }
 
-    auto qobj = ObjectBase::getPointer(object)->qObject();
+    auto qobj = ObjectPointer::getPointer(object)->qObject();
     auto variant = fromRuby<QVariant>(newValue);
     auto result = withoutGvl([&] {
         metaProperty.write(qobj, variant);
@@ -286,7 +312,7 @@ void MetaObject::setMetaObject(const QMetaObject *metaObject)
 
     for (int i = 0; i < methodCount; ++i) {
 
-        auto index = i + metaObject->methodOffset() + i;
+        auto index = i + metaObject->methodOffset();
         auto method = metaObject->method(index);
 
         if (method.methodType() == QMetaMethod::Constructor) {

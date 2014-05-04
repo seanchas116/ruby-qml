@@ -69,11 +69,6 @@ public slots:
         return mName;
     }
 
-    QString customType(const QMetaObject *metaobj)
-    {
-        return metaobj->className();
-    }
-
 signals:
 
     void someSignal(const QString &arg);

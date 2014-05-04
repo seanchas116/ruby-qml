@@ -1,30 +1,33 @@
 require 'ropework'
+require 'qml/object_base'
 require 'qml/qml'
 
 module QML
 
   class QtProperty < Ropework::Property
-    def initialize(obj, metaobj, name)
-      @obj = obj
+    def initialize(objptr, metaobj, name)
+      super()
+      @objptr = objptr
       @metaobj = metaobj
       @name = name
       signal = @metaobj.notify_signal(name)
-      metaobj.connect_signal(obj, signal, method(:set_value_orig)) if signal
+      metaobj.connect_signal(objptr, signal, method(:set_value_orig)) if signal
     end
 
     alias_method :set_value_orig, :value=
 
     def value=(newval)
-      @metaobj.set_property(@obj, @name, newval)
+      @metaobj.set_property(@objptr, @name, newval)
     end
   end
 
   class QtSignal < Ropework::Signal
-    def initialize(obj, metaobj, name)
-      @obj = obj
+    def initialize(objptr, metaobj, name)
+      super(variadic: true)
+      @objptr = objptr
       @metaobj = metaobj
       @name = name
-      metaobj.connect_signal(obj, name, method(:emit_orig))
+      metaobj.connect_signal(objptr, name, method(:emit_orig))
     end
 
     alias_method :emit_orig, :emit
@@ -52,7 +55,7 @@ module QML
         define_property(name)
       end
       @metaobj.enumerators.each do |k, v|
-        const_set(k, v)
+        @klass.send :const_set, k, v
       end
 
       @klass
@@ -62,18 +65,20 @@ module QML
 
     def define_method(name)
       metaobj = @metaobj
+      return if @metaobj.private?(name)
       if @metaobj.signal?(name)
-        @klass.class_eval { signal name, signal: proc { QtSignal.new(self, metaobj, name) } }
+        @klass.send :signal, name, signal: proc { QtSignal.new(@objptr, metaobj, name) }
       else
-        @klass.define_method(name) do |*args|
-          metaobj.invoke(name, args)
+        @klass.send :define_method, name do |*args|
+          metaobj.invoke_method(@objptr, name, args)
         end
-        @klass.class_eval { private name } if @metaobj.protected?(name)
+        @klass.send :private, name if @metaobj.protected?(name)
       end
     end
 
     def define_property(name)
-      @klass.class_eval { property name, property: proc { QtSignal.new(self, metaobj, name) } }
+      metaobj = @metaobj
+      @klass.send :property, name, property: proc { QtProperty.new(@objptr, metaobj, name) }
     end
   end
 end

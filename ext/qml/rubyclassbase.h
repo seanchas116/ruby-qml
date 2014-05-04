@@ -25,7 +25,7 @@ public:
         auto klass = rubyClass();
         protect([&] {
             if (!RTEST(rb_obj_is_kind_of(value, klass))) {
-                rb_raise(rb_eTypeError, "the value is not a %s", rb_class2name(klass));
+                rb_raise(rb_eTypeError, "expected %s, got %s", rb_class2name(klass), rb_obj_classname(value));
             }
         });
         TDerived *ptr;
@@ -85,21 +85,6 @@ private:
 
 template <typename TDerived>
 VALUE RubyClassBase<TDerived>::mKlass = Qnil;
-
-/*
-namespace detail {
-
-template <typename T>
-struct Conversion<T *, typename std::enable_if<std::is_base_of<RubyClassBase<T>, T>::value>::type>
-{
-    static T *from(VALUE value)
-    {
-        return T::getPointer(value);
-    }
-};
-
-}
-*/
 
 template <typename TDerived>
 class RubyClassBase<TDerived>::ClassBuilder

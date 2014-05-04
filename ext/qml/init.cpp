@@ -1,5 +1,5 @@
 #include "metaobject.h"
-#include "objectbase.h"
+#include "objectpointer.h"
 #include "pluginloader.h"
 
 using namespace RubyQml;
@@ -9,14 +9,14 @@ void Init_qml()
 {
     rb_require("qml/errors");
     MetaObject::defineClass();
-    ObjectBase::defineClass();
+    ObjectPointer::defineClass();
     PluginLoader::defineClass();
     rb_define_module_under(rb_path2class("QML"), "TestUtil");
 
     auto echo_conversion = [](VALUE klass, VALUE value) {
-        //return unprotect([&] {
+        return unprotect([&] {
             return echoConversion(value);
-        //});
+        });
     };
 
     rb_define_module_function(rb_path2class("QML::TestUtil"), "echo_conversion",

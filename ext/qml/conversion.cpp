@@ -56,8 +56,8 @@ QDateTime Conversion<QDateTime>::from(VALUE x)
 {
     return protect([&] {
         auto at = rb_convert_type(x, T_RATIONAL, "Rational", "to_r");
-        int num = RRATIONAL(at)->num;
-        int den = RRATIONAL(at)->den;
+        long long num = NUM2LL(RRATIONAL(at)->num);
+        long long den = NUM2LL(RRATIONAL(at)->den);
         return QDateTime::fromMSecsSinceEpoch(num * 1000 / den);
     });
 }
@@ -65,8 +65,8 @@ QDateTime Conversion<QDateTime>::from(VALUE x)
 VALUE Conversion<QDateTime>::to(const QDateTime &dateTime)
 {
     return protect([&] {
-        auto at = rb_rational_new(INT2FIX(dateTime.toMSecsSinceEpoch()), INT2FIX(1000));
-        return rb_funcall(rb_cTime, rb_intern("at"), at);
+        auto at = rb_rational_new(LL2NUM(dateTime.toMSecsSinceEpoch()), INT2FIX(1000));
+        return rb_funcall(rb_cTime, rb_intern("at"), 1, at);
     });
 }
 

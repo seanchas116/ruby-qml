@@ -4,7 +4,7 @@ describe "test object" do
 
   before do
     loader = QML::PluginLoader.new Pathname(__FILE__) + '../../ext/qml/plugins/testobject', 'testobject'
-    @obj = loader.instance
+    @obj = loader.instance.createTestObject
   end
 
   describe '#normalMethod' do

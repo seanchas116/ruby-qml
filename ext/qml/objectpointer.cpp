@@ -45,6 +45,9 @@ QObject *ObjectPointer::qObject()
 
 void ObjectPointer::setQObject(QObject *obj, bool hasOwnership)
 {
+    if (mHasOwnership && mObject) {
+        destroyObject(mObject);
+    }
     mObject = obj;
     mHasOwnership = hasOwnership;
 }

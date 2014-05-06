@@ -1,6 +1,5 @@
 #pragma once
 #include <QObject>
-#include "testobject.h"
 
 namespace RubyQml {
 
@@ -16,6 +15,7 @@ signals:
 
 public slots:
     QObject *createTestObject();
+    QObject *createTestObjectSubclass();
 
 private:
 

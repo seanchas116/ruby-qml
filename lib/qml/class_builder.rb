@@ -44,7 +44,9 @@ module QML
     end
 
     def create_class
-      @klass = Class.new(ObjectBase) do
+      super_metaobj = @metaobj.super_class
+
+      @klass = Class.new(super_metaobj ? super_metaobj.object_class : ObjectBase) do
         include Ropework::PropertyDef
         include Ropework::SignalDef
       end

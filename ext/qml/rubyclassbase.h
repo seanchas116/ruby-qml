@@ -65,7 +65,9 @@ private:
 
     static void dealloc(TDerived *ptr)
     {
-        ptr->~TDerived();
+        withoutGvl([&] {
+            ptr->~TDerived();
+        });
         ruby_xfree(ptr);
     }
 

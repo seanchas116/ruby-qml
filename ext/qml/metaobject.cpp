@@ -288,8 +288,12 @@ VALUE MetaObject::enumerators() const
 
 VALUE MetaObject::superClass() const
 {
+    auto superclass = mMetaObject->superClass();
+    if (!superclass) {
+        return Qnil;
+    }
     auto value = newAsRuby();
-    MetaObject::getPointer(value)->setMetaObject(mMetaObject->superClass());
+    MetaObject::getPointer(value)->setMetaObject(superclass);
     return value;
 }
 

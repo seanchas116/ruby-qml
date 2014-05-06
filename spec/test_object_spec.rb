@@ -5,6 +5,7 @@ describe "test object" do
   before do
     loader = QML::PluginLoader.new Pathname(__FILE__) + '../../ext/qml/plugins/testobject', 'testobject'
     @obj = loader.instance.createTestObject
+    @subobj = loader.instance.createTestObjectSubclass
   end
 
   describe '#normalMethod' do
@@ -62,13 +63,6 @@ describe "test object" do
     end
   end
 
-  describe '#deleteLater' do
-
-    it 'cannot be called' do
-      expect(@obj.respond_to?(:deleteLater)).to eq(false)
-    end
-  end
-
   describe 'name property' do
 
     it 'should be set' do
@@ -97,6 +91,12 @@ describe "test object" do
       expect(k::Apple).to eq(0)
       expect(k::Banana).to eq(1)
       expect(k::Orange).to eq(2)
+    end
+  end
+
+  context 'in subclass' do
+    it "can call TestObject's method" do
+      expect(@subobj.normalMethod(1, "23")).to eq(24)
     end
   end
 end

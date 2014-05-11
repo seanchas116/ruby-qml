@@ -1,6 +1,7 @@
 #include "signalforwarder.h"
 #include "conversion.h"
 #include "util.h"
+#include "extension.h"
 #include <QtCore/QDebug>
 
 namespace RubyQml {
@@ -12,6 +13,7 @@ SignalForwarder::SignalForwarder(QObject *obj, const QMetaMethod &signal, VALUE 
 {
     rb_gc_register_address(&mProc);
     QMetaObject::connect(obj, signal.methodIndex(), this, QObject::staticMetaObject.methodCount());
+    connect(Extension::instance(), &QObject::destroyed, this, [&] { delete this; });
 }
 
 SignalForwarder::~SignalForwarder()

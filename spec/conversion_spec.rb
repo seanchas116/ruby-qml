@@ -41,8 +41,6 @@ describe 'Conversion between C++ and Ruby' do
   it 'can convert Time' do
     time = Time.now
     result = convert(time)
-    puts time
-    puts result
 
     expect(result.year).to eq(time.year)
     expect(result.month).to eq(time.month)

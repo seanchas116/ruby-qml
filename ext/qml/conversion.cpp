@@ -115,6 +115,7 @@ struct ConverterHash
         add<QDateTime>();
 
         add<QObject *>();
+        add<const QMetaObject *>();
 
         fromRubyHash[QMetaType::UnknownType] = [](VALUE value) {
             return QVariant();
@@ -191,6 +192,18 @@ VALUE Conversion<QObject *>::to(QObject *obj)
     return send(send(metaObject, "object_class"), "new", objptr);
 }
 
+const QMetaObject *Conversion<const QMetaObject *>::from(VALUE x)
+{
+    return MetaObject::getPointer(x)->metaObject();
+}
+
+VALUE Conversion<const QMetaObject *>::to(const QMetaObject *metaobj)
+{
+    auto value = MetaObject::newAsRuby();
+    MetaObject::getPointer(value)->setMetaObject(metaobj);
+    return value;
+}
+
 } // namespace detail
 
 TypeCategory metaTypeToCategory(int metaType)
@@ -236,6 +249,9 @@ TypeCategory metaTypeToCategory(int metaType)
         return TypeCategory::QtObject;
 
     default:
+        if (metaType == QMetaType::type("const QMetaObject*")) {
+            return TypeCategory::QtMetaObject;
+        }
         return TypeCategory::Invalid;
     }
 }
@@ -259,6 +275,8 @@ int categoryToMetaType(TypeCategory category)
         return QMetaType::QDateTime;
     case TypeCategory::QtObject:
         return QMetaType::QObjectStar;
+    case TypeCategory::QtMetaObject:
+        return QMetaType::type("const QMetaObject*");
     default:
         return QMetaType::UnknownType;
     }
@@ -267,6 +285,7 @@ int categoryToMetaType(TypeCategory category)
 TypeCategory rubyValueCategory(VALUE x)
 {
     auto objectBaseClass = ObjectPointer::rubyClass();
+    auto metaObjectClass = MetaObject::rubyClass();
     TypeCategory category;
     protect([&] {
         switch (rb_type(x)) {
@@ -299,7 +318,11 @@ TypeCategory rubyValueCategory(VALUE x)
             return;
         }
         if (rb_obj_is_kind_of(x, objectBaseClass)) {
-            category =TypeCategory::QtObject;
+            category = TypeCategory::QtObject;
+            return;
+        }
+        if (rb_obj_is_kind_of(x, metaObjectClass)) {
+            category = TypeCategory::QtMetaObject;
             return;
         }
         category = TypeCategory::Invalid;

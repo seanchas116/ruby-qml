@@ -193,6 +193,13 @@ struct Conversion<QVariant>
     static VALUE to(const QVariant &variant);
 };
 
+template <>
+struct Conversion<const QMetaObject *>
+{
+    static const QMetaObject *from(VALUE x);
+    static VALUE to(const QMetaObject *metaobj);
+};
+
 } // namespace detail
 
 template <typename T>
@@ -217,7 +224,8 @@ enum class TypeCategory
     Array,
     Hash,
     Time,
-    QtObject
+    QtObject,
+    QtMetaObject
 };
 
 TypeCategory metaTypeToCategory(int metaType);

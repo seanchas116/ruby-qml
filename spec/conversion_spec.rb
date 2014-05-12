@@ -6,13 +6,6 @@ end
 
 describe 'Conversion between C++ and Ruby' do
 
-  shared_examples 'conversion' do
-    it 'works' do
-      actual = convert(@expected)
-      expect(actual).to eq @expected
-    end
-  end
-
   samples = {
     'Integer' => 1234,
     'true' => true,
@@ -50,6 +43,12 @@ describe 'Conversion between C++ and Ruby' do
     expect(result.sec).to eq(time.sec)
     expect(result.nsec / 1_000_000).to eq(time.nsec / 1_000_000)
     expect(result.gmt_offset).to eq(result.gmt_offset)
+  end
+
+  it 'can convert meta object' do
+    metaobj = QML::MetaObject.new
+    actual = convert(metaobj)
+    expect(actual).to eq metaobj
   end
 
 end

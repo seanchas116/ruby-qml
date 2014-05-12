@@ -69,6 +69,12 @@ describe "test object" do
     end
   end
 
+  describe '#metaObjectMethod' do
+    it 'returns the QML::MetaObject of the test object' do
+      expect(@obj.metaObjectMethod).to eq @obj.class.meta_object
+    end
+  end
+
   describe 'name property' do
 
     it 'should be set' do

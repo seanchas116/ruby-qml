@@ -75,6 +75,11 @@ public slots:
         throw std::runtime_error("test error");
     }
 
+    const QMetaObject *metaObjectMethod() const
+    {
+        return &TestObject::staticMetaObject;
+    }
+
 signals:
 
     void someSignal(const QString &arg);

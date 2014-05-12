@@ -14,6 +14,8 @@ Extension *extension_ = nullptr;
 Extension::Extension(QObject *parent) :
     QObject(parent)
 {
+    qRegisterMetaType<const QMetaObject *>();
+
     protect([&] {
         rb_require("qml/errors");
 

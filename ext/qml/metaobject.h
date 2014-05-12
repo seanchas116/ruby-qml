@@ -42,6 +42,8 @@ public:
 
     static VALUE fromObject(QObject *obj);
 
+    const QMetaObject *metaObject() const { return mMetaObject; }
+
 private:
 
     void mark() {}

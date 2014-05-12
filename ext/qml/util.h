@@ -39,3 +39,5 @@ void fail(const char *errorClassName, const QString &message);
 bool isKindOf(VALUE obj, VALUE klass);
 
 } // namespace RubyQml
+
+Q_DECLARE_METATYPE(const QMetaObject*)

@@ -60,6 +60,11 @@ module QML
         @klass.send :const_set, k, v
       end
 
+      metaobj = @metaobj
+      @klass.define_singleton_method :meta_object do
+        metaobj
+      end
+
       @klass
     end
 

@@ -11,21 +11,25 @@ namespace detail {
 
 VALUE Conversion<const char *>::to(const char *str)
 {
-    return protect([&] {
-        return rb_enc_str_new_cstr(str, rb_utf8_encoding());
+    VALUE ret;
+    protect([&] {
+        ret = rb_enc_str_new_cstr(str, rb_utf8_encoding());
     });
+    return ret;
 }
 
 namespace {
 
 VALUE convertToString(VALUE x)
 {
-    return protect([&] {
+    VALUE ret;
+    protect([&] {
         if (rb_type(x) == T_SYMBOL) {
             x = rb_sym_to_s(x);
         }
-        return rb_convert_type(x, T_STRING, "String", "to_str");
+        ret = rb_convert_type(x, T_STRING, "String", "to_str");
     });
+    return ret;
 }
 
 }
@@ -54,20 +58,24 @@ VALUE Conversion<QString>::to(const QString &str)
 
 QDateTime Conversion<QDateTime>::from(VALUE x)
 {
-    return protect([&] {
+    QDateTime ret;
+    protect([&] {
         auto at = rb_convert_type(x, T_RATIONAL, "Rational", "to_r");
         long long num = NUM2LL(RRATIONAL(at)->num);
         long long den = NUM2LL(RRATIONAL(at)->den);
-        return QDateTime::fromMSecsSinceEpoch(num * 1000 / den);
+        ret = QDateTime::fromMSecsSinceEpoch(num * 1000 / den);
     });
+    return ret;
 }
 
 VALUE Conversion<QDateTime>::to(const QDateTime &dateTime)
 {
-    return protect([&] {
+    VALUE ret;
+    protect([&] {
         auto at = rb_rational_new(LL2NUM(dateTime.toMSecsSinceEpoch()), INT2FIX(1000));
-        return rb_funcall(rb_cTime, rb_intern("at"), 1, at);
+        ret = rb_funcall(rb_cTime, rb_intern("at"), 1, at);
     });
+    return ret;
 }
 
 namespace {
@@ -259,34 +267,44 @@ int categoryToMetaType(TypeCategory category)
 TypeCategory rubyValueCategory(VALUE x)
 {
     auto objectBaseClass = ObjectPointer::rubyClass();
-    return protect([&] {
+    TypeCategory category;
+    protect([&] {
         switch (rb_type(x)) {
         case T_TRUE:
         case T_FALSE:
-            return TypeCategory::Boolean;
+            category = TypeCategory::Boolean;
+            return;
         case T_FIXNUM:
         case T_BIGNUM:
-            return TypeCategory::Integer;
+            category = TypeCategory::Integer;
+            return;
         case T_FLOAT:
-            return TypeCategory::Float;
+            category = TypeCategory::Float;
+            return;
         case T_SYMBOL:
         case T_STRING:
-            return TypeCategory::String;
+            category = TypeCategory::String;
+            return;
         case T_ARRAY:
-            return TypeCategory::Array;
+            category = TypeCategory::Array;
+            return;
         case T_HASH:
-            return TypeCategory::Hash;
+            category = TypeCategory::Hash;
+            return;
         default:
             break;
         }
         if (rb_obj_is_kind_of(x, rb_cTime)) {
-            return TypeCategory::Time;
+            category = TypeCategory::Time;
+            return;
         }
         if (rb_obj_is_kind_of(x, objectBaseClass)) {
-            return TypeCategory::QtObject;
+            category =TypeCategory::QtObject;
+            return;
         }
-        return TypeCategory::Invalid;
+        category = TypeCategory::Invalid;
     });
+    return category;
 }
 
 QVariant fromRuby(VALUE x, int type)

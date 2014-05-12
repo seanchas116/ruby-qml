@@ -20,9 +20,11 @@ struct Conversion<T, typename std::enable_if<std::is_signed<T>::value && std::is
 {
     static T from(VALUE x)
     {
-        return protect([&] {
-            return NUM2LL(x);
+        T ret;
+        protect([&] {
+            ret = NUM2LL(x);
         });
+        return ret;
     }
     static VALUE to(T x)
     {
@@ -35,9 +37,11 @@ struct Conversion<T, typename std::enable_if<std::is_unsigned<T>::value && std::
 {
     static T from(VALUE x)
     {
-        return protect([&] {
-            return NUM2ULL(x);
+        T ret;
+        protect([&] {
+            ret = NUM2ULL(x);
         });
+        return ret;
     }
     static VALUE to(T x)
     {
@@ -50,9 +54,11 @@ struct Conversion<T, typename std::enable_if<std::is_floating_point<T>::value>::
 {
     static T from(VALUE x)
     {
-        return protect([&] {
-            return rb_float_value(x);
+        T ret;
+        protect([&] {
+            ret = rb_float_value(x);
         });
+        return ret;
     }
     static VALUE to(T x)
     {
@@ -82,8 +88,9 @@ struct Conversion<T<V>, typename std::enable_if<IsQListLike<T<V>>::value>::type>
     }
     static VALUE to(const T<V> &list)
     {
-        VALUE ary = protect([&] {
-            return rb_ary_new();
+        VALUE ary;
+        protect([&] {
+            ary = rb_ary_new();
         });
         for (const auto &elem : list) {
             auto x = toRuby(elem);

@@ -19,13 +19,14 @@ namespace {
 
 VALUE idListToArray(const QList<ID> &xs)
 {
-    return protect([&] {
-        auto ary = rb_ary_new();
+    VALUE ary;
+    protect([&] {
+        ary = rb_ary_new();
         for (ID id : xs) {
             rb_ary_push(ary, ID2SYM(id));
         }
-        return ary;
     });
+    return ary;
 }
 
 }
@@ -210,8 +211,9 @@ VALUE MetaObject::getProperty(VALUE object, VALUE name) const
     auto metaProperty = mMetaObject->property(findProperty(name));
 
     auto qobj = ObjectPointer::getPointer(object)->qObject();
-    auto result = withoutGvl([&] {
-        return metaProperty.read(qobj);
+    QVariant result;
+    withoutGvl([&] {
+        result = metaProperty.read(qobj);
     });
     return toRuby(result);
 }
@@ -229,9 +231,10 @@ VALUE MetaObject::setProperty(VALUE object, VALUE name, VALUE newValue) const
 
     auto qobj = ObjectPointer::getPointer(object)->qObject();
     auto variant = fromRuby<QVariant>(newValue);
-    auto result = withoutGvl([&] {
+    QVariant result;
+    withoutGvl([&] {
         metaProperty.write(qobj, variant);
-        return metaProperty.read(qobj);
+        result = metaProperty.read(qobj);
     });
     return toRuby(result);
 }
@@ -273,8 +276,9 @@ int MetaObject::findProperty(VALUE name) const
 
 VALUE MetaObject::enumerators() const
 {
-    return protect([&] {
-        auto hash = rb_hash_new();
+    VALUE hash;
+    protect([&] {
+        hash = rb_hash_new();
         int count = mMetaObject->enumeratorCount();
         for (int enumIndex = 0; enumIndex < count; ++enumIndex) {
             auto enumerator = mMetaObject->enumerator(enumIndex);
@@ -282,8 +286,8 @@ VALUE MetaObject::enumerators() const
                 rb_hash_aset(hash, toRuby(enumerator.key(i)), toRuby(enumerator.value(i)));
             }
         }
-        return hash;
     });
+    return hash;
 }
 
 VALUE MetaObject::superClass() const

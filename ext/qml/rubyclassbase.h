@@ -36,9 +36,11 @@ public:
     static VALUE newAsRuby()
     {
         auto klass = rubyClass();
-        return protect([&] {
-            return rb_obj_alloc(klass);
+        VALUE ret;
+        protect([&] {
+            ret = rb_obj_alloc(klass);
         });
+        return ret;
     }
 
     class ClassBuilder;
@@ -146,9 +148,11 @@ private:
 
         static VALUE apply(VALUE self, TArgs ... args)
         {
-            return unprotect([&] {
-                return (getPointer(self)->*memfn)(args ...);
+            VALUE ret;
+            unprotect([&] {
+                ret = (getPointer(self)->*memfn)(args ...);
             });
+            return ret;
         }
     };
 
@@ -159,9 +163,11 @@ private:
 
         static VALUE apply(VALUE self, TArgs ... args)
         {
-            return unprotect([&] {
-                return (getPointer(self)->*memfn)(args ...);
+            VALUE ret;
+            unprotect([&] {
+                ret = (getPointer(self)->*memfn)(args ...);
             });
+            return ret;
         }
     };
 

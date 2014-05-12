@@ -20,9 +20,11 @@ Extension::Extension(QObject *parent) :
         rb_define_module_under(rb_path2class("QML"), "TestUtil");
 
         auto echo_conversion = [](VALUE klass, VALUE value) {
-            return unprotect([&] {
-                return echoConversion(value);
+            VALUE ret;
+            unprotect([&] {
+                ret = echoConversion(value);
             });
+            return ret;
         };
 
         rb_define_module_function(rb_path2class("QML::TestUtil"), "echo_conversion",

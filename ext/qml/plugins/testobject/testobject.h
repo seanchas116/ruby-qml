@@ -70,6 +70,11 @@ public slots:
         return mName;
     }
 
+    void throwingMethod() const
+    {
+        throw std::runtime_error("test error");
+    }
+
 signals:
 
     void someSignal(const QString &arg);

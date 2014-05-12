@@ -5,5 +5,6 @@ module QML
   class PropertyError < StandardError; end
   class PluginError < StandardError; end
   class NullObjectError < StandardError; end
+  class CxxError < StandardError; end
 
 end

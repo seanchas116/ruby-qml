@@ -6,6 +6,7 @@
 #include <functional>
 #include <tuple>
 #include <type_traits>
+#include <string>
 
 namespace RubyQml {
 
@@ -76,13 +77,24 @@ template <typename TCallback>
 auto unprotect(const TCallback &callback) -> decltype(callback())
 {
     int state = 0;
+    bool cxxEx = false;
+    std::string cxxExMsg;
     try {
         return callback();
     }
     catch (const RubyException &ex) {
         state = ex.state();
     }
-    rb_jump_tag(state);
+    catch (const std::exception &ex) {
+        cxxEx = true;
+        cxxExMsg = ex.what();
+    }
+    if (state) {
+        rb_jump_tag(state);
+    }
+    if (cxxEx) {
+        rb_raise(rb_path2class("QML::CxxError"), "%s", cxxExMsg.c_str());
+    }
 }
 
 template <typename TCallback>

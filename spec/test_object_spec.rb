@@ -63,6 +63,12 @@ describe "test object" do
     end
   end
 
+  describe '#throwingMethod' do
+    it 'raises a QML::CxxError' do
+      expect { @obj.throwingMethod }.to raise_error(QML::CxxError)
+    end
+  end
+
   describe 'name property' do
 
     it 'should be set' do

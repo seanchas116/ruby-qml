@@ -39,10 +39,9 @@ public:
     VALUE hash() const;
 
     void setMetaObject(const QMetaObject *metaObject);
-
-    static VALUE fromObject(QObject *obj);
-
     const QMetaObject *metaObject() const { return mMetaObject; }
+
+    static VALUE createOrUpdate(const QMetaObject *qmetaobj);
 
 private:
 

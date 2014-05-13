@@ -39,14 +39,17 @@ module QML
 
   class ClassBuilder
 
-    def initialize(metaobj)
+    attr_reader :metaobj, :klass
+
+    def initialize(metaobj, klass)
       @metaobj = metaobj
+      @klass = klass
     end
 
-    def create_class
+    def update
       super_metaobj = @metaobj.super_class
 
-      @klass = Class.new(super_metaobj ? super_metaobj.object_class : ObjectBase) do
+      @klass ||= Class.new(super_metaobj ? super_metaobj.object_class : ObjectBase) do
         include Ropework::PropertyDef
         include Ropework::SignalDef
       end

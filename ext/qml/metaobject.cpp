@@ -343,19 +343,30 @@ void MetaObject::setMetaObject(const QMetaObject *metaObject)
     mPropertyHash = propertyHash;
 }
 
-VALUE MetaObject::fromObject(QObject *obj)
+VALUE MetaObject::createOrUpdate(const QMetaObject *qmetaobj)
 {
-    auto metaObj = obj->metaObject();
-    auto address = toRuby(reinterpret_cast<size_t>(metaObj));
-    auto include = send(metaObjectHash, "include?", address);
-    if (RTEST(include)) {
-        return send(metaObjectHash, "fetch", address);
-    } else {
-        auto metaObject = send(rubyClass(), "new");
-        MetaObject::getPointer(metaObject)->setMetaObject(metaObj);
-        send(metaObjectHash, "[]=", address, metaObject);
-        return metaObject;
+    VALUE metaobj;
+    VALUE nameId = rb_intern(qmetaobj->className());
+    protect([&] {
+        metaobj = rb_hash_aref(metaObjectHash, nameId);
+    });
+
+    if (RTEST(metaobj)) {
+        auto p = getPointer(metaobj);
+        if (p->metaObject() != qmetaobj) {
+            p->setMetaObject(qmetaobj);
+            send(metaobj, "update_class");
+        }
     }
+    else {
+        metaobj = newAsRuby();
+        auto p = getPointer(metaobj);
+        p->setMetaObject(qmetaobj);
+        protect([&] {
+            rb_hash_aset(metaObjectHash, nameId, metaobj);
+        });
+    }
+    return metaobj;
 }
 
 MetaObject::ClassBuilder MetaObject::buildClass()

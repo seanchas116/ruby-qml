@@ -179,12 +179,15 @@ QObject *Conversion<QObject *>::from(VALUE x)
         }
         objptr = rb_ivar_get(x, rb_intern("@objptr"));
     });
-    return ObjectPointer::getPointer(objptr)->qObject();
+    auto obj = ObjectPointer::getPointer(objptr)->qObject();
+    // update MetaObject every time because the QObject's meta object may be modified
+    MetaObject::createOrUpdate(obj->metaObject());
+    return obj;
 }
 
 VALUE Conversion<QObject *>::to(QObject *obj)
 {
-    auto metaObject = MetaObject::fromObject(obj);
+    auto metaObject = MetaObject::createOrUpdate(obj->metaObject());
 
     auto objptr = ObjectPointer::newAsRuby();
     ObjectPointer::getPointer(objptr)->setQObject(obj);

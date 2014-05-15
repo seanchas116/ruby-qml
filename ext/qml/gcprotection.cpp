@@ -30,4 +30,6 @@ GCProtection::ClassBuilder GCProtection::buildClass()
     return builder;
 }
 
+QSet<VALUE> GCProtection::mValues;
+
 } // namespace RubyQml

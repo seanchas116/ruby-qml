@@ -39,9 +39,7 @@ Extension::Extension(QObject *parent) :
     PluginLoader::defineClass();
     GCProtection::defineClass();
 
-    auto protection = GCProtection::newAsRuby();
-    rb_gc_register_mark_object(protection);
-    mProtection = GCProtection::getPointer(protection);
+    rb_gc_register_mark_object(GCProtection::newAsRuby());
 }
 
 Extension *Extension::instance()

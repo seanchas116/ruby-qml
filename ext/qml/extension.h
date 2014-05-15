@@ -12,12 +12,9 @@ class Extension : public QObject
 public:
     explicit Extension(QObject *parent = 0);
 
-    GCProtection *protection() { return mProtection; }
-
     static Extension *instance();
 
 private:
-    GCProtection *mProtection = nullptr;
 };
 
 } // namespace RubyQml

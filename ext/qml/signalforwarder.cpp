@@ -12,14 +12,14 @@ SignalForwarder::SignalForwarder(QObject *obj, const QMetaMethod &signal, VALUE 
     mSignal(signal),
     mProc(proc)
 {
-    Extension::instance()->protection()->add(mProc);
+    GCProtection::add(mProc);
     QMetaObject::connect(obj, signal.methodIndex(), this, QObject::staticMetaObject.methodCount());
     connect(Extension::instance(), &QObject::destroyed, this, [&] { delete this; });
 }
 
 SignalForwarder::~SignalForwarder()
 {
-    Extension::instance()->protection()->remove(mProc);
+    GCProtection::remove(mProc);
 }
 
 int SignalForwarder::qt_metacall(QMetaObject::Call call, int id, void **args)

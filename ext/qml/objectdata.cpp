@@ -7,12 +7,12 @@ namespace RubyQml {
 ObjectData::ObjectData(VALUE rubyObject) :
     mRubyObject(rubyObject)
 {
-    Extension::instance()->protection()->add(mRubyObject);
+    GCProtection::add(mRubyObject);
 }
 
 ObjectData::~ObjectData()
 {
-    Extension::instance()->protection()->remove(mRubyObject);
+    GCProtection::remove(mRubyObject);
 }
 
 std::shared_ptr<ObjectData> ObjectData::get(QObject *obj)

@@ -108,6 +108,9 @@ public:
         }
 
         int returnType = mMethod.returnType();
+        if (returnType == QMetaType::UnknownType) {
+            fail("QML::MethodError", "unknown return metatype");
+        }
         bool voidReturning = (returnType == QMetaType::Void);
         QVariant returnValue;
         if (!voidReturning) {

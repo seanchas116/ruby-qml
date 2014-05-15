@@ -1,6 +1,7 @@
 #include "conversion.h"
 #include "objectpointer.h"
 #include "metaobject.h"
+#include "objectdata.h"
 #include <ruby/intern.h>
 #include <QtCore/QDebug>
 
@@ -187,12 +188,19 @@ QObject *Conversion<QObject *>::from(VALUE x)
 
 VALUE Conversion<QObject *>::to(QObject *obj)
 {
+    auto data = ObjectData::get(obj);
+    if (data) {
+        return data->rubyObject();
+    }
+
     auto metaObject = MetaObject::createOrUpdate(obj->metaObject());
 
     auto objptr = ObjectPointer::newAsRuby();
     ObjectPointer::getPointer(objptr)->setQObject(obj);
 
-    return send(send(metaObject, "object_class"), "new", objptr);
+    auto rubyobj = send(send(metaObject, "object_class"), "new", objptr);
+    ObjectData::set(obj, std::make_shared<ObjectData>(rubyobj));
+    return rubyobj;
 }
 
 const QMetaObject *Conversion<const QMetaObject *>::from(VALUE x)

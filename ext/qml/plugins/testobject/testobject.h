@@ -80,6 +80,11 @@ public slots:
         return &TestObject::staticMetaObject;
     }
 
+    QObject *selfReturningMethod()
+    {
+        return this;
+    }
+
 signals:
 
     void someSignal(const QString &arg);

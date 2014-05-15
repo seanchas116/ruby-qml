@@ -75,6 +75,12 @@ describe "test object" do
     end
   end
 
+  describe '#selfReturningMethod' do
+    it 'returns the same Ruby object' do
+      expect(@obj.selfReturningMethod).to be @obj
+    end
+  end
+
   describe 'name property' do
 
     it 'should be set' do

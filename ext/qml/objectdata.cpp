@@ -1,18 +1,20 @@
 #include "objectdata.h"
-#include "extension.h"
-#include "gcprotection.h"
+#include "util.h"
+#include <QtCore/QSet>
+#include <QtCore/QObject>
+#include <QtCore/QVariant>
 
 namespace RubyQml {
 
 ObjectData::ObjectData(VALUE rubyObject) :
     mRubyObject(rubyObject)
 {
-    GCProtection::add(mRubyObject);
+    globalMarkValues() << mRubyObject;
 }
 
 ObjectData::~ObjectData()
 {
-    GCProtection::remove(mRubyObject);
+    globalMarkValues().remove(mRubyObject);
 }
 
 std::shared_ptr<ObjectData> ObjectData::get(QObject *obj)

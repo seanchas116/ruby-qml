@@ -1,6 +1,9 @@
 #include "util.h"
 #include "conversion.h"
 #include <QtCore/QString>
+#include <QtCore/QSet>
+#include <ruby/thread.h>
+#include <string>
 
 namespace RubyQml {
 
@@ -78,6 +81,18 @@ bool isKindOf(VALUE obj, VALUE klass)
         result = rb_obj_is_kind_of(obj, klass);
     });
     return fromRuby<bool>(result);
+}
+
+QSet<VALUE> &globalMarkValues()
+{
+    static QSet<VALUE> values;
+    return values;
+}
+
+QObject *exitHandlerObject()
+{
+    static auto obj = new QObject();
+    return obj;
 }
 
 }

@@ -1,8 +1,6 @@
 #include "signalforwarder.h"
 #include "conversion.h"
 #include "util.h"
-#include "extension.h"
-#include "gcprotection.h"
 #include <QtCore/QDebug>
 
 namespace RubyQml {
@@ -12,14 +10,14 @@ SignalForwarder::SignalForwarder(QObject *obj, const QMetaMethod &signal, VALUE 
     mSignal(signal),
     mProc(proc)
 {
-    GCProtection::add(mProc);
+    globalMarkValues() << mProc;
     QMetaObject::connect(obj, signal.methodIndex(), this, QObject::staticMetaObject.methodCount());
-    connect(Extension::instance(), &QObject::destroyed, this, [&] { delete this; });
+    connect(exitHandlerObject(), &QObject::destroyed, this, [&] { delete this; });
 }
 
 SignalForwarder::~SignalForwarder()
 {
-    GCProtection::remove(mProc);
+    globalMarkValues().remove(mProc);
 }
 
 int SignalForwarder::qt_metacall(QMetaObject::Call call, int id, void **args)

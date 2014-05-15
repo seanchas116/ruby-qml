@@ -11,6 +11,14 @@ class CorePlugin : public QObject
 
 public:
     CorePlugin(QObject *parent = 0);
+
+public slots:
+    QObject *createGuiApplication(const QVariantList &args);
+    QObject *createEngine();
+    QObject *createComponent(QObject *engine);
+    QObject *createApplicationWrapper(QObject *app);
+    QObject *createEngineWrapper(QObject *engine);
+    QObject *createComponentWrapper(QObject *component);
 };
 
 

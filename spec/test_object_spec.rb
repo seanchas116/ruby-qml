@@ -3,7 +3,7 @@ require 'spec_helper'
 describe "test object" do
 
   before do
-    loader = QML::PluginLoader.new Pathname(__FILE__) + '../../ext/qml/plugins/testobject', 'testobject'
+    loader = QML::PluginLoader.new Pathname(__FILE__) + '../../ext/qml/plugins/testobject', 'rubyqml-testobject'
     @obj = loader.instance.createTestObject
     @subobj = loader.instance.createTestObjectSubclass
   end

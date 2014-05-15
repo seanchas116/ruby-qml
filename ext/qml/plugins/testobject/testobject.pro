@@ -2,7 +2,7 @@ TEMPLATE = lib
 CONFIG += plugin c++11
 QT += qml
 
-TARGET = testobject
+TARGET = rubyqml-testobject
 INCLUDEPATH += .
 
 # Input

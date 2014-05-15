@@ -4,20 +4,18 @@
 #
 #-------------------------------------------------
 
-QT       += core gui
+QT       += core gui qml quick
 
-TARGET = core
+TARGET = rubyqml-core
 TEMPLATE = lib
-CONFIG += plugin
+CONFIG += plugin c++11
 
-DESTDIR = $$[QT_INSTALL_PLUGINS]/generic
+SOURCES += coreplugin.cpp \
+    applicationwrapper.cpp \
+    enginewrapper.cpp \
+    componentwrapper.cpp
 
-SOURCES += coreplugin.cpp
-
-HEADERS += coreplugin.h
-OTHER_FILES +=
-
-unix {
-    target.path = /usr/lib
-    INSTALLS += target
-}
+HEADERS += coreplugin.h \
+    applicationwrapper.h \
+    enginewrapper.h \
+    componentwrapper.h

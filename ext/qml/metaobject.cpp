@@ -245,7 +245,13 @@ VALUE MetaObject::setProperty(VALUE object, VALUE name, VALUE newValue) const
 VALUE MetaObject::notifySignal(VALUE name) const
 {
     auto metaProperty = mMetaObject->property(findProperty(name));
-    return ID2SYM(rb_intern(metaProperty.notifySignal().name()));
+    auto signal = metaProperty.notifySignal();
+    if (signal.isValid()) {
+        return ID2SYM(rb_intern(metaProperty.notifySignal().name()));
+    }
+    else {
+        return Qnil;
+    }
 }
 
 QList<int> MetaObject::findMethods(VALUE name) const

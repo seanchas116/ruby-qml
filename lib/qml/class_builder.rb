@@ -1,6 +1,8 @@
+require 'logger'
 require 'ropework'
 require 'qml/object_base'
 require 'qml/qml'
+require 'qml/null_logger'
 
 module QML
 
@@ -12,12 +14,23 @@ module QML
       @name = name
       signal = @metaobj.notify_signal(name)
       metaobj.connect_signal(objptr, signal, method(:set_value_orig)) if signal
+      set_value_orig(read_value)
     end
 
     alias_method :set_value_orig, :value=
 
     def value=(newval)
+      write_value(newval)
+    end
+
+    private
+
+    def write_value(newval)
       @metaobj.set_property(@objptr, @name, newval)
+    end
+
+    def read_value
+      @metaobj.get_property(@objptr, @name)
     end
   end
 
@@ -44,6 +57,8 @@ module QML
     def initialize(metaobj, klass)
       @metaobj = metaobj
       @klass = klass
+      #@logger = Logger.new(PROJECT_ROOT + 'log/class_builder.log')
+      @logger = NullLogger.new
     end
 
     def update
@@ -53,9 +68,21 @@ module QML
         include Ropework::PropertyDef
         include Ropework::SignalDef
       end
+
+      @logger.info "--------"
+      @logger.info "creating class for #{@metaobj.name}"
+      @logger.info "--------"
+
+      @logger.info "methods:"
+      @logger.info @metaobj.method_names.inspect
+
       @metaobj.method_names.each do |name|
         define_method(name)
       end
+
+      @logger.info "properties:"
+      @logger.info @metaobj.property_names.inspect
+
       @metaobj.property_names.each do |name|
         define_property(name)
       end
@@ -77,6 +104,7 @@ module QML
       metaobj = @metaobj
       return if @metaobj.private?(name)
       if @metaobj.signal?(name)
+        @logger.info "signal: #{name}"
         @klass.send :signal, name, signal: proc { QtSignal.new(@objptr, metaobj, name) }
       else
         @klass.send :define_method, name do |*args|

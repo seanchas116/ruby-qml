@@ -165,7 +165,7 @@ VALUE Conversion<QVariant>::to(const QVariant &variant)
     auto &hash = converterHash->toRubyHash;
     auto type = variant.userType();
     if (!hash.contains(type)) {
-        qWarning() << __PRETTY_FUNCTION__ << ": unsupported meta type" << type;
+        qWarning() << __PRETTY_FUNCTION__ << ": unsupported meta type" << QMetaType::typeName(type);
         return Qnil;
     }
     return hash[type](variant);
@@ -295,7 +295,7 @@ int categoryToMetaType(TypeCategory category)
 
 TypeCategory rubyValueCategory(VALUE x)
 {
-    auto objectBaseClass = ObjectPointer::rubyClass();
+    auto objectBaseClass = ObjectPointer::objectBaseClass();
     auto metaObjectClass = MetaObject::rubyClass();
     TypeCategory category;
     protect([&] {

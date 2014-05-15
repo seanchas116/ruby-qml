@@ -2,6 +2,7 @@
 #include "metaobject.h"
 #include "objectpointer.h"
 #include "pluginloader.h"
+#include "gcprotection.h"
 
 namespace RubyQml {
 
@@ -36,6 +37,11 @@ Extension::Extension(QObject *parent) :
     MetaObject::defineClass();
     ObjectPointer::defineClass();
     PluginLoader::defineClass();
+    GCProtection::defineClass();
+
+    auto protection = GCProtection::newAsRuby();
+    rb_gc_register_mark_object(protection);
+    mProtection = GCProtection::getPointer(protection);
 }
 
 Extension *Extension::instance()

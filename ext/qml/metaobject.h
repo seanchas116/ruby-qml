@@ -41,7 +41,9 @@ public:
     void setMetaObject(const QMetaObject *metaObject);
     const QMetaObject *metaObject() const { return mMetaObject; }
 
-    static VALUE createOrUpdate(const QMetaObject *qmetaobj);
+    VALUE updateClass();
+
+    static VALUE fromMetaObject(const QMetaObject *metaObject);
 
 private:
 
@@ -54,8 +56,6 @@ private:
     const QMetaObject *mMetaObject = nullptr;
     QMultiHash<ID, int> mMethodHash;
     QHash<ID, int> mPropertyHash;
-
-    static VALUE metaObjectHash;
 };
 
 

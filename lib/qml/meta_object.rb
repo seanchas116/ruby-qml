@@ -1,5 +1,6 @@
 require 'qml/qml'
 require 'qml/class_builder'
+require 'qml/class_provider'
 
 module QML
   class MetaObject
@@ -9,15 +10,8 @@ module QML
       "<QML::MetaObject:#{self}>"
     end
 
-    def object_class
-      update_class unless @object_class
-      @object_class
-    end
-
     def update_class
-      cb = ClassBuilder.new(self, @object_class)
-      cb.update
-      @object_class = cb.klass
+      ClassProvider.instance.update_class(self)
     end
   end
 end

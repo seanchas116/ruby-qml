@@ -181,8 +181,7 @@ QObject *Conversion<QObject *>::from(VALUE x)
         objptr = rb_ivar_get(x, rb_intern("@objptr"));
     });
     auto obj = ObjectPointer::getPointer(objptr)->qObject();
-    // update MetaObject every time because the QObject's meta object may be modified
-    MetaObject::createOrUpdate(obj->metaObject());
+    MetaObject::getPointer(MetaObject::fromMetaObject(obj->metaObject()))->updateClass();
     return obj;
 }
 
@@ -193,12 +192,12 @@ VALUE Conversion<QObject *>::to(QObject *obj)
         return data->rubyObject();
     }
 
-    auto metaObject = MetaObject::createOrUpdate(obj->metaObject());
+    auto metaobj = MetaObject::fromMetaObject(obj->metaObject());
 
     auto objptr = ObjectPointer::newAsRuby();
     ObjectPointer::getPointer(objptr)->setQObject(obj);
 
-    auto rubyobj = send(send(metaObject, "object_class"), "new", objptr);
+    auto rubyobj = send(MetaObject::getPointer(metaobj)->updateClass(), "new", objptr);
     ObjectData::set(obj, std::make_shared<ObjectData>(rubyobj));
     return rubyobj;
 }
@@ -210,9 +209,7 @@ const QMetaObject *Conversion<const QMetaObject *>::from(VALUE x)
 
 VALUE Conversion<const QMetaObject *>::to(const QMetaObject *metaobj)
 {
-    auto value = MetaObject::newAsRuby();
-    MetaObject::getPointer(value)->setMetaObject(metaobj);
-    return value;
+    return MetaObject::fromMetaObject(metaobj);
 }
 
 } // namespace detail

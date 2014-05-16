@@ -305,9 +305,7 @@ VALUE MetaObject::superClass() const
     if (!superclass) {
         return Qnil;
     }
-    auto value = newAsRuby();
-    MetaObject::getPointer(value)->setMetaObject(superclass);
-    return value;
+    return fromMetaObject(superclass);
 }
 
 VALUE MetaObject::isEqual(VALUE other) const
@@ -352,37 +350,20 @@ void MetaObject::setMetaObject(const QMetaObject *metaObject)
     mPropertyHash = propertyHash;
 }
 
-VALUE MetaObject::createOrUpdate(const QMetaObject *qmetaobj)
+VALUE MetaObject::updateClass()
 {
-    VALUE metaobj;
-    VALUE nameId = rb_intern(qmetaobj->className());
-    protect([&] {
-        metaobj = rb_hash_aref(metaObjectHash, nameId);
-    });
+    return send(self(), "update_class");
+}
 
-    if (RTEST(metaobj)) {
-        auto p = getPointer(metaobj);
-        if (p->metaObject() != qmetaobj) {
-            p->setMetaObject(qmetaobj);
-            send(metaobj, "update_class");
-        }
-    }
-    else {
-        metaobj = newAsRuby();
-        auto p = getPointer(metaobj);
-        p->setMetaObject(qmetaobj);
-        protect([&] {
-            rb_hash_aset(metaObjectHash, nameId, metaobj);
-        });
-    }
-    return metaobj;
+VALUE MetaObject::fromMetaObject(const QMetaObject *metaObject)
+{
+    auto value = newAsRuby();
+    getPointer(value)->setMetaObject(metaObject);
+    return value;
 }
 
 MetaObject::ClassBuilder MetaObject::buildClass()
 {
-    metaObjectHash = rb_hash_new();
-    rb_gc_register_mark_object(metaObjectHash);
-
     ClassBuilder builder("QML", "MetaObject");
 
     builder.defineMethod<METHOD_TYPE_NAME(&MetaObject::className)>("name");
@@ -411,7 +392,5 @@ MetaObject::ClassBuilder MetaObject::buildClass()
 
     return builder;
 }
-
-VALUE MetaObject::metaObjectHash = Qnil;
 
 } // namespace RubyQml

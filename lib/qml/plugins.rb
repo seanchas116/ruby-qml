@@ -1,10 +1,11 @@
 require 'qml/plugin_loader'
+require 'qml/root_path'
 require 'pathname'
 
 module QML
   module Plugins
 
-    PATH = Pathname(__FILE__) + '../../../ext/qml/plugins'
+    PATH = ROOT_PATH + 'ext/qml/plugins'
 
     class << self
       def core

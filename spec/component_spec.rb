@@ -16,7 +16,7 @@ describe QML::Component do
   end
 
   it 'instantiates a object from file' do
-    component.load_file Pathname(__FILE__) + '../assets/testobj.qml'
+    component.load_file QML::ROOT_PATH + 'spec/assets/testobj.qml'
     expect(component.create.name).to eq 'foo'
   end
 

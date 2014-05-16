@@ -15,12 +15,13 @@ private:
     int mState = 0;
 };
 
-// convert Ruby exceptions into C++ exceptions (RubyException)
+// Convert Ruby exceptions into C++ exceptions (RubyException)
 void protect(const std::function<void()> &callback);
 
-// regenerate Ruby exceptions that are converted into RubyException
-// and convert std::exception exceptions into Ruby errors
-void unprotect(const std::function<void()> &callback);
+// Regenerate Ruby exceptions that are converted into RubyException
+// and convert std::exception exceptions into Ruby errors.
+// Other C++ exceptions are not allowed to be thrown out of this function.
+void unprotect(const std::function<void()> &callback) noexcept;
 
 // call function with GVL unlocked
 void withoutGvl(const std::function<void()> &callback);

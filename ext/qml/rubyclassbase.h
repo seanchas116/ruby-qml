@@ -60,12 +60,12 @@ public:
 
 private:
 
-    static void markImpl(TDerived *ptr)
+    static void markImpl(TDerived *ptr) noexcept
     {
         ptr->mark();
     }
 
-    static void dealloc(TDerived *ptr)
+    static void dealloc(TDerived *ptr) noexcept
     {
         withoutGvl([&] {
             ptr->~TDerived();
@@ -73,7 +73,7 @@ private:
         ruby_xfree(ptr);
     }
 
-    static VALUE alloc(VALUE klass)
+    static VALUE alloc(VALUE klass) noexcept
     {
         auto ptr = ruby_xmalloc(sizeof(TDerived));
         new(ptr) TDerived();

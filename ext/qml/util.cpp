@@ -22,7 +22,7 @@ void protect(const std::function<void ()> &callback)
     }
 }
 
-void unprotect(const std::function<void ()> &callback)
+void unprotect(const std::function<void ()> &callback) noexcept
 {
     int state = 0;
     bool cxxCaught = false;

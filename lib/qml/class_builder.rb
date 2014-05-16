@@ -62,14 +62,7 @@ module QML
 
     def create
       super_metaobj = @metaobj.super_class
-      klass = Class.new(super_metaobj ? super_metaobj.update_class : ObjectBase) do
-        include Ropework::PropertyDef
-        include Ropework::SignalDef
-        class << self
-          attr_accessor :meta_object
-          private :meta_object=
-        end
-      end
+      klass = Class.new(super_metaobj ? super_metaobj.update_class : ObjectBase)
       update(klass)
     end
 

@@ -85,12 +85,19 @@ public:
                 return true;
             }
             auto paramCategory = metaTypeToCategory(metaType);
-            auto argCategory = rubyValueCategory(RARRAY_AREF(mArgs, i));
+            auto arg = RARRAY_AREF(mArgs, i);
+            auto argCategory = rubyValueCategory(arg);
             if (argCategory == TypeCategory::Invalid) {
                 return false;
             }
             if (paramCategory != argCategory) {
                 return false;
+            }
+            if (paramCategory == TypeCategory::QtObject) {
+                auto paramMetaobj = QMetaType::metaObjectForType(metaType);
+                if (!fromRuby<QObject *>(arg)->inherits(paramMetaobj->className())) {
+                    return false;
+                }
             }
         }
         return true;

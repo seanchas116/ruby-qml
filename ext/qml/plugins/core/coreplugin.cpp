@@ -9,26 +9,19 @@
 
 namespace RubyQml {
 
-namespace {
-
-template <typename T>
-T *expect(QObject *obj)
-{
-    auto p = qobject_cast<T *>(obj);
-    if (!p) {
-        throw std::invalid_argument(QString("expected %1").arg(T::staticMetaObject.className()).toStdString());
-    }
-    return p;
-}
-
-}
-
 CorePlugin::CorePlugin(QObject *parent) :
     QObject(parent)
 {
+    qRegisterMetaType<ApplicationWrapper *>();
+    qRegisterMetaType<EngineWrapper *>();
+    qRegisterMetaType<ComponentWrapper *>();
+    qRegisterMetaType<QGuiApplication *>();
+    qRegisterMetaType<QCoreApplication *>();
+    qRegisterMetaType<QQmlEngine *>();
+    qRegisterMetaType<QQmlComponent *>();
 }
 
-QObject *CorePlugin::createGuiApplication(const QVariantList &args)
+QGuiApplication *CorePlugin::createGuiApplication(const QVariantList &args)
 {
     static bool created = false;
     static QList<QByteArray> staticArgs;
@@ -53,29 +46,29 @@ QObject *CorePlugin::createGuiApplication(const QVariantList &args)
     return app;
 }
 
-QObject *CorePlugin::createEngine()
+QQmlEngine *CorePlugin::createEngine()
 {
     return new QQmlEngine();
 }
 
-QObject *CorePlugin::createComponent(QObject *e)
+QQmlComponent *CorePlugin::createComponent(QQmlEngine *e)
 {
-    return new QQmlComponent(expect<QQmlEngine>(e));
+    return new QQmlComponent(e);
 }
 
-QObject *CorePlugin::createApplicationWrapper(QObject *app)
+ApplicationWrapper *CorePlugin::createApplicationWrapper(QGuiApplication *app)
 {
-    return new ApplicationWrapper(expect<QGuiApplication>(app));
+    return new ApplicationWrapper(app);
 }
 
-QObject *CorePlugin::createEngineWrapper(QObject *engine)
+EngineWrapper *CorePlugin::createEngineWrapper(QQmlEngine *engine)
 {
-    return new EngineWrapper(expect<QQmlEngine>(engine));
+    return new EngineWrapper(engine);
 }
 
-QObject *CorePlugin::createComponentWrapper(QObject *component)
+ComponentWrapper *CorePlugin::createComponentWrapper(QQmlComponent *component)
 {
-    return new ComponentWrapper(expect<QQmlComponent>(component));
+    return new ComponentWrapper(component);
 }
 
 } // namespace RubyQml

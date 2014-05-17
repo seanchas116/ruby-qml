@@ -19,7 +19,7 @@ public slots:
     void loadString(const QString &data, const QString &path);
     void loadFile(const QString &filePath);
     QObject *create();
-    QObject *wrapper() { return mComponent; }
+    QQmlComponent *component() { return mComponent; }
 
 private:
     void throwIfError();

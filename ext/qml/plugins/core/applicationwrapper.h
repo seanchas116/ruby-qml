@@ -18,7 +18,7 @@ signals:
     void eventLoopProcessed();
 
 public slots:
-    QObject *application() { return mApp; }
+    QGuiApplication *application() { return mApp; }
 
 private:
     QGuiApplication *mApp;

@@ -4,6 +4,7 @@
 namespace RubyQml {
 
 class TestObject;
+class TestObjectSubclass;
 
 class TestObjectPlugin : public QObject
 {
@@ -15,7 +16,7 @@ signals:
 
 public slots:
     RubyQml::TestObject *createTestObject();
-    QObject *createTestObjectSubclass();
+    RubyQml::TestObjectSubclass *createTestObjectSubclass();
 
 private:
 

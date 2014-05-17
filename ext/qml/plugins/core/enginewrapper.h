@@ -15,7 +15,7 @@ public:
     explicit EngineWrapper(QQmlEngine *engine);
 
 public slots:
-    QObject *engine() { return mEngine; }
+    QQmlEngine *engine() { return mEngine; }
 
 private:
     QQmlEngine *mEngine;

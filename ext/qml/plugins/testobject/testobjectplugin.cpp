@@ -16,7 +16,7 @@ TestObject *TestObjectPlugin::createTestObject()
     return new TestObject();
 }
 
-QObject *TestObjectPlugin::createTestObjectSubclass()
+TestObjectSubclass *TestObjectPlugin::createTestObjectSubclass()
 {
     return new TestObjectSubclass();
 }

@@ -2,6 +2,7 @@
 #include "objectpointer.h"
 #include "pluginloader.h"
 #include "gcmarker.h"
+#include "signalforwarder.h"
 #include <QtCore/QSet>
 
 using namespace RubyQml;
@@ -52,13 +53,14 @@ void setupGlobalGCMarking()
     rb_gc_register_mark_object(marker);
 }
 
-void setupExitHandlerObject()
+void cleanup()
 {
-    rb_set_end_proc([](VALUE) {
-        unprotect([] {
-            delete exitHandlerObject();
-        });
-    }, Qnil);
+    SignalForwarder::deleteAll();
+}
+
+void setupEndProc()
+{
+    rb_set_end_proc([](VALUE) { unprotect(cleanup); }, Qnil);
 }
 
 }
@@ -73,5 +75,5 @@ void Init_qml()
     defineTestUtil();
     defineClasses();
     setupGlobalGCMarking();
-    setupExitHandlerObject();
+    setupEndProc();
 }

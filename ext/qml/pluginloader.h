@@ -1,8 +1,9 @@
 #pragma once
 
 #include "rubyclassbase.h"
-#include <QtCore/QPluginLoader>
 #include <memory>
+
+class QPluginLoader;
 
 namespace RubyQml {
 

@@ -46,9 +46,6 @@ bool isKindOf(VALUE obj, VALUE klass);
 // set of VALUEs that are marked in every GC
 QSet<VALUE> &globalMarkValues();
 
-// object that is destroyed on exit (used as exit handler)
-QObject *exitHandlerObject();
-
 } // namespace RubyQml
 
 Q_DECLARE_METATYPE(const QMetaObject*)

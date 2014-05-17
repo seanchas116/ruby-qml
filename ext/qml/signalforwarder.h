@@ -12,6 +12,7 @@ public:
     ~SignalForwarder();
 
     int qt_metacall(QMetaObject::Call call, int id, void **args) override;
+    static void deleteAll();
 
 private:
     void forwardArgs(void **args);
@@ -19,6 +20,7 @@ private:
 
     QMetaMethod mSignal;
     VALUE mProc;
+    static QSet<SignalForwarder *> mInstances;
 };
 
 } // namespace RubyQml

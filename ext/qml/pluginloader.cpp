@@ -1,5 +1,7 @@
 #include "pluginloader.h"
 #include "objectpointer.h"
+#include <QtCore/QPluginLoader>
+#include <QtCore/QSet>
 
 namespace RubyQml {
 
@@ -10,9 +12,6 @@ PluginLoader::PluginLoader() :
 
 PluginLoader::~PluginLoader()
 {
-    if (mPluginLoader->isLoaded()) {
-        mPluginLoader->unload();
-    }
 }
 
 VALUE PluginLoader::initialize(VALUE path)

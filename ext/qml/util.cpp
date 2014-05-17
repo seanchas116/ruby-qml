@@ -109,10 +109,4 @@ QSet<VALUE> &globalMarkValues()
     return values;
 }
 
-QObject *exitHandlerObject()
-{
-    static auto obj = new QObject();
-    return obj;
-}
-
 }

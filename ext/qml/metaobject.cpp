@@ -96,9 +96,8 @@ public:
         return true;
     }
 
-    VALUE invoke(VALUE object)
+    VALUE invoke(QObject *obj)
     {
-        auto obj = ObjectPointer::getPointer(object)->qObject();
         std::array<QVariant, 10> argVariants;
         std::array<QGenericArgument, 10> args;
         for (int i = 0; i < mMethod.parameterCount(); ++i) {
@@ -158,10 +157,11 @@ VALUE MetaObject::invokeMethod(VALUE object, VALUE methodName, VALUE args) const
     protect([&] {
         args = rb_check_array_type(args);
     });
+    auto obj = ObjectPointer::getPointer(object)->qObject();
     for (int i : methodIndexes) {
         MethodInvoker invoker(args, mMetaObject->method(i));
         if (invoker.isArgsCompatible()) {
-            return invoker.invoke(object);
+            return invoker.invoke(obj);
         }
     }
     protect([&] {

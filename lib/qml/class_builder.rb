@@ -12,15 +12,23 @@ module QML
       @objptr = objptr
       @metaobj = metaobj
       @name = name
-      signal = @metaobj.notify_signal(name)
-      metaobj.connect_signal(objptr, signal, method(:set_value_orig)) if signal
-      set_value_orig(read_value)
     end
 
     alias_method :set_value_orig, :value=
 
     def value=(newval)
+      lazy_initialize
       write_value(newval)
+    end
+
+    def value
+      lazy_initialize
+      super
+    end
+
+    def changed
+      lazy_initialize
+      super
     end
 
     private
@@ -32,6 +40,14 @@ module QML
     def read_value
       @metaobj.get_property(@objptr, @name)
     end
+
+    def lazy_initialize
+      return if @initialized
+      signal = @metaobj.notify_signal(@name)
+      @metaobj.connect_signal(@objptr, signal, method(:set_value_orig)) if signal
+      set_value_orig(read_value)
+      @initialized = true
+    end
   end
 
   class QtSignal < Ropework::Signal
@@ -40,13 +56,25 @@ module QML
       @objptr = objptr
       @metaobj = metaobj
       @name = name
-      metaobj.connect_signal(objptr, name, method(:emit_orig))
+    end
+
+    def connect(&block)
+      lazy_initialize
+      super
     end
 
     alias_method :emit_orig, :emit
 
     def emit(*args)
       @metaobj.invoke(@name, args)
+    end
+
+    private
+
+    def lazy_initialize
+      return if @initialized
+      @metaobj.connect_signal(@objptr, @name, method(:emit_orig))
+      @initialized = true
     end
   end
 

@@ -8,9 +8,10 @@ namespace RubyQml {
 TestObjectPlugin::TestObjectPlugin(QObject *parent) :
     QObject(parent)
 {
+    qRegisterMetaType<TestObject *>();
 }
 
-QObject *TestObjectPlugin::createTestObject()
+TestObject *TestObjectPlugin::createTestObject()
 {
     return new TestObject();
 }

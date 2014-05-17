@@ -14,7 +14,7 @@ public:
 signals:
 
 public slots:
-    QObject *createTestObject();
+    RubyQml::TestObject *createTestObject();
     QObject *createTestObjectSubclass();
 
 private:

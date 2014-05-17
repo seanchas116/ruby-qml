@@ -164,9 +164,13 @@ VALUE Conversion<QVariant>::to(const QVariant &variant)
 {
     auto &hash = converterHash->toRubyHash;
     auto type = variant.userType();
+    if (QMetaType::metaObjectForType(type)) {
+        type = QMetaType::QObjectStar;
+    }
     if (!hash.contains(type)) {
-        qWarning() << __PRETTY_FUNCTION__ << ": unsupported meta type" << QMetaType::typeName(type);
-        return Qnil;
+        fail("QML::ConversionError",
+             QString("failed to convert QVariant value (%1)")
+             .arg(QMetaType::typeName(type)));
     }
     return hash[type](variant);
 }
@@ -176,7 +180,7 @@ QObject *Conversion<QObject *>::from(VALUE x)
     VALUE objptr;
     protect([&] {
         if (!rb_obj_is_kind_of(x, ObjectPointer::objectBaseClass())) {
-            rb_raise(rb_eTypeError, "expected QML::ObjectBase, got %s", rb_obj_classname(x));
+            rb_raise(rb_path2class("QML::ConversionError"), "expected QML::ObjectBase, got %s", rb_obj_classname(x));
         }
         objptr = rb_ivar_get(x, rb_intern("@objptr"));
     });
@@ -257,6 +261,9 @@ TypeCategory metaTypeToCategory(int metaType)
         return TypeCategory::QtObject;
 
     default:
+        if (QMetaType::metaObjectForType(metaType)) {
+            return TypeCategory::QtObject;
+        }
         if (metaType == QMetaType::type("const QMetaObject*")) {
             return TypeCategory::QtMetaObject;
         }
@@ -345,7 +352,21 @@ QVariant fromRuby(VALUE x, int type)
     }
     auto &hash = detail::converterHash->fromRubyHash;
     if (!hash.contains(type)) {
-        qWarning() << __PRETTY_FUNCTION__ << ": unsupported Ruby type" << type;
+        auto metaobj = QMetaType::metaObjectForType(type);
+        if (metaobj) {
+            auto qobj = hash[QMetaType::QObjectStar](x).value<QObject *>();
+            if (qobj->inherits(metaobj->className())) {
+                return QVariant::fromValue(qobj);
+            }
+            fail("QML::ConversionError",
+                 QString("failed to convert QObject value (%1 to %2)")
+                 .arg(qobj->metaObject()->className())
+                 .arg(metaobj->className()));
+        }
+        fail("QML::ConversionError",
+             QString("failed to convert Ruby value (%1 to %2)")
+             .arg(rb_obj_classname(x))
+             .arg(QMetaType::typeName(type)));
         return QVariant();
     }
     return hash[type](x);

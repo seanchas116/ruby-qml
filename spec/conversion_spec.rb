@@ -34,14 +34,8 @@ describe 'Conversion between C++ and Ruby' do
   it 'can convert Time' do
     time = Time.now
     result = convert(time)
-
-    expect(result.year).to eq(time.year)
-    expect(result.month).to eq(time.month)
-    expect(result.day).to eq(time.day)
-    expect(result.hour).to eq(time.hour)
-    expect(result.min).to eq(time.min)
-    expect(result.sec).to eq(time.sec)
-    expect(result.nsec / 1_000_000).to eq(time.nsec / 1_000_000)
+    # QDateTime has msec precision
+    expect((result.to_r * 1000).to_i).to eq (time.to_r * 1000).to_i
     expect(result.gmt_offset).to eq(result.gmt_offset)
   end
 

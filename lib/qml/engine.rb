@@ -1,5 +1,6 @@
 require 'qml/plugins'
 require 'qml/wrapper'
+require 'qml/context'
 
 module QML
   class Engine
@@ -11,6 +12,10 @@ module QML
 
     def qt_engine
       wrapper.engine
+    end
+
+    def context
+      Context.new(nil, qt_context: wrapper.rootContext)
     end
   end
 end

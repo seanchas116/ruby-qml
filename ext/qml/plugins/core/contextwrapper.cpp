@@ -25,5 +25,15 @@ QVariant ContextWrapper::evaluate(QObject *obj, const QString &str)
     return result;
 }
 
+void ContextWrapper::setContextProperty(const QString &key, const QVariant &value)
+{
+    mContext->setContextProperty(key, value);
+}
+
+QVariant ContextWrapper::contextProperty(const QString &key)
+{
+    return mContext->contextProperty(key);
+}
+
 
 } // namespace RubyQml

@@ -18,6 +18,15 @@ module QML
       wrapper.evaluate(obj, str)
     end
 
+    def []=(key, value)
+      wrapper.setContextProperty(key, value)
+      value
+    end
+
+    def [](key)
+      wrapper.contextProperty(key)
+    end
+
     def self.for_object(obj)
       qt_context = Plugins.core.contextForObject(obj)
       qt_context && new(nil, qt_context: qt_context)

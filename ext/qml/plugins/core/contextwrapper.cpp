@@ -20,7 +20,7 @@ QVariant ContextWrapper::evaluate(QObject *obj, const QString &str)
     QQmlExpression expression(mContext, obj, str);
     auto result = expression.evaluate();
     if (expression.hasError()) {
-        throw QmlException(expression.error());
+        throw QmlException(expression.error().toString());
     }
     return result;
 }

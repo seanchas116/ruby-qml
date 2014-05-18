@@ -1,4 +1,5 @@
 #include "componentwrapper.h"
+#include "qmlexception.h"
 #include <QQmlComponent>
 #include <QDebug>
 
@@ -31,7 +32,7 @@ QObject *ComponentWrapper::create()
 void ComponentWrapper::throwIfError()
 {
     if (mComponent->status() == QQmlComponent::Error) {
-        throw std::runtime_error(mComponent->errorString().toStdString());
+        throw QmlException(mComponent->errorString());
     }
 }
 

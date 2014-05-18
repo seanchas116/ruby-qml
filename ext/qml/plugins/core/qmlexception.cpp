@@ -1,10 +1,10 @@
 #include "qmlexception.h"
-#include <QQmlError>
+#include <QString>
 
 namespace RubyQml {
 
-QmlException::QmlException(const QQmlError &error) :
-    std::runtime_error(error.toString().toStdString())
+QmlException::QmlException(const QString &error) :
+    std::runtime_error(error.toStdString())
 {
 }
 

@@ -1,14 +1,15 @@
 #ifndef RUBYQML_QMLERROR_H
 #define RUBYQML_QMLERROR_H
+
 #include <stdexcept>
-class QQmlError;
+class QString;
 
 namespace RubyQml {
 
 class QmlException : public std::runtime_error
 {
 public:
-    QmlException(const QQmlError &error);
+    QmlException(const QString &error);
 };
 
 } // namespace RubyQml

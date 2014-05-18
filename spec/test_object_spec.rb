@@ -62,7 +62,7 @@ describe "test object" do
 
   describe '#throwingMethod' do
     it 'raises a QML::CxxError' do
-      expect { obj.throwingMethod }.to raise_error(QML::CxxError, "<std::runtime_error> test error")
+      expect { obj.throwingMethod }.to raise_error(QML::CppError, "<std::runtime_error> test error")
     end
   end
 

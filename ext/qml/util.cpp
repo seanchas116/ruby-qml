@@ -25,8 +25,9 @@ void protect(const std::function<void ()> &callback)
 void unprotect(const std::function<void ()> &callback) noexcept
 {
     int state = 0;
-    bool cxxCaught = false;
-    VALUE cxxMsg = Qnil;
+    bool cppErrorOccured= false;
+    VALUE cppErrorClassName = Qnil;
+    VALUE cppErrorMessage = Qnil;
     try {
         callback();
     }
@@ -34,17 +35,19 @@ void unprotect(const std::function<void ()> &callback) noexcept
         state = ex.state();
     }
     catch (const std::exception &ex) {
-        cxxCaught = true;
+        cppErrorOccured = true;
         int status;
         auto classname = abi::__cxa_demangle(typeid(ex).name(), nullptr, nullptr, &status);
-        cxxMsg = rb_sprintf("<%s> %s", classname, ex.what());
+        cppErrorClassName = rb_str_new_cstr(classname);
         free(classname);
+        cppErrorMessage = rb_str_new_cstr(ex.what());
     }
     if (state) {
         rb_jump_tag(state);
     }
-    if (cxxCaught) {
-        rb_exc_raise(rb_exc_new_str(rb_path2class("QML::CxxError"), cxxMsg));
+    if (cppErrorOccured) {
+        auto exc = rb_funcall(rb_path2class("QML::CppError"), rb_intern("new"), 2, cppErrorClassName, cppErrorMessage);
+        rb_exc_raise(exc);
     }
 }
 

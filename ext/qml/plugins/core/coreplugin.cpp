@@ -2,10 +2,11 @@
 #include "applicationwrapper.h"
 #include "enginewrapper.h"
 #include "componentwrapper.h"
+#include "contextwrapper.h"
 #include <QGuiApplication>
 #include <QQmlEngine>
 #include <QQmlComponent>
-
+#include <QQmlContext>
 
 namespace RubyQml {
 
@@ -15,10 +16,12 @@ CorePlugin::CorePlugin(QObject *parent) :
     qRegisterMetaType<ApplicationWrapper *>();
     qRegisterMetaType<EngineWrapper *>();
     qRegisterMetaType<ComponentWrapper *>();
+    qRegisterMetaType<ContextWrapper *>();
     qRegisterMetaType<QGuiApplication *>();
     qRegisterMetaType<QCoreApplication *>();
     qRegisterMetaType<QQmlEngine *>();
     qRegisterMetaType<QQmlComponent *>();
+    qRegisterMetaType<QQmlContext *>();
 }
 
 QGuiApplication *CorePlugin::createGuiApplication(const QVariantList &args)
@@ -56,6 +59,11 @@ QQmlComponent *CorePlugin::createComponent(QQmlEngine *e)
     return new QQmlComponent(e);
 }
 
+QQmlContext *CorePlugin::createContext(QQmlEngine *engine)
+{
+    return new QQmlContext(engine);
+}
+
 ApplicationWrapper *CorePlugin::createApplicationWrapper(QGuiApplication *app)
 {
     return new ApplicationWrapper(app);
@@ -69,6 +77,16 @@ EngineWrapper *CorePlugin::createEngineWrapper(QQmlEngine *engine)
 ComponentWrapper *CorePlugin::createComponentWrapper(QQmlComponent *component)
 {
     return new ComponentWrapper(component);
+}
+
+ContextWrapper *CorePlugin::createContextWrapper(QQmlContext *context)
+{
+    return new ContextWrapper(context);
+}
+
+QQmlContext *CorePlugin::contextForObject(QObject *object)
+{
+    return QQmlEngine::contextForObject(object);
 }
 
 } // namespace RubyQml

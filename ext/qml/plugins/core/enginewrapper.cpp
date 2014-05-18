@@ -8,4 +8,9 @@ EngineWrapper::EngineWrapper(QQmlEngine *engine) :
 {
 }
 
+QQmlContext *EngineWrapper::rootContext()
+{
+    return mEngine->rootContext();
+}
+
 } // namespace RubyQml

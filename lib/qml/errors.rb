@@ -7,5 +7,6 @@ module QML
   class NullObjectError < StandardError; end
   class CxxError < StandardError; end
   class ConversionError < StandardError; end
+  class QMLError < StandardError; end
 
 end

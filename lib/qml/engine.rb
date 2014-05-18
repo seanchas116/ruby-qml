@@ -1,13 +1,16 @@
 require 'qml/plugins'
+require 'qml/wrapper'
 
 module QML
   class Engine
+    include Wrapper
 
-    attr_reader :wrapper
+    def initialize(qt_engine: nil)
+      wrapper_init(qt_engine || Plugins.core.createEngine, Plugins.core.method(:createEngineWrapper))
+    end
 
-    def initialize
-      engine = Plugins.core.createEngine
-      @wrapper = Plugins.core.createEngineWrapper(engine)
+    def qt_engine
+      wrapper.engine
     end
   end
 end

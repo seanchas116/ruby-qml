@@ -2,9 +2,9 @@
 #define RUBYQML_ENGINEWRAPPER_H
 
 #include <QObject>
-#include <QQmlEngine>
 
 class QQmlEngine;
+class QQmlContext;
 
 namespace RubyQml {
 
@@ -16,6 +16,7 @@ public:
 
 public slots:
     QQmlEngine *engine() { return mEngine; }
+    QQmlContext *rootContext();
 
 private:
     QQmlEngine *mEngine;

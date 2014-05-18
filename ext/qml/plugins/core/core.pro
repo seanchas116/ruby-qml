@@ -13,9 +13,11 @@ CONFIG += plugin c++11
 SOURCES += coreplugin.cpp \
     applicationwrapper.cpp \
     enginewrapper.cpp \
-    componentwrapper.cpp
+    componentwrapper.cpp \
+    contextwrapper.cpp
 
 HEADERS += coreplugin.h \
     applicationwrapper.h \
     enginewrapper.h \
-    componentwrapper.h
+    componentwrapper.h \
+    contextwrapper.h

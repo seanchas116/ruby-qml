@@ -3,26 +3,28 @@ require 'qml/engine'
 
 module QML
   class Component
-
-    attr_reader :wrapper
+    include Wrapper
 
     def initialize(engine)
-      component = Plugins.core.createComponent(engine.wrapper.engine)
-      @wrapper = Plugins.core.createComponentWrapper(component)
+      wrapper_init Plugins.core.createComponent(engine.qt_engine), Plugins.core.method(:createComponentWrapper)
     end
 
     def load_str(str, filepath = '')
-      @wrapper.loadString(str, filepath.to_s)
+      wrapper.loadString(str, filepath.to_s)
       self
     end
 
     def load_file(filepath)
-      @wrapper.loadFile(filepath.to_s)
+      wrapper.loadFile(filepath.to_s)
       self
     end
 
     def create
-      @wrapper.create
+      wrapper.create
+    end
+
+    def qt_component
+      wrapper.component
     end
   end
 end

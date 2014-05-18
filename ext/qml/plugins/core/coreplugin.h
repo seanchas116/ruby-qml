@@ -26,9 +26,12 @@ public slots:
     QGuiApplication *createGuiApplication(const QVariantList &args);
     QQmlEngine *createEngine();
     QQmlComponent *createComponent(QQmlEngine *engine);
+    QQmlContext *createContext(QQmlEngine *engine);
     RubyQml::ApplicationWrapper *createApplicationWrapper(QGuiApplication *app);
     RubyQml::EngineWrapper *createEngineWrapper(QQmlEngine *engine);
     RubyQml::ComponentWrapper *createComponentWrapper(QQmlComponent *component);
+    RubyQml::ContextWrapper *createContextWrapper(QQmlContext *context);
+    QQmlContext *contextForObject(QObject *object);
 };
 
 

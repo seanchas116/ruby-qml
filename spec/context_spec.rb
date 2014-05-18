@@ -4,8 +4,7 @@ describe QML::Context do
 
   let(:engine) { QML::Engine.new }
   let(:component) do
-    c = QML::Component.new(engine)
-    c.load_str <<-EOS
+    QML::Component.new engine, data: <<-EOS
       import QtQuick 2.0
       QtObject {
       }

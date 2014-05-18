@@ -5,18 +5,16 @@ module QML
   class Component
     include Wrapper
 
-    def initialize(engine)
+    def initialize(engine, data: nil, path: nil)
       wrapper_init Plugins.core.createComponent(engine.qt_engine), Plugins.core.method(:createComponentWrapper)
-    end
 
-    def load_str(str, filepath = '')
-      wrapper.loadString(str, filepath.to_s)
-      self
-    end
-
-    def load_file(filepath)
-      wrapper.loadFile(filepath.to_s)
-      self
+      if data
+        wrapper.loadString(data, (path && path.to_s) || '')
+      elsif path
+        wrapper.loadFile(path.to_s)
+      else
+        fail QMLError, 'neither data nor path specified'
+      end
     end
 
     def create

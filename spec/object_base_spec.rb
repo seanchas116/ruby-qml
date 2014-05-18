@@ -16,10 +16,25 @@ describe QML::ObjectBase do
       EOS
     end
     let(:object) { component.create }
+    let(:expression) { 'foo + bar' }
+    let(:result) { object.qml_eval(expression) }
 
     it 'evaluates a JS expression in its QML scope' do
-      result = object.qml_eval('foo + bar')
       expect(result).to eq 'foobar'
+    end
+
+    context 'when expression is wrong' do
+      let(:expression) { 'hoge + piyo' }
+      it 'raises QML::QMLError' do
+        expect { result }.to raise_error(QML::QMLError)
+      end
+    end
+
+    context 'when object does not belong to context' do
+      let(:object) { QML::Plugins.testobject.createTestObject }
+      it 'raises QML::QMLError' do
+        expect { result }.to raise_error(QML::QMLError)
+      end
     end
   end
 end

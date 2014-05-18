@@ -12,6 +12,10 @@ module QML
         @core ||= load('core')
       end
 
+      def testobject
+        @testobject ||= load('testobject')
+      end
+
       private
 
       def load(name)

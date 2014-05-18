@@ -1,4 +1,5 @@
 #include "contextwrapper.h"
+#include "qmlexception.h"
 #include <QQmlContext>
 #include <QQmlExpression>
 
@@ -19,7 +20,7 @@ QVariant ContextWrapper::evaluate(QObject *obj, const QString &str)
     QQmlExpression expression(mContext, obj, str);
     auto result = expression.evaluate();
     if (expression.hasError()) {
-        throw std::runtime_error(expression.error().toString().toStdString());
+        throw QmlException(expression.error());
     }
     return result;
 }

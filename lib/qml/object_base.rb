@@ -23,10 +23,13 @@ module QML
 
     def qml_eval(str)
       context = Context.for_object(self)
-      unless context
-        fail QMLError, 'belongs to no context'
+      fail QMLError, 'belongs to no context' unless context
+      begin
+        context.eval(self, str)
+      rescue CppError => error
+        raise QMLError, error.raw_message if error.class_name == 'RubyQml::QmlException'
+        raise
       end
-      context.eval(self, str)
     end
   end
 end

@@ -14,10 +14,12 @@ SOURCES += coreplugin.cpp \
     applicationwrapper.cpp \
     enginewrapper.cpp \
     componentwrapper.cpp \
-    contextwrapper.cpp
+    contextwrapper.cpp \
+    qmlexception.cpp
 
 HEADERS += coreplugin.h \
     applicationwrapper.h \
     enginewrapper.h \
     componentwrapper.h \
-    contextwrapper.h
+    contextwrapper.h \
+    qmlexception.h

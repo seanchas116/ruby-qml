@@ -191,6 +191,10 @@ QObject *Conversion<QObject *>::from(VALUE x)
 
 VALUE Conversion<QObject *>::to(QObject *obj)
 {
+    if (!obj) {
+        return Qnil;
+    }
+
     auto data = ObjectData::get(obj);
     if (data) {
         return data->rubyObject();
@@ -213,6 +217,9 @@ const QMetaObject *Conversion<const QMetaObject *>::from(VALUE x)
 
 VALUE Conversion<const QMetaObject *>::to(const QMetaObject *metaobj)
 {
+    if (!metaobj) {
+        return Qnil;
+    }
     return MetaObject::fromMetaObject(metaobj);
 }
 

@@ -4,6 +4,7 @@ require 'qml/meta_object'
 require 'qml/component'
 require 'qml/engine'
 require 'qml/gui_application'
+require 'qml/access'
 require 'qml/root_path'
 require 'pathname'
 

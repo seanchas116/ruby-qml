@@ -15,7 +15,12 @@ module QML
     end
 
     def eval(obj, str)
-      wrapper.evaluate(obj, str)
+      begin
+        wrapper.evaluate(obj, str)
+      rescue CppError => error
+        fail QMLError, error.raw_message if error.class_name == 'RubyQml::QmlException'
+        raise
+      end
     end
 
     def []=(key, value)

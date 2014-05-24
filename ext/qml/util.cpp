@@ -58,7 +58,9 @@ void unprotect(const std::function<void ()> &callback) noexcept
     }
 }
 
-void withoutGvl(const std::function<void ()> &callback)
+namespace {
+
+void withOrWithoutGvl(const std::function<void ()> &callback, bool with)
 {
     auto callbackp = const_cast<void *>(static_cast<const void *>(&callback));
     auto f = [](void *data) -> void * {
@@ -70,30 +72,28 @@ void withoutGvl(const std::function<void ()> &callback)
         }
         return nullptr;
     };
-    auto result = rb_thread_call_without_gvl(f, callbackp, RUBY_UBF_IO, nullptr);
+    void *result;
+    if (with) {
+        result = rb_thread_call_with_gvl(f, callbackp);
+    } else {
+        result = rb_thread_call_without_gvl(f, callbackp, RUBY_UBF_IO, nullptr);
+    }
     std::unique_ptr<std::exception_ptr> exc(static_cast<std::exception_ptr *>(result));
     if (exc && *exc) {
         std::rethrow_exception(*exc);
     }
 }
 
+}
+
+void withoutGvl(const std::function<void ()> &callback)
+{
+    withOrWithoutGvl(callback, false);
+}
+
 void withGvl(const std::function<void ()> &callback)
 {
-    auto callbackp = const_cast<void *>(static_cast<const void *>(&callback));
-    auto f = [](void *data) -> void * {
-        auto &callback = *static_cast<const std::function<void ()> *>(data);
-        try {
-            callback();
-        } catch (...) {
-            return new std::exception_ptr(std::current_exception());
-        }
-        return nullptr;
-    };
-    auto result = rb_thread_call_with_gvl(f, callbackp);
-    std::unique_ptr<std::exception_ptr> exc(static_cast<std::exception_ptr *>(result));
-    if (exc && *exc) {
-        std::rethrow_exception(*exc);
-    }
+    withOrWithoutGvl(callback, true);
 }
 
 void fail(const char *errorClassName, const QString &message)

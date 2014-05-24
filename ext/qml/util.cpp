@@ -46,7 +46,14 @@ void unprotect(const std::function<void ()> &callback) noexcept
         rb_jump_tag(state);
     }
     if (cppErrorOccured) {
-        auto exc = rb_funcall(rb_path2class("QML::CppError"), rb_intern("new"), 2, cppErrorClassName, cppErrorMessage);
+        auto patterns = rb_funcall(rb_path2class("QML::ErrorConverter"), rb_intern("patterns"), 0);
+        auto rubyClass = rb_hash_aref(patterns, cppErrorClassName);
+        VALUE exc;
+        if (RTEST(rubyClass)) {
+            exc = rb_funcall(rubyClass, rb_intern("new"), 1, cppErrorMessage);
+        } else {
+            exc = rb_funcall(rb_path2class("QML::CppError"), rb_intern("new"), 2, cppErrorClassName, cppErrorMessage);
+        }
         rb_exc_raise(exc);
     }
 }

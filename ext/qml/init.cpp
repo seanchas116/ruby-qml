@@ -14,6 +14,7 @@ void defineTestUtil()
     rb_define_module_under(rb_path2class("QML"), "TestUtil");
 
     auto echo_conversion = [](VALUE klass, VALUE value) {
+        Q_UNUSED(klass);
         VALUE ret;
         unprotect([&] {
             ret = echoConversion(value);
@@ -71,6 +72,7 @@ void Init_qml()
     defineMetaTypes();
 
     rb_require("qml/errors");
+    rb_require("qml/error_converter");
 
     defineTestUtil();
     defineClasses();

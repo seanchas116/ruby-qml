@@ -14,7 +14,7 @@ module QML
     def initialize(classname, message)
       super("<#{classname}> #{message}")
       @class_name = classname
-      @message = message
+      @raw_message = message
     end
   end
 end

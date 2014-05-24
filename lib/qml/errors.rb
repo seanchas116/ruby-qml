@@ -7,6 +7,7 @@ module QML
   class NullObjectError < StandardError; end
   class ConversionError < StandardError; end
   class QMLError < StandardError; end
+  class AccessError < StandardError; end
 
   class CppError < StandardError
     attr_reader :class_name, :raw_message

@@ -5,7 +5,10 @@ module QML
   class Context
     include Wrapper
 
+    attr_reader :engine
+
     def initialize(engine, qt_context: nil)
+      @engine = engine
       wrapper_init(qt_context || Plugins.core.createContext(engine.qt_engine),
                    Plugins.core.method(:createContextWrapper))
     end

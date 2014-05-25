@@ -5,7 +5,12 @@ module QML
   class Component
     include Wrapper
 
+    attr_reader :engine, :data, :path
+
     def initialize(engine, data: nil, path: nil)
+      @engine = engine
+      @data = data
+      @path = path
       wrapper_init Plugins.core.createComponent(engine.qt_engine), Plugins.core.method(:createComponentWrapper)
 
       if data

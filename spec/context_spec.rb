@@ -13,6 +13,12 @@ describe QML::Context do
   let(:object) { component.create }
   let(:context) { engine.context }
 
+  describe '#engine' do
+    it 'returns its engine' do
+      expect(context.engine).to eq engine
+    end
+  end
+
   describe '#[]=' do
     it 'makes a value available to QML context' do
       context[:foo] = 'foo'

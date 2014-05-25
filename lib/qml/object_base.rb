@@ -26,5 +26,12 @@ module QML
       fail QMLError, 'belongs to no context' unless context
       context.eval(self, str)
     end
+
+    def inspect
+      property_inspect = properties.map { |name| "#{name}=#{property(name).value.inspect}" }.join(' ')
+      "#<QML::ObjectBase[#{self.class.meta_object.name}]:#{object_id} #{property_inspect}>"
+    end
+
+    alias_method :to_s, :inspect
   end
 end

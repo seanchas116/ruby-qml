@@ -6,6 +6,13 @@ require 'qml/null_logger'
 
 module QML
 
+  class UnsupportedTypeValue
+    def inspect
+      "<unsupported type>"
+    end
+    alias_method :to_s, :inspect
+  end
+
   class QtProperty < Ropework::Property
     def initialize(objptr, metaobj, name)
       super()
@@ -43,10 +50,16 @@ module QML
 
     def lazy_initialize
       return if @initialized
-      signal = @metaobj.notify_signal(@name)
-      @metaobj.connect_signal(@objptr, signal, method(:set_value_orig)) if signal
-      set_value_orig(read_value)
-      @initialized = true
+
+      begin
+        set_value_orig(read_value)
+        signal = @metaobj.notify_signal(@name)
+        @metaobj.connect_signal(@objptr, signal, method(:set_value_orig)) if signal
+        @initialized = true
+      rescue ConversionError
+        @initialized = true
+        set_value_orig(UnsupportedTypeValue.new)
+      end
     end
   end
 

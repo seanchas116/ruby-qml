@@ -1,35 +1,35 @@
-#include "componentwrapper.h"
+#include "componentextension.h"
 #include "qmlexception.h"
 #include <QQmlComponent>
 #include <QDebug>
 
 namespace RubyQml {
 
-ComponentWrapper::ComponentWrapper(QQmlComponent *component) :
+ComponentExtension::ComponentExtension(QQmlComponent *component) :
     mComponent(component)
 {
 }
 
-void ComponentWrapper::loadString(const QString &data, const QString &path)
+void ComponentExtension::loadString(const QString &data, const QString &path)
 {
     mComponent->setData(data.toUtf8(), QUrl::fromLocalFile(path));
     throwIfError();
 }
 
-void ComponentWrapper::loadFile(const QString &filePath)
+void ComponentExtension::loadFile(const QString &filePath)
 {
     mComponent->loadUrl(QUrl::fromLocalFile(filePath));
     throwIfError();
 }
 
-QObject *ComponentWrapper::create()
+QObject *ComponentExtension::create()
 {
     auto created = mComponent->create();
     throwIfError();
     return created;
 }
 
-void ComponentWrapper::throwIfError()
+void ComponentExtension::throwIfError()
 {
     if (mComponent->status() == QQmlComponent::Error) {
         throw QmlException(mComponent->errorString());

@@ -11,15 +11,15 @@ TEMPLATE = lib
 CONFIG += plugin c++11
 
 SOURCES += coreplugin.cpp \
-    applicationwrapper.cpp \
-    enginewrapper.cpp \
-    componentwrapper.cpp \
-    contextwrapper.cpp \
-    qmlexception.cpp
+    qmlexception.cpp \
+    applicationextension.cpp \
+    componentextension.cpp \
+    contextextension.cpp \
+    engineextension.cpp
 
 HEADERS += coreplugin.h \
-    applicationwrapper.h \
-    enginewrapper.h \
-    componentwrapper.h \
-    contextwrapper.h \
-    qmlexception.h
+    qmlexception.h \
+    applicationextension.h \
+    componentextension.h \
+    contextextension.h \
+    engineextension.h

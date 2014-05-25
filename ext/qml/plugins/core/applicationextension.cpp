@@ -1,10 +1,10 @@
-#include "applicationwrapper.h"
+#include "applicationextension.h"
 #include <QGuiApplication>
 #include <QTimer>
 
 namespace RubyQml {
 
-ApplicationWrapper::ApplicationWrapper(QGuiApplication *app) :
+ApplicationExtension::ApplicationExtension(QGuiApplication *app) :
     mApp(app)
 {
     auto timer = new QTimer();

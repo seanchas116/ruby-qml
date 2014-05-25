@@ -1,5 +1,4 @@
-#ifndef RUBYQML_APPLICATIONWRAPPER_H
-#define RUBYQML_APPLICATIONWRAPPER_H
+#pragma once
 
 #include <QObject>
 #include <QGuiApplication>
@@ -8,11 +7,11 @@ class QGuiApplication;
 
 namespace RubyQml {
 
-class ApplicationWrapper : public QObject
+class ApplicationExtension : public QObject
 {
     Q_OBJECT
 public:
-    explicit ApplicationWrapper(QGuiApplication *app);
+    explicit ApplicationExtension(QGuiApplication *app);
 
 signals:
     void eventLoopProcessed();
@@ -25,5 +24,3 @@ private:
 };
 
 } // namespace RubyQml
-
-#endif // RUBYQML_APPLICATIONWRAPPER_H

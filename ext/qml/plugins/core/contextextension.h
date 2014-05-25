@@ -1,5 +1,4 @@
-#ifndef RUBYQML_CONTEXTWRAPPER_H
-#define RUBYQML_CONTEXTWRAPPER_H
+#pragma once
 
 #include <QObject>
 #include <QVariant>
@@ -9,11 +8,11 @@ class QQmlEngine;
 
 namespace RubyQml {
 
-class ContextWrapper : public QObject
+class ContextExtension : public QObject
 {
     Q_OBJECT
 public:
-    explicit ContextWrapper(QQmlContext *context);
+    explicit ContextExtension(QQmlContext *context);
 
 public slots:
 
@@ -28,5 +27,3 @@ private:
 };
 
 } // namespace RubyQml
-
-#endif // RUBYQML_CONTEXTWRAPPER_H

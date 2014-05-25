@@ -1,5 +1,4 @@
-#ifndef RUBYQML_ENGINEWRAPPER_H
-#define RUBYQML_ENGINEWRAPPER_H
+#pragma once
 
 #include <QObject>
 
@@ -8,11 +7,11 @@ class QQmlContext;
 
 namespace RubyQml {
 
-class EngineWrapper : public QObject
+class EngineExtension : public QObject
 {
     Q_OBJECT
 public:
-    explicit EngineWrapper(QQmlEngine *engine);
+    explicit EngineExtension(QQmlEngine *engine);
 
 public slots:
     QQmlEngine *engine() { return mEngine; }
@@ -23,5 +22,3 @@ private:
 };
 
 } // namespace RubyQml
-
-#endif // RUBYQML_ENGINEWRAPPER_H

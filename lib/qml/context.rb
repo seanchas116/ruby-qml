@@ -1,38 +1,43 @@
 require 'qml/plugins'
-require 'qml/wrapper'
+require 'qml/unique_wrapper'
 
 module QML
-  class Context
-    include Wrapper
+  class Context < UniqueWrapper
 
-    attr_reader :engine
+    def self.wrap(qt_context)
+      new(nil, qt_context: qt_context)
+    end
 
     def initialize(engine, qt_context: nil)
-      @engine = engine
-      wrapper_init(qt_context || Plugins.core.createContext(engine.qt_engine),
-                   Plugins.core.method(:createContextWrapper))
+      qt_context ||= Plugins.core.createContext(engine.qt_engine)
+      super(qt_context)
+      @extension = Plugins.core.createContextExtension(qt_context)
+    end
+
+    def engine
+      Engine.from_qt(@extension.engine)
     end
 
     def qt_context
-      wrapper.context
+      @extension.context
     end
 
     def eval(obj, str)
-      wrapper.evaluate(obj, str)
+      @extension.evaluate(obj, str)
     end
 
     def []=(key, value)
-      wrapper.setContextProperty(key, value)
+      @extension.setContextProperty(key, value)
       value
     end
 
     def [](key)
-      wrapper.contextProperty(key)
+      @extension.contextProperty(key)
     end
 
     def self.for_object(obj)
       qt_context = Plugins.core.contextForObject(obj)
-      qt_context && new(nil, qt_context: qt_context)
+      qt_context && from_qt(qt_context)
     end
   end
 end

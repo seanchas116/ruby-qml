@@ -3,31 +3,29 @@ require 'qml/engine'
 
 module QML
   class Component
-    include Wrapper
-
     attr_reader :engine, :data, :path
 
     def initialize(engine, data: nil, path: nil)
       @engine = engine
       @data = data
       @path = path
-      wrapper_init Plugins.core.createComponent(engine.qt_engine), Plugins.core.method(:createComponentWrapper)
+      @extension = Plugins.core.createComponentExtension(Plugins.core.createComponent(engine.qt_engine))
 
       if data
-        wrapper.loadString(data, (path && path.to_s) || '')
+        @extension.loadString(data, (path && path.to_s) || '')
       elsif path
-        wrapper.loadFile(path.to_s)
+        @extension.loadFile(path.to_s)
       else
         fail QMLError, 'neither data nor path specified'
       end
     end
 
     def create
-      wrapper.create
+      @extension.create
     end
 
     def qt_component
-      wrapper.component
+      @extension.component
     end
   end
 end

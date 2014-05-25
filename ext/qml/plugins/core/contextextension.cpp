@@ -1,21 +1,21 @@
-#include "contextwrapper.h"
+#include "contextextension.h"
 #include "qmlexception.h"
 #include <QQmlContext>
 #include <QQmlExpression>
 
 namespace RubyQml {
 
-ContextWrapper::ContextWrapper(QQmlContext *context) :
+ContextExtension::ContextExtension(QQmlContext *context) :
     mContext(context)
 {
 }
 
-QQmlEngine *ContextWrapper::engine()
+QQmlEngine *ContextExtension::engine()
 {
     return mContext->engine();
 }
 
-QVariant ContextWrapper::evaluate(QObject *obj, const QString &str)
+QVariant ContextExtension::evaluate(QObject *obj, const QString &str)
 {
     QQmlExpression expression(mContext, obj, str);
     auto result = expression.evaluate();
@@ -25,12 +25,12 @@ QVariant ContextWrapper::evaluate(QObject *obj, const QString &str)
     return result;
 }
 
-void ContextWrapper::setContextProperty(const QString &key, const QVariant &value)
+void ContextExtension::setContextProperty(const QString &key, const QVariant &value)
 {
     mContext->setContextProperty(key, value);
 }
 
-QVariant ContextWrapper::contextProperty(const QString &key)
+QVariant ContextExtension::contextProperty(const QString &key)
 {
     return mContext->contextProperty(key);
 }

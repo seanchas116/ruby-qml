@@ -1,5 +1,4 @@
-#ifndef RUBYQML_COMPONENTWRAPPER_H
-#define RUBYQML_COMPONENTWRAPPER_H
+#pragma once
 
 #include <QObject>
 #include <QQmlComponent>
@@ -8,11 +7,11 @@ class QQmlComponent;
 
 namespace RubyQml {
 
-class ComponentWrapper : public QObject
+class ComponentExtension : public QObject
 {
     Q_OBJECT
 public:
-    explicit ComponentWrapper(QQmlComponent *component);
+    explicit ComponentExtension(QQmlComponent *component);
 
 public slots:
 
@@ -28,5 +27,3 @@ private:
 };
 
 } // namespace RubyQml
-
-#endif // RUBYQML_COMPONENTWRAPPER_H

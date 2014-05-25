@@ -1,8 +1,8 @@
 #include "coreplugin.h"
-#include "applicationwrapper.h"
-#include "enginewrapper.h"
-#include "componentwrapper.h"
-#include "contextwrapper.h"
+#include "applicationextension.h"
+#include "engineextension.h"
+#include "componentextension.h"
+#include "contextextension.h"
 #include <QGuiApplication>
 #include <QQmlEngine>
 #include <QQmlComponent>
@@ -13,10 +13,10 @@ namespace RubyQml {
 CorePlugin::CorePlugin(QObject *parent) :
     QObject(parent)
 {
-    qRegisterMetaType<ApplicationWrapper *>();
-    qRegisterMetaType<EngineWrapper *>();
-    qRegisterMetaType<ComponentWrapper *>();
-    qRegisterMetaType<ContextWrapper *>();
+    qRegisterMetaType<ApplicationExtension *>();
+    qRegisterMetaType<EngineExtension *>();
+    qRegisterMetaType<ComponentExtension *>();
+    qRegisterMetaType<ContextExtension *>();
     qRegisterMetaType<QGuiApplication *>();
     qRegisterMetaType<QCoreApplication *>();
     qRegisterMetaType<QQmlEngine *>();
@@ -64,24 +64,24 @@ QQmlContext *CorePlugin::createContext(QQmlEngine *engine)
     return new QQmlContext(engine);
 }
 
-ApplicationWrapper *CorePlugin::createApplicationWrapper(QGuiApplication *app)
+ApplicationExtension *CorePlugin::createApplicationExtension(QGuiApplication *app)
 {
-    return new ApplicationWrapper(app);
+    return new ApplicationExtension(app);
 }
 
-EngineWrapper *CorePlugin::createEngineWrapper(QQmlEngine *engine)
+EngineExtension *CorePlugin::createEngineExtension(QQmlEngine *engine)
 {
-    return new EngineWrapper(engine);
+    return new EngineExtension(engine);
 }
 
-ComponentWrapper *CorePlugin::createComponentWrapper(QQmlComponent *component)
+ComponentExtension *CorePlugin::createComponentExtension(QQmlComponent *component)
 {
-    return new ComponentWrapper(component);
+    return new ComponentExtension(component);
 }
 
-ContextWrapper *CorePlugin::createContextWrapper(QQmlContext *context)
+ContextExtension *CorePlugin::createContextExtension(QQmlContext *context)
 {
-    return new ContextWrapper(context);
+    return new ContextExtension(context);
 }
 
 QQmlContext *CorePlugin::contextForObject(QObject *object)

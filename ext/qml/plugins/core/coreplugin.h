@@ -9,10 +9,10 @@ class QQmlContext;
 
 namespace RubyQml {
 
-class ApplicationWrapper;
-class ComponentWrapper;
-class EngineWrapper;
-class ContextWrapper;
+class ApplicationExtension;
+class ComponentExtension;
+class EngineExtension;
+class ContextExtension;
 
 class CorePlugin : public QObject
 {
@@ -27,10 +27,10 @@ public slots:
     QQmlEngine *createEngine();
     QQmlComponent *createComponent(QQmlEngine *engine);
     QQmlContext *createContext(QQmlEngine *engine);
-    RubyQml::ApplicationWrapper *createApplicationWrapper(QGuiApplication *app);
-    RubyQml::EngineWrapper *createEngineWrapper(QQmlEngine *engine);
-    RubyQml::ComponentWrapper *createComponentWrapper(QQmlComponent *component);
-    RubyQml::ContextWrapper *createContextWrapper(QQmlContext *context);
+    RubyQml::ApplicationExtension *createApplicationExtension(QGuiApplication *app);
+    RubyQml::EngineExtension *createEngineExtension(QQmlEngine *engine);
+    RubyQml::ComponentExtension *createComponentExtension(QQmlComponent *component);
+    RubyQml::ContextExtension *createContextExtension(QQmlContext *context);
     QQmlContext *contextForObject(QObject *object);
 };
 

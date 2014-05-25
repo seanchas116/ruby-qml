@@ -1,14 +1,14 @@
-#include "enginewrapper.h"
+#include "engineextension.h"
 #include <QQmlEngine>
 
 namespace RubyQml {
 
-EngineWrapper::EngineWrapper(QQmlEngine *engine) :
+EngineExtension::EngineExtension(QQmlEngine *engine) :
     mEngine(engine)
 {
 }
 
-QQmlContext *EngineWrapper::rootContext()
+QQmlContext *EngineExtension::rootContext()
 {
     return mEngine->rootContext();
 }

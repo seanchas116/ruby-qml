@@ -1,19 +1,18 @@
 require 'mkmf'
 require 'pathname'
-$LOAD_PATH.unshift Pathname(__FILE__) + '../../../lib'
-require 'qml/platform'
+
+pkgconfig = with_config('pkg-config') || find_executable('pkg-config')
+abort 'pkg-config executable not found' unless pkgconfig
 
 qt_include, qt_lib = dir_config('qt')
-qt_path =
-  if qt_include
-    Pathname(qt_include).realpath.parent
-  else
-    qmake_path = `which qmake`.strip
-    fail "qmake not found" if qmake_path == ''
-    Pathname(qmake_path).parent.parent
-  end
+qt_path = qt_include && Pathname(qt_include).parent.realpath
 
-qmake = qt_path + 'bin/qmake'
+if qt_path
+  ENV['PKG_CONFIG_PATH'] = "#{ENV['PKG_CONFIG_PATH']}:#{qt_path + 'lib/pkgconfig'}"
+end
+
+qmake = qt_path ? qt_path + 'bin/qmake' : find_executable('qmake')
+abort 'qmake executable not found' unless qmake
 
 # build plugins
 
@@ -28,25 +27,17 @@ end
 
 RbConfig::CONFIG['CPP'].gsub!(RbConfig::CONFIG['CC'], RbConfig::CONFIG['CXX'])
 
-case
-when QML::Platform.mac?
-  framework_flag = " -F'#{qt_path + 'lib'}'"
-  $CPPFLAGS += framework_flag
-  $LDFLAGS += framework_flag
-else
-  $LDFLAGS += " -L'#{qt_path + 'lib'}'"
+def add_cppflags(flags)
+  $CPPFLAGS += " #{flags}"
 end
 
-modules = %w{QtCore QtGui QtQml QtQuick}
-modules.each do |mod|
-  case
-  when QML::Platform.mac?
-    $CPPFLAGS += " -I'#{qt_path + "lib/#{mod}.framework/Headers"}'"
-    $LDFLAGS += " -framework #{mod}"
-  else
-    $CPPFLAGS += " -I'#{include_path + mod}'"
-    $LDFLAGS += " -l#{mod.downcase}"
-  end
+def add_ldflags(flags)
+  $LDFLAGS += " #{flags}"
+end
+
+%w{Qt5Core Qt5Gui Qt5Qml Qt5Quick}.each do |mod|
+  add_cppflags `#{pkgconfig} --cflags #{mod}`.chomp
+  add_ldflags `#{pkgconfig} --libs #{mod}`.chomp
 end
 
 headers = %w{
@@ -58,9 +49,9 @@ headers = %w{
   QtQml/QQmlContext
 }
 headers.each do |h|
-  fail "header not found: #{h}" unless have_header(h)
+  abort "header not found: #{h}" unless have_header(h)
 end
 
-$CPPFLAGS += ' -std=c++11 -Wall -Wextra -g'
+add_cppflags '-std=c++11 -Wall -Wextra -g'
 
 create_makefile "qml/qml"

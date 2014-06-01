@@ -1,8 +1,8 @@
-#include "metaobject.h"
+#include "ext_metaobject.h"
 #include "conversion.h"
 #include "util.h"
-#include "objectpointer.h"
-#include "rubyclassbase.h"
+#include "ext_objectpointer.h"
+#include "extbase.h"
 #include "signalforwarder.h"
 #include <QtCore/QMetaObject>
 #include <QtCore/QMetaMethod>
@@ -14,6 +14,7 @@
 #include <QtQml/QQmlEngine>
 
 namespace RubyQml {
+namespace Ext {
 
 namespace {
 
@@ -400,4 +401,5 @@ MetaObject::ClassBuilder MetaObject::buildClass()
     return builder;
 }
 
+} // namespace Ext
 } // namespace RubyQml

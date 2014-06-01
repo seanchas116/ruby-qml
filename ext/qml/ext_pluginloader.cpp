@@ -1,9 +1,10 @@
-#include "pluginloader.h"
-#include "objectpointer.h"
+#include "ext_pluginloader.h"
+#include "ext_objectpointer.h"
 #include <QtCore/QPluginLoader>
 #include <QtCore/QSet>
 
 namespace RubyQml {
+namespace Ext {
 
 PluginLoader::PluginLoader() :
     mPluginLoader(new QPluginLoader())
@@ -48,4 +49,5 @@ PluginLoader::ClassBuilder PluginLoader::buildClass()
         .defineMethod<METHOD_TYPE_NAME(&PluginLoader::instance)>("instance");
 }
 
+} // namespace Ext
 } // namespace RubyQml

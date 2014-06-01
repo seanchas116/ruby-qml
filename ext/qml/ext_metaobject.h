@@ -1,16 +1,17 @@
 #pragma once
 
-#include "rubyclassbase.h"
+#include "extbase.h"
 #include <QtCore/QMetaObject>
 #include <QtCore/QVector>
 #include <QtCore/QHash>
 #include <QtCore/QObject>
 
 namespace RubyQml {
+namespace Ext {
 
-class MetaObject : public RubyClassBase<MetaObject>
+class MetaObject : public ExtBase<MetaObject>
 {
-    friend class RubyClassBase<MetaObject>;
+    friend class ExtBase<MetaObject>;
 public:
 
     MetaObject();
@@ -58,5 +59,5 @@ private:
     QHash<ID, int> mPropertyHash;
 };
 
-
-}
+} // namespace Ext
+} // namespace RubyQml

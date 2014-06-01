@@ -1,12 +1,13 @@
 #pragma once
-#include "rubyclassbase.h"
+#include "extbase.h"
 #include <QtCore/QPointer>
 
 namespace RubyQml {
+namespace Ext {
 
-class ObjectPointer : public RubyClassBase<ObjectPointer>
+class ObjectPointer : public ExtBase<ObjectPointer>
 {
-    friend class RubyClassBase<ObjectPointer>;
+    friend class ExtBase<ObjectPointer>;
 
 public:
     ObjectPointer();
@@ -34,4 +35,5 @@ private:
     static VALUE mObjectBaseClass;
 };
 
+} // namespace Ext
 } // namespace RubyQml

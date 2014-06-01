@@ -1,15 +1,16 @@
 #pragma once
 
-#include "rubyclassbase.h"
+#include "extbase.h"
 #include <memory>
 
 class QPluginLoader;
 
 namespace RubyQml {
+namespace Ext {
 
-class PluginLoader : public RubyClassBase<PluginLoader>
+class PluginLoader : public ExtBase<PluginLoader>
 {
-    friend class RubyClassBase<PluginLoader>;
+    friend class ExtBase<PluginLoader>;
 
 public:
     PluginLoader();
@@ -25,5 +26,6 @@ private:
     std::unique_ptr<QPluginLoader> mPluginLoader;
 };
 
+} // namespace Ext
 } // namespace RubyQml
 

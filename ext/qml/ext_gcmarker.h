@@ -1,12 +1,14 @@
 #pragma once
 
-#include "rubyclassbase.h"
+#include "extbase.h"
 
 namespace RubyQml {
 
-class GCMarker : public RubyClassBase<GCMarker>
+namespace Ext {
+
+class GCMarker : public ExtBase<GCMarker>
 {
-    friend class RubyClassBase<GCMarker>;
+    friend class ExtBase<GCMarker>;
 public:
     GCMarker();
 
@@ -18,5 +20,7 @@ private:
 
     std::function<void ()> mMarkFunc;
 };
+
+} // namespace Ext
 
 } // namespace RubyQml

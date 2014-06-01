@@ -14,7 +14,7 @@ enum class MethodAccess
 };
 
 template <typename TDerived>
-class RubyClassBase
+class ExtBase
 {
 public:
 
@@ -88,10 +88,10 @@ private:
 };
 
 template <typename TDerived>
-VALUE RubyClassBase<TDerived>::mKlass = Qnil;
+VALUE ExtBase<TDerived>::mKlass = Qnil;
 
 template <typename TDerived>
-class RubyClassBase<TDerived>::ClassBuilder
+class ExtBase<TDerived>::ClassBuilder
 {
 public:
 

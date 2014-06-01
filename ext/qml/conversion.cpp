@@ -1,6 +1,6 @@
 #include "conversion.h"
-#include "objectpointer.h"
-#include "metaobject.h"
+#include "ext_objectpointer.h"
+#include "ext_metaobject.h"
 #include "objectdata.h"
 #include <ruby/intern.h>
 #include <QtCore/QDebug>
@@ -179,13 +179,13 @@ QObject *Conversion<QObject *>::from(VALUE x)
 {
     VALUE objptr;
     protect([&] {
-        if (!rb_obj_is_kind_of(x, ObjectPointer::objectBaseClass())) {
+        if (!rb_obj_is_kind_of(x, Ext::ObjectPointer::objectBaseClass())) {
             rb_raise(rb_path2class("QML::ConversionError"), "expected QML::ObjectBase, got %s", rb_obj_classname(x));
         }
         objptr = rb_ivar_get(x, rb_intern("@objptr"));
     });
-    auto obj = ObjectPointer::getPointer(objptr)->qObject();
-    MetaObject::getPointer(MetaObject::fromMetaObject(obj->metaObject()))->updateClass();
+    auto obj = Ext::ObjectPointer::getPointer(objptr)->qObject();
+    Ext::MetaObject::getPointer(Ext::MetaObject::fromMetaObject(obj->metaObject()))->updateClass();
     return obj;
 }
 
@@ -200,19 +200,19 @@ VALUE Conversion<QObject *>::to(QObject *obj)
         return data->rubyObject();
     }
 
-    auto metaobj = MetaObject::fromMetaObject(obj->metaObject());
+    auto metaobj = Ext::MetaObject::fromMetaObject(obj->metaObject());
 
-    auto objptr = ObjectPointer::newAsRuby();
-    ObjectPointer::getPointer(objptr)->setQObject(obj);
+    auto objptr = Ext::ObjectPointer::newAsRuby();
+    Ext::ObjectPointer::getPointer(objptr)->setQObject(obj);
 
-    auto rubyobj = send(MetaObject::getPointer(metaobj)->updateClass(), "new", objptr);
+    auto rubyobj = send(Ext::MetaObject::getPointer(metaobj)->updateClass(), "new", objptr);
     ObjectData::set(obj, std::make_shared<ObjectData>(rubyobj));
     return rubyobj;
 }
 
 const QMetaObject *Conversion<const QMetaObject *>::from(VALUE x)
 {
-    return MetaObject::getPointer(x)->metaObject();
+    return Ext::MetaObject::getPointer(x)->metaObject();
 }
 
 VALUE Conversion<const QMetaObject *>::to(const QMetaObject *metaobj)
@@ -220,7 +220,7 @@ VALUE Conversion<const QMetaObject *>::to(const QMetaObject *metaobj)
     if (!metaobj) {
         return Qnil;
     }
-    return MetaObject::fromMetaObject(metaobj);
+    return Ext::MetaObject::fromMetaObject(metaobj);
 }
 
 } // namespace detail
@@ -306,8 +306,8 @@ int categoryToMetaType(TypeCategory category)
 
 TypeCategory rubyValueCategory(VALUE x)
 {
-    auto objectBaseClass = ObjectPointer::objectBaseClass();
-    auto metaObjectClass = MetaObject::rubyClass();
+    auto objectBaseClass = Ext::ObjectPointer::objectBaseClass();
+    auto metaObjectClass = Ext::MetaObject::rubyClass();
     TypeCategory category;
     protect([&] {
         switch (rb_type(x)) {

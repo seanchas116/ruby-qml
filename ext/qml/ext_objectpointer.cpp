@@ -1,10 +1,11 @@
-#include "objectpointer.h"
+#include "ext_objectpointer.h"
 #include <QtCore/QObject>
 #include <QtCore/QHash>
 #include <QtQml/QQmlEngine>
 #include <QtCore/QDebug>
 
 namespace RubyQml {
+namespace Ext {
 
 namespace {
 
@@ -99,4 +100,5 @@ ObjectPointer::ClassBuilder ObjectPointer::buildClass()
     return builder;
 }
 
+} // namespace Ext
 } // namespace RubyQml

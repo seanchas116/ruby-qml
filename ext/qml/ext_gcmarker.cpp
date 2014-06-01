@@ -1,7 +1,8 @@
-#include "gcmarker.h"
+#include "ext_gcmarker.h"
 #include <QtCore/QSet>
 
 namespace RubyQml {
+namespace Ext {
 
 GCMarker::GCMarker()
 {
@@ -24,4 +25,5 @@ GCMarker::ClassBuilder GCMarker::buildClass()
     return builder;
 }
 
+} // namespace Ext
 } // namespace RubyQml

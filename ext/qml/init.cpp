@@ -1,7 +1,7 @@
-#include "metaobject.h"
-#include "objectpointer.h"
-#include "pluginloader.h"
-#include "gcmarker.h"
+#include "ext_metaobject.h"
+#include "ext_objectpointer.h"
+#include "ext_pluginloader.h"
+#include "ext_gcmarker.h"
 #include "signalforwarder.h"
 #include <QtCore/QSet>
 
@@ -36,17 +36,17 @@ void defineMetaTypes()
 void defineClasses()
 {
     unprotect([&] {
-        MetaObject::defineClass();
-        ObjectPointer::defineClass();
-        PluginLoader::defineClass();
-        GCMarker::defineClass();
+        Ext::MetaObject::defineClass();
+        Ext::ObjectPointer::defineClass();
+        Ext::PluginLoader::defineClass();
+        Ext::GCMarker::defineClass();
     });
 }
 
 void setupGlobalGCMarking()
 {
-    auto marker = GCMarker::newAsRuby();
-    GCMarker::getPointer(marker)->setMarkFunction([]{
+    auto marker = Ext::GCMarker::newAsRuby();
+    Ext::GCMarker::getPointer(marker)->setMarkFunction([]{
         for (auto value : globalMarkValues()) {
             rb_gc_mark(value);
         }

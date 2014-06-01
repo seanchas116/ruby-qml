@@ -119,9 +119,11 @@ struct ConverterHash
         add<const QMetaObject *>();
 
         fromRubyHash[QMetaType::UnknownType] = [](VALUE value) {
+            Q_UNUSED(value);
             return QVariant();
         };
         toRubyHash[QMetaType::UnknownType] = [](const QVariant &variant) {
+            Q_UNUSED(variant);
             return Qnil;
         };
     }

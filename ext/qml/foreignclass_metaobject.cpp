@@ -131,7 +131,7 @@ int ForeignClass::MetaObject::dynamicMetaCall(Object *obj, QMetaObject::Call cal
 
     switch (call) {
     case QMetaObject::InvokeMetaMethod: {
-        if (index < mMethodIds.size()) {
+        if (index < mMethodCount) {
             if (index < mSignalCount) {
                 QMetaObject::activate(obj, this, index, argv);
             } else {
@@ -145,42 +145,43 @@ int ForeignClass::MetaObject::dynamicMetaCall(Object *obj, QMetaObject::Call cal
                 }
             }
         }
-        index -= mMethodIds.size();
-    } break;
-
+        index -= mMethodCount;
+        break;
+    }
     case QMetaObject::ReadProperty: {
-        if (index < mPropertyIds.size()) {
-            auto result = klass->getProperty(obj, mPropertyIds[index]);
+        if (index < mPropertyCount) {
+            auto result = klass->getProperty(obj, mPropertyGetterIds[index]);
             *static_cast<QVariant *>(argv[0]) = result;
         }
-        index -= mPropertyIds.size();
-    } break;
-
+        index -= mPropertyCount;
+        break;
+    }
     case QMetaObject::WriteProperty: {
-        if (index < mPropertyIds.size()) {
+        if (index < mPropertyCount) {
             auto variant = *static_cast<QVariant *>(argv[0]);
-            klass->setProperty(obj, mPropertyIds[index], variant);
+            klass->setProperty(obj, mPropertySetterIds[index], variant);
         }
-        index -= mPropertyIds.size();
-    } break;
-
+        index -= mPropertyCount;
+        break;
+    }
     case QMetaObject::ResetProperty:
     case QMetaObject::QueryPropertyDesignable:
     case QMetaObject::QueryPropertyScriptable:
     case QMetaObject::QueryPropertyStored:
     case QMetaObject::QueryPropertyEditable:
     case QMetaObject::QueryPropertyUser: {
-        index -= mPropertyIds.size();
-    } break;
-
+        index -= mPropertyCount;
+        break;
+    }
     case QMetaObject::RegisterPropertyMetaType: {
-        if (index < mPropertyIds.size()) {
+        if (index < mPropertyCount) {
             *static_cast<int *>(argv[0]) = -1;
         }
-        index -= mPropertyIds.size();
-    } break;
-
-    default: break;
+        index -= mPropertyCount;
+        break;
+    }
+    default:
+        break;
     }
 
     return index;
@@ -191,6 +192,7 @@ void ForeignClass::MetaObject::buildData()
     auto klass = mForeignClassWP.lock();
 
     int index = 0;
+    mMethodCount = klass->methods().size();
     for (const auto &signal : klass->signalMethods()) {
         mMethodIds << signal.id;
         mMethodArities << signal.arity;
@@ -201,8 +203,10 @@ void ForeignClass::MetaObject::buildData()
         mMethodIds << method.id;
         mMethodArities << method.arity;
     }
+    mPropertyCount = klass->properties().size();
     for (const auto &property : klass->properties()) {
-        mPropertyIds << property.id;
+        mPropertySetterIds << property.setterId;
+        mPropertyGetterIds << property.getterId;
     }
 
     StringPool stringPool;

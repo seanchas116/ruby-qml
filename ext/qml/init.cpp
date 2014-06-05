@@ -2,6 +2,7 @@
 #include "ext_objectpointer.h"
 #include "ext_pluginloader.h"
 #include "ext_gcmarker.h"
+#include "ext_accesscomposer.h"
 #include "signalforwarder.h"
 #include <QtCore/QSet>
 
@@ -40,6 +41,7 @@ void defineClasses()
         Ext::ObjectPointer::defineClass();
         Ext::PluginLoader::defineClass();
         Ext::GCMarker::defineClass();
+        Ext::AccessComposer::defineClass();
     });
 }
 

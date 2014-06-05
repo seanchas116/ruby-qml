@@ -225,7 +225,8 @@ enum class TypeCategory
     Hash,
     Time,
     QtObject,
-    QtMetaObject
+    QtMetaObject,
+    Access
 };
 
 TypeCategory metaTypeToCategory(int metaType);

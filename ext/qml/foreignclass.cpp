@@ -32,11 +32,15 @@ QList<ForeignClass::Method> ForeignClass::nonSignalMethods() const
     return sigs;
 }
 
+void ForeignClass::createMetaObject()
+{
+    mMetaObject = makeSP<MetaObject>(shared_from_this());
+}
 
 SP<ForeignClass::MetaObject> ForeignClass::metaObject()
 {
     if (!mMetaObject) {
-        mMetaObject = makeSP<MetaObject>(shared_from_this());
+        throw std::runtime_error("meta object has not been created");
     }
     return mMetaObject;
 }
@@ -103,13 +107,13 @@ void ForeignClass::addSignal(const QByteArray &name, std::size_t id, int arity)
     addMethod(name, id, arity, Method::Access::Protected, Method::Type::Signal);
 }
 
-void ForeignClass::addProperty(const QByteArray &name, std::size_t id, Property::Flags flags, bool hasNotifySignal,std::size_t notifySignalId)
+void ForeignClass::addProperty(const QByteArray &name, std::size_t getterId, std::size_t setterId, Property::Flags flags, bool hasNotifySignal,std::size_t notifySignalId)
 {
     if (mMetaObject) {
         qWarning() << "meta object alread created";
         return;
     }
-    Property property = { .name = name, .flags = flags, .id = id, .hasNotifySignal = hasNotifySignal, .notifySignalId = notifySignalId};
+    Property property = { .name = name, .flags = flags, .setterId = setterId, .getterId = getterId, .hasNotifySignal = hasNotifySignal, .notifySignalId = notifySignalId};
     mProperties << property;
 }
 

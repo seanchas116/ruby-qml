@@ -29,12 +29,12 @@ describe QML::Access do
       QtObject {
         id: root
         property string text: foo.text + foo.text
-        Connections {
+        property var connections: Connections {
           id: connections
           target: foo
           property var args
           onSome_signal: {
-            args = parameters
+            args = [arg]
           }
         }
       }
@@ -66,7 +66,10 @@ describe QML::Access do
         expect(root.qml_eval('foo.name')).to eq 'test'
       end
       it 'can be used for property binding' do
-        expect(root.qml_eval('root.text')).to eq 'texttext'
+        foo.text = 'hoge'
+        expect(root.qml_eval('root.text')).to eq 'hogehoge'
+        foo.text = 'piyo'
+        expect(root.qml_eval('root.text')).to eq 'piyopiyo'
       end
     end
     describe 'some_signal signal' do

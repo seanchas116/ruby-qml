@@ -2,6 +2,7 @@
 #include "ext_objectpointer.h"
 #include "ext_metaobject.h"
 #include "objectdata.h"
+#include "accessobject.h"
 #include <ruby/intern.h>
 #include <QtCore/QDebug>
 
@@ -179,6 +180,24 @@ VALUE Conversion<QVariant>::to(const QVariant &variant)
 
 QObject *Conversion<QObject *>::from(VALUE x)
 {
+    bool isAccess;
+    protect([&] {
+        isAccess = rb_obj_is_kind_of(x, rb_path2class("QML::Access"));
+    });
+    if (isAccess) {
+        VALUE accessptr;
+        protect([&] {
+            accessptr = rb_funcall(x, rb_intern("access_object"), 0);
+        });
+        auto obj = Ext::ObjectPointer::getPointer(accessptr)->fetchQObject();
+        auto accessObj = dynamic_cast<AccessObject *>(obj);
+        qDebug() << "access obj";
+        auto metaobj = accessObj->metaObject();
+        qDebug() << metaobj->className();
+        qDebug() << metaobj->methodCount();
+        return obj;
+    }
+
     VALUE objptr;
     protect([&] {
         if (!rb_obj_is_kind_of(x, Ext::ObjectPointer::objectBaseClass())) {
@@ -186,7 +205,7 @@ QObject *Conversion<QObject *>::from(VALUE x)
         }
         objptr = rb_ivar_get(x, rb_intern("@objptr"));
     });
-    auto obj = Ext::ObjectPointer::getPointer(objptr)->qObject();
+    auto obj = Ext::ObjectPointer::getPointer(objptr)->fetchQObject();
     Ext::MetaObject::getPointer(Ext::MetaObject::fromMetaObject(obj->metaObject()))->updateClass();
     return obj;
 }
@@ -195,6 +214,10 @@ VALUE Conversion<QObject *>::to(QObject *obj)
 {
     if (!obj) {
         return Qnil;
+    }
+    auto accessObj = dynamic_cast<AccessObject *>(obj);
+    if (accessObj) {
+        return accessObj->value();
     }
 
     auto data = ObjectData::get(obj);
@@ -347,6 +370,10 @@ TypeCategory rubyValueCategory(VALUE x)
         }
         if (rb_obj_is_kind_of(x, metaObjectClass)) {
             category = TypeCategory::QtMetaObject;
+            return;
+        }
+        if (rb_obj_is_kind_of(x, rb_path2class("QML::Access"))) {
+            category = TypeCategory::QtObject;
             return;
         }
         category = TypeCategory::Invalid;

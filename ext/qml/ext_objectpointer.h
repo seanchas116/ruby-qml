@@ -13,7 +13,8 @@ public:
     ObjectPointer();
     ~ObjectPointer();
 
-    QObject *qObject();
+    QObject *qObject() { return mObject; }
+    QObject *fetchQObject();
     void setQObject(QObject *obj, bool hasOwnership = false);
     void setOwnership(bool ownership);
 

@@ -53,7 +53,8 @@ public:
 
         QByteArray name;
         Flags flags;
-        std::size_t id;
+        std::size_t setterId;
+        std::size_t getterId;
         bool hasNotifySignal;
         std::size_t notifySignalId;
     };
@@ -65,6 +66,12 @@ public:
     QList<Property> properties() const { return mProperties; }
     SP<ForeignClass> superClass() const { return mSuperclass; }
 
+    void setClassName(const QByteArray &name) { mClassName = name; }
+    void addMethod(const QByteArray &name, std::size_t id, int arity, Method::Access access = Method::Access::Public, Method::Type type = Method::Type::Method);
+    void addSignal(const QByteArray &name, std::size_t id, int arity);
+    void addProperty(const QByteArray &name, std::size_t getterId, std::size_t setterId, Property::Flags flags, bool hasNotifySignal = false, std::size_t notifySignalId = 0);
+
+    void createMetaObject();
     SP<MetaObject> metaObject();
 
     void emitSignal(Object *obj, std::size_t id, const QVariantList &args);
@@ -75,10 +82,6 @@ public:
 
 protected:
 
-    void setClassName(const QByteArray &name) { mClassName = name; }
-    void addMethod(const QByteArray &name, std::size_t id, int arity, Method::Access access = Method::Access::Public, Method::Type type = Method::Type::Method);
-    void addSignal(const QByteArray &name, std::size_t id, int arity);
-    void addProperty(const QByteArray &name, std::size_t id, Property::Flags flags, bool hasNotifySignal = false, std::size_t notifySignalId = 0);
 
 private:
 

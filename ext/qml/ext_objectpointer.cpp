@@ -36,7 +36,7 @@ ObjectPointer::~ObjectPointer()
     }
 }
 
-QObject *ObjectPointer::qObject()
+QObject *ObjectPointer::fetchQObject()
 {
     if (!mObject) {
         fail("QML::NullObjectError", "referencing already deleted Qt Object");

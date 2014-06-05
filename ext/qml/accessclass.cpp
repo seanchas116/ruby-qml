@@ -1,0 +1,71 @@
+#include "accessclass.h"
+#include "accessobject.h"
+#include "util.h"
+#include "conversion.h"
+
+namespace RubyQml {
+
+AccessClass::AccessClass(VALUE className, VALUE methodInfos, VALUE signalInfos, VALUE propertyInfos)
+{
+    setClassName(fromRuby<QByteArray>(className));
+    protect([&] {
+        rb_check_array_type(methodInfos);
+        rb_check_array_type(signalInfos);
+        rb_check_array_type(propertyInfos);
+    });
+    for (int i = 0; i < RARRAY_LEN(methodInfos); ++i) {
+        auto info = RARRAY_AREF(methodInfos, i);
+        auto nameSym = send(info, "name");
+        auto name = fromRuby<QByteArray>(nameSym);
+        auto arity = fromRuby<int>(send(info, "arity"));
+        addMethod(name, SYM2ID(nameSym), arity);
+    }
+    for (int i = 0; i < RARRAY_LEN(signalInfos); ++i) {
+        auto info = RARRAY_AREF(signalInfos, i);
+        auto nameSym = send(info, "name");
+        auto name = fromRuby<QByteArray>(nameSym);
+        auto arity = fromRuby<int>(send(info, "arity"));
+        addSignal(name, SYM2ID(nameSym), arity);
+    }
+    for (int i = 0; i < RARRAY_LEN(propertyInfos); ++i) {
+        auto info = RARRAY_AREF(propertyInfos, i);
+        auto getterSym = send(info, "getter");
+        auto setterSym = send(info, "setter");
+        auto notifierSym = send(info, "notifier");
+        auto name = fromRuby<QByteArray>(send(info, "name"));
+        addProperty(name, SYM2ID(getterSym), SYM2ID(setterSym), Property::Flag::Readable | Property::Flag::Writable, true, SYM2ID(notifierSym));
+    }
+}
+
+AccessObject *AccessClass::newAccessObject(VALUE obj)
+{
+    return new AccessObject(shared_from_this(), obj);
+}
+
+QVariant AccessClass::callMethod(Object *obj, size_t id, const QVariantList &args)
+{
+    auto self = static_cast<AccessObject *>(obj)->value();
+    QVariant ret;
+    withGvl([&] {
+        std::vector<VALUE> values(args.size());
+        std::transform(args.begin(), args.end(), values.begin(), toRuby<QVariant>);
+        VALUE retValue;
+        protect([&] {
+            retValue = rb_funcallv(self, id, values.size(), values.data());
+        });
+        ret = fromRuby<QVariant>(retValue);
+    });
+    return ret;
+}
+
+void AccessClass::setProperty(Object *obj, size_t id, const QVariant &variant)
+{
+    callMethod(obj, id, {variant});
+}
+
+QVariant AccessClass::getProperty(Object *obj, size_t id)
+{
+    return callMethod(obj, id, {});
+}
+
+} // namespace RubyQml

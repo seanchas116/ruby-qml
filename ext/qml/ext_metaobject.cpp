@@ -144,10 +144,10 @@ public:
             auto ret = toRuby(returnValue);
             // add ownership to ObjectBase unless it has parent or is owned by QML engine
             if (isKindOf(ret, ObjectPointer::rubyClass())) {
-                auto objectBase = ObjectPointer::getPointer(ret);
-                auto obj = objectBase->qObject();
+                auto objectPointer = ObjectPointer::getPointer(ret);
+                auto obj = objectPointer->fetchQObject();
                 if (QQmlEngine::objectOwnership(obj) == QQmlEngine::CppOwnership && !obj->parent()) {
-                    objectBase->setOwnership(true);
+                    objectPointer->setOwnership(true);
                 }
             }
             return ret;
@@ -165,7 +165,7 @@ VALUE MetaObject::invokeMethod(VALUE object, VALUE methodName, VALUE args) const
     protect([&] {
         args = rb_check_array_type(args);
     });
-    auto obj = ObjectPointer::getPointer(object)->qObject();
+    auto obj = ObjectPointer::getPointer(object)->fetchQObject();
     for (int i : methodIndexes) {
         MethodInvoker invoker(args, mMetaObject->method(i));
         if (invoker.isArgsCompatible()) {
@@ -189,7 +189,7 @@ VALUE MetaObject::invokeMethod(VALUE object, VALUE methodName, VALUE args) const
 VALUE MetaObject::connectSignal(VALUE object, VALUE signalName, VALUE proc) const
 {
     auto id = idFromValue(signalName);
-    auto obj = ObjectPointer::getPointer(object)->qObject();
+    auto obj = ObjectPointer::getPointer(object)->fetchQObject();
 
     proc = send(proc, "to_proc");
 
@@ -221,7 +221,7 @@ VALUE MetaObject::getProperty(VALUE object, VALUE name) const
 {
     auto metaProperty = mMetaObject->property(findProperty(name));
 
-    auto qobj = ObjectPointer::getPointer(object)->qObject();
+    auto qobj = ObjectPointer::getPointer(object)->fetchQObject();
     QVariant result;
     withoutGvl([&] {
         result = metaProperty.read(qobj);
@@ -240,7 +240,7 @@ VALUE MetaObject::setProperty(VALUE object, VALUE name, VALUE newValue) const
         });
     }
 
-    auto qobj = ObjectPointer::getPointer(object)->qObject();
+    auto qobj = ObjectPointer::getPointer(object)->fetchQObject();
     auto variant = fromRuby<QVariant>(newValue);
     QVariant result;
     withoutGvl([&] {

@@ -6,6 +6,10 @@ end
 
 describe 'Conversion between C++ and Ruby' do
 
+  class Foo
+    include QML::Access
+  end
+
   samples = {
     'Integer' => 1234,
     'true' => true,
@@ -15,7 +19,8 @@ describe 'Conversion between C++ and Ruby' do
     'String' => 'hoge',
     'non-ascii String' => 'ほげ',
     'Array' => [1, "foobar", true],
-    'Hash' => {'one' => 1, 'two' => 2, '三' => 3}
+    'Hash' => {'one' => 1, 'two' => 2, '三' => 3},
+    'Access derived' => Foo.new
   }
 
   samples.each do |k, v|

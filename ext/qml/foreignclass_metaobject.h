@@ -31,9 +31,12 @@ private:
 
     QList<std::size_t> mMethodIds;
     QList<int> mMethodArities;
+    int mMethodCount;
     int mSignalCount;
 
-    QList<std::size_t> mPropertyIds;
+    QList<std::size_t> mPropertySetterIds;
+    QList<std::size_t> mPropertyGetterIds;
+    int mPropertyCount;
 };
 
 } // namespace RubyQml

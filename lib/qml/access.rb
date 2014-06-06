@@ -33,22 +33,27 @@ module QML
         end
         classname = "RubyQml::Access::#{name}"
         
-        signals = superclasses.flat_map(&:signals).grep(ALLOWED_PATTERN).map do |name|
-          OpenStruct.new(name: name, arity: signal_defs(include_super: true)[name].args.size)
+        signals = []
+        methods = []
+        properties = []
+        superclasses.flat_map(&:signals).grep(ALLOWED_PATTERN).each do |name|
+          params = signal_defs(include_super: true)[name].args
+          fail AccessError, "cannot export variadic signal: #{name}" unless params
+          signals << OpenStruct.new(name: name, params: params)
+        end
+        superclasses.flat_map(&:properties).grep(ALLOWED_PATTERN).each do |name|
+          properties << OpenStruct.new(name: name, getter: name, setter: :"#{name}=", notifier: :"#{name}_changed")
+          signals << OpenStruct.new(name: :"#{name}_changed", params: [:new_value])
+        end
+        superclasses.flat_map { |k| k.instance_methods(false) }.grep(ALLOWED_PATTERN).each do |name|
+          if signals.find { |signal| signal.name == name } || properties.find { |property| property.getter == name || property.setter == name || property.notifier == name }
+            next
+          end
+          methods << OpenStruct.new(name: name, params: instance_method(name).parameters.map(&:last))
         end
         p signals
-        properties = superclasses.flat_map(&:properties).grep(ALLOWED_PATTERN).map do |name|
-          OpenStruct.new(name: name, getter: name, setter: :"#{name}=", notifier: :"#{name}_changed")
-        end
-        p properties
-        methods = superclasses.flat_map { |k| k.instance_methods(false) }.grep(ALLOWED_PATTERN).flat_map do |name|
-          if signals.find { |signal| signal.name == name } || properties.find { |property| property.getter == name || property.setter == name }
-            []
-          else
-            [OpenStruct.new(name: name, arity: instance_method(name).arity)]
-          end
-        end
         p methods
+        p properties
         AccessComposer.new(classname, methods, signals, properties)
       end
     end

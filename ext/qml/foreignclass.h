@@ -35,7 +35,7 @@ public:
         };
 
         QByteArray name;
-        int arity;
+        QList<QByteArray> params;
         Access access;
         Type type;
         std::size_t id;
@@ -67,8 +67,8 @@ public:
     SP<ForeignClass> superClass() const { return mSuperclass; }
 
     void setClassName(const QByteArray &name) { mClassName = name; }
-    void addMethod(const QByteArray &name, std::size_t id, int arity, Method::Access access = Method::Access::Public, Method::Type type = Method::Type::Method);
-    void addSignal(const QByteArray &name, std::size_t id, int arity);
+    void addMethod(const QByteArray &name, std::size_t id, const QList<QByteArray> &params, Method::Access access = Method::Access::Public, Method::Type type = Method::Type::Method);
+    void addSignal(const QByteArray &name, std::size_t id, const QList<QByteArray> &params);
     void addProperty(const QByteArray &name, std::size_t getterId, std::size_t setterId, Property::Flags flags, bool hasNotifySignal = false, std::size_t notifySignalId = 0);
 
     void createMetaObject();

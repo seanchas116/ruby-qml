@@ -2,6 +2,8 @@
 #include "foreignclass.h"
 #include "foreignclass_object.h"
 #include <QQueue>
+#include <QDebug>
+#include <QQmlProperty>
 
 namespace RubyQml {
 
@@ -195,13 +197,13 @@ void ForeignClass::MetaObject::buildData()
     mMethodCount = klass->methods().size();
     for (const auto &signal : klass->signalMethods()) {
         mMethodIds << signal.id;
-        mMethodArities << signal.arity;
+        mMethodArities << signal.params.size();
         mSignalIndexHash[signal.id] = index++;
     }
     mSignalCount = klass->signalMethods().size();
     for (const auto &method : klass->nonSignalMethods()) {
         mMethodIds << method.id;
-        mMethodArities << method.arity;
+        mMethodArities << method.params.size();
     }
     mPropertyCount = klass->properties().size();
     for (const auto &property : klass->properties()) {
@@ -225,7 +227,7 @@ QVector<uint> ForeignClass::MetaObject::writeMetaData(StringPool &stringPool)
     int methodDataSize = 0;
 
     for (const auto &method : klass->methods()) {
-        methodDataSize += 5 + 1 + method.arity * 2;
+        methodDataSize += 5 + 1 + method.params.size() * 2;
     }
 
     QVector<uint> metaData;
@@ -273,13 +275,15 @@ QVector<uint> ForeignClass::MetaObject::writeMetaData(StringPool &stringPool)
 
     auto addMethodInfo = [&](const ForeignClass::Method &method) {
         metaData << stringPool.intern(method.name); // name
-        metaData << method.arity; // argc
+        metaData << method.params.size(); // argc
         parameterInfoPosIndexes.enqueue(markIndex()); // parameters
         metaData << 2; // tag
-        int flags = AccessPublic;
+        int flags = 0;
         if (method.type == ForeignClass::Method::Type::Signal) {
             flags |= AccessProtected;
             flags |= MethodSignal;
+        } else {
+            flags |= AccessPublic;
         }
         metaData << flags; // flags
     };
@@ -294,11 +298,11 @@ QVector<uint> ForeignClass::MetaObject::writeMetaData(StringPool &stringPool)
     auto addParametersInfo = [&](const ForeignClass::Method &method) {
         writeCurrentPos(parameterInfoPosIndexes.dequeue());
         metaData << QMetaType::QVariant;
-        for (int i = 0; i < method.arity; ++i) {
+        for (int i = 0; i < method.params.size(); ++i) {
             metaData << QMetaType::QVariant;
         }
-        for (int i = 0; i < method.arity; ++i) {
-            metaData << stringPool.intern("");
+        for (const auto &param : method.params) {
+            metaData << stringPool.intern(param);
         }
     };
 
@@ -344,6 +348,28 @@ QVector<uint> ForeignClass::MetaObject::writeMetaData(StringPool &stringPool)
     metaData << 0;
 
     return metaData;
+}
+
+void ForeignClass::MetaObject::dump()
+{
+    qDebug() << "-- dumping ForeignClass::MetaObject" << className();
+    qDebug() << "  -- methods";
+    for (int i = 0; i < methodCount(); ++i) {
+        auto m = method(i);
+        qDebug() << "name:" << m.name();
+        qDebug() << "return type:" << QMetaType::typeName(m.returnType());
+        qDebug() << "param types:" << m.parameterTypes();
+        qDebug() << "param names" << m.parameterNames();
+    }
+    qDebug() << "  -- properties";
+    for (int i = 0; i < propertyCount(); ++i) {
+        auto p = property(i);
+        qDebug() << "name:" << p.name();
+        qDebug() << "notify signal:" << p.notifySignal().name();
+        qDebug() << "writable" << p.isWritable();
+        qDebug() << "readable" << p.isReadable();
+        qDebug() << "constant" << p.isConstant();
+    }
 }
 
 } // namespace RubyQml

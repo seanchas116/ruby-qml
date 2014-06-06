@@ -15,6 +15,8 @@ public:
     int dynamicMetaCall(Object *obj, QMetaObject::Call call, int index, void **argv);
     QHash<std::size_t, int> signalIndexHash() const { return mSignalIndexHash; }
 
+    void dump();
+
 private:
     class StringPool;
 

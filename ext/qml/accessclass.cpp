@@ -17,15 +17,15 @@ AccessClass::AccessClass(VALUE className, VALUE methodInfos, VALUE signalInfos, 
         auto info = RARRAY_AREF(methodInfos, i);
         auto nameSym = send(info, "name");
         auto name = fromRuby<QByteArray>(nameSym);
-        auto arity = fromRuby<int>(send(info, "arity"));
-        addMethod(name, SYM2ID(nameSym), arity);
+        auto params = fromRuby<QList<QByteArray>>(send(info, "params"));
+        addMethod(name, SYM2ID(nameSym), params);
     }
     for (int i = 0; i < RARRAY_LEN(signalInfos); ++i) {
         auto info = RARRAY_AREF(signalInfos, i);
         auto nameSym = send(info, "name");
         auto name = fromRuby<QByteArray>(nameSym);
-        auto arity = fromRuby<int>(send(info, "arity"));
-        addSignal(name, SYM2ID(nameSym), arity);
+        auto params = fromRuby<QList<QByteArray>>(send(info, "params"));
+        addSignal(name, SYM2ID(nameSym), params);
     }
     for (int i = 0; i < RARRAY_LEN(propertyInfos); ++i) {
         auto info = RARRAY_AREF(propertyInfos, i);

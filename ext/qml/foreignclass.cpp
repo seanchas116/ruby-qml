@@ -49,6 +49,7 @@ void ForeignClass::emitSignal(Object *obj, std::size_t id, const QVariantList &a
 {
     auto metaobj = metaObject();
     auto metamethod = metaobj->method(metaobj->signalIndexHash()[id] + metaobj->methodOffset());
+    qDebug() << "emitting signal" << metamethod.name();
     if (metamethod.parameterCount() != args.size()) {
         qWarning() << "wrong number of signal arguments";
         return;
@@ -92,19 +93,19 @@ QVariant ForeignClass::getProperty(Object *obj, size_t id)
     return QVariant();
 }
 
-void ForeignClass::addMethod(const QByteArray &name, std::size_t id, int arity, Method::Access access, Method::Type type)
+void ForeignClass::addMethod(const QByteArray &name, std::size_t id, const QList<QByteArray> &params, Method::Access access, Method::Type type)
 {
     if (mMetaObject) {
         qWarning() << "meta object alread created";
         return;
     }
-    Method method = { .name = name, .arity = arity, .access = access, .type = type, .id = id };
+    Method method = { .name = name, .params = params, .access = access, .type = type, .id = id };
     mMethods << method;
 }
 
-void ForeignClass::addSignal(const QByteArray &name, std::size_t id, int arity)
+void ForeignClass::addSignal(const QByteArray &name, std::size_t id, const QList<QByteArray> &params)
 {
-    addMethod(name, id, arity, Method::Access::Protected, Method::Type::Signal);
+    addMethod(name, id, params, Method::Access::Protected, Method::Type::Signal);
 }
 
 void ForeignClass::addProperty(const QByteArray &name, std::size_t getterId, std::size_t setterId, Property::Flags flags, bool hasNotifySignal,std::size_t notifySignalId)

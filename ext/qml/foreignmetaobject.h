@@ -3,16 +3,18 @@
 #include <QVector>
 #include <QHash>
 #include "common.h"
-#include "foreignclass.h"
 
 namespace RubyQml {
 
-class ForeignClass::MetaObject : public QMetaObject
+class ForeignClass;
+class ForeignObject;
+
+class ForeignMetaObject : public QMetaObject
 {
 public:
-    MetaObject(const SP<ForeignClass> &foreignClass);
+    ForeignMetaObject(const SP<ForeignClass> &foreignClass);
 
-    int dynamicMetaCall(Object *obj, QMetaObject::Call call, int index, void **argv);
+    int dynamicMetaCall(ForeignObject *obj, QMetaObject::Call call, int index, void **argv);
     QHash<std::size_t, int> signalIndexHash() const { return mSignalIndexHash; }
 
     void dump();
@@ -27,7 +29,7 @@ private:
     QVector<uint> mData;
 
     WP<ForeignClass> mForeignClassWP;
-    SP<MetaObject> mSuperMetaObject;
+    SP<ForeignMetaObject> mSuperMetaObject;
 
     QHash<std::size_t, int> mSignalIndexHash;
 

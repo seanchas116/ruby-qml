@@ -1,14 +1,15 @@
 #pragma once
 #include <QObject>
 #include "common.h"
-#include "foreignclass.h"
 
 namespace RubyQml {
 
-class ForeignClass::Object : public QObject
+class ForeignClass;
+
+class ForeignObject : public QObject
 {
 public:
-    explicit Object(const SP<ForeignClass> &foreignClass, QObject *parent = 0);
+    explicit ForeignObject(const SP<ForeignClass> &foreignClass, QObject *parent = 0);
 
     SP<ForeignClass> foreignClass() const { return mForeignClass; }
 

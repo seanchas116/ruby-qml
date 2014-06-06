@@ -13,9 +13,9 @@ public:
 
     AccessObject *newAccessObject(VALUE obj);
 
-    QVariant callMethod(Object *obj, size_t id, const QVariantList &args) override;
-    void setProperty(Object *obj, size_t id, const QVariant &value) override;
-    QVariant getProperty(Object *obj, size_t id) override;
+    QVariant callMethod(ForeignObject *obj, size_t id, const QVariantList &args) override;
+    void setProperty(ForeignObject *obj, size_t id, const QVariant &value) override;
+    QVariant getProperty(ForeignObject *obj, size_t id) override;
 };
 
 } // namespace RubyQml

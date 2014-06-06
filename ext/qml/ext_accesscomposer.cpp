@@ -23,7 +23,7 @@ VALUE AccessComposer::emitSignal(VALUE obj, VALUE name, VALUE args)
     auto nameId = SYM2ID(name);
     auto argVariants = fromRuby<QVariantList>(args);
     withoutGvl([&] {
-        mAccessClass->emitSignal(dynamic_cast<ForeignClass::Object *>(accessObj), nameId, argVariants);
+        mAccessClass->emitSignal(dynamic_cast<ForeignObject *>(accessObj), nameId, argVariants);
     });
     return Qnil;
 }

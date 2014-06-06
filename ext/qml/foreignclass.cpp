@@ -1,6 +1,6 @@
 #include "foreignclass.h"
-#include "foreignclass_metaobject.h"
-#include "foreignclass_object.h"
+#include "foreignmetaobject.h"
+#include "foreignobject.h"
 #include <QDebug>
 
 namespace RubyQml {
@@ -34,10 +34,10 @@ QList<ForeignClass::Method> ForeignClass::nonSignalMethods() const
 
 void ForeignClass::createMetaObject()
 {
-    mMetaObject = makeSP<MetaObject>(shared_from_this());
+    mMetaObject = makeSP<ForeignMetaObject>(shared_from_this());
 }
 
-SP<ForeignClass::MetaObject> ForeignClass::metaObject()
+SP<ForeignMetaObject> ForeignClass::metaObject()
 {
     if (!mMetaObject) {
         throw std::runtime_error("meta object has not been created");
@@ -45,7 +45,7 @@ SP<ForeignClass::MetaObject> ForeignClass::metaObject()
     return mMetaObject;
 }
 
-void ForeignClass::emitSignal(Object *obj, std::size_t id, const QVariantList &args)
+void ForeignClass::emitSignal(ForeignObject *obj, std::size_t id, const QVariantList &args)
 {
     auto metaobj = metaObject();
     auto metamethod = metaobj->method(metaobj->signalIndexHash()[id] + metaobj->methodOffset());
@@ -71,7 +71,7 @@ void ForeignClass::emitSignal(Object *obj, std::size_t id, const QVariantList &a
                       Q_ARG(QVariant, argsToPass[9]));
 }
 
-QVariant ForeignClass::callMethod(Object *obj, size_t id, const QVariantList &args)
+QVariant ForeignClass::callMethod(ForeignObject *obj, size_t id, const QVariantList &args)
 {
     Q_UNUSED(obj);
     Q_UNUSED(id);
@@ -79,14 +79,14 @@ QVariant ForeignClass::callMethod(Object *obj, size_t id, const QVariantList &ar
     return QVariant();
 }
 
-void ForeignClass::setProperty(Object *obj, size_t id, const QVariant &value)
+void ForeignClass::setProperty(ForeignObject *obj, size_t id, const QVariant &value)
 {
     Q_UNUSED(obj);
     Q_UNUSED(id);
     Q_UNUSED(value);
 }
 
-QVariant ForeignClass::getProperty(Object *obj, size_t id)
+QVariant ForeignClass::getProperty(ForeignObject *obj, size_t id)
 {
     Q_UNUSED(obj);
     Q_UNUSED(id);

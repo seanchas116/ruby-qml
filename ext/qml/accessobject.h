@@ -1,11 +1,11 @@
 #pragma once
 #include <ruby.h>
-#include "foreignclass_object.h"
+#include "foreignobject.h"
 
 namespace RubyQml {
 
 
-class AccessObject : public ForeignClass::Object
+class AccessObject : public ForeignObject
 {
 public:
     AccessObject(const SP<ForeignClass> &klass, VALUE value);

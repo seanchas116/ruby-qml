@@ -1,63 +1,14 @@
-#include "foreignclass_metaobject.h"
+#include "foreignmetaobject.h"
 #include "foreignclass.h"
-#include "foreignclass_object.h"
+#include "foreignobject.h"
 #include <QQueue>
 #include <QDebug>
 #include <QQmlProperty>
+#include <private/qmetaobject_p.h>
 
 namespace RubyQml {
 
-namespace {
-
-// from qmetaobject_p.h in Qt 5.2.0
-
-enum PropertyFlags  {
-    Invalid = 0x00000000,
-    Readable = 0x00000001,
-    Writable = 0x00000002,
-    Resettable = 0x00000004,
-    EnumOrFlag = 0x00000008,
-    StdCppSet = 0x00000100,
-//     Override = 0x00000200,
-    Constant = 0x00000400,
-    Final = 0x00000800,
-    Designable = 0x00001000,
-    ResolveDesignable = 0x00002000,
-    Scriptable = 0x00004000,
-    ResolveScriptable = 0x00008000,
-    Stored = 0x00010000,
-    ResolveStored = 0x00020000,
-    Editable = 0x00040000,
-    ResolveEditable = 0x00080000,
-    User = 0x00100000,
-    ResolveUser = 0x00200000,
-    Notify = 0x00400000,
-    Revisioned = 0x00800000
-};
-
-enum MethodFlags  {
-    AccessPrivate = 0x00,
-    AccessProtected = 0x01,
-    AccessPublic = 0x02,
-    AccessMask = 0x03, //mask
-
-    MethodMethod = 0x00,
-    MethodSignal = 0x04,
-    MethodSlot = 0x08,
-    MethodConstructor = 0x0c,
-    MethodTypeMask = 0x0c,
-
-    MethodCompatibility = 0x10,
-    MethodCloned = 0x20,
-    MethodScriptable = 0x40,
-    MethodRevisioned = 0x80
-};
-
-// end
-
-}
-
-class ForeignClass::MetaObject::StringPool
+class ForeignMetaObject::StringPool
 {
 public:
     int intern(const QByteArray &str) {
@@ -104,7 +55,7 @@ private:
 };
 
 
-ForeignClass::MetaObject::MetaObject(const SP<ForeignClass> &klass) :
+ForeignMetaObject::ForeignMetaObject(const SP<ForeignClass> &klass) :
     mForeignClassWP(klass)
 {
     buildData();
@@ -117,7 +68,7 @@ ForeignClass::MetaObject::MetaObject(const SP<ForeignClass> &klass) :
     d.extradata = nullptr;
 }
 
-int ForeignClass::MetaObject::dynamicMetaCall(Object *obj, QMetaObject::Call call, int index, void **argv)
+int ForeignMetaObject::dynamicMetaCall(ForeignObject *obj, QMetaObject::Call call, int index, void **argv)
 {
     auto klass = mForeignClassWP.lock();
 
@@ -189,7 +140,7 @@ int ForeignClass::MetaObject::dynamicMetaCall(Object *obj, QMetaObject::Call cal
     return index;
 }
 
-void ForeignClass::MetaObject::buildData()
+void ForeignMetaObject::buildData()
 {
     auto klass = mForeignClassWP.lock();
 
@@ -220,7 +171,7 @@ void ForeignClass::MetaObject::buildData()
     }
 }
 
-QVector<uint> ForeignClass::MetaObject::writeMetaData(StringPool &stringPool)
+QVector<uint> ForeignMetaObject::writeMetaData(StringPool &stringPool)
 {
     auto klass = mForeignClassWP.lock();
 
@@ -350,7 +301,7 @@ QVector<uint> ForeignClass::MetaObject::writeMetaData(StringPool &stringPool)
     return metaData;
 }
 
-void ForeignClass::MetaObject::dump()
+void ForeignMetaObject::dump()
 {
     qDebug() << "-- dumping ForeignClass::MetaObject" << className();
     qDebug() << "  -- methods";

@@ -7,7 +7,7 @@
 namespace RubyQml {
 
 AccessObject::AccessObject(const SP<ForeignClass> &klass, VALUE value) :
-    ForeignClass::Object(klass),
+    ForeignObject(klass),
     mValue(value)
 {
     globalMarkValues() << value;

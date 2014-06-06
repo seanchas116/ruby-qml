@@ -42,7 +42,7 @@ AccessObject *AccessClass::newAccessObject(VALUE obj)
     return new AccessObject(shared_from_this(), obj);
 }
 
-QVariant AccessClass::callMethod(Object *obj, size_t id, const QVariantList &args)
+QVariant AccessClass::callMethod(ForeignObject *obj, size_t id, const QVariantList &args)
 {
     auto self = static_cast<AccessObject *>(obj)->value();
     QVariant ret;
@@ -58,12 +58,12 @@ QVariant AccessClass::callMethod(Object *obj, size_t id, const QVariantList &arg
     return ret;
 }
 
-void AccessClass::setProperty(Object *obj, size_t id, const QVariant &variant)
+void AccessClass::setProperty(ForeignObject *obj, size_t id, const QVariant &variant)
 {
     callMethod(obj, id, {variant});
 }
 
-QVariant AccessClass::getProperty(Object *obj, size_t id)
+QVariant AccessClass::getProperty(ForeignObject *obj, size_t id)
 {
     return callMethod(obj, id, {});
 }

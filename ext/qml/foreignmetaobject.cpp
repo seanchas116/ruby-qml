@@ -54,7 +54,6 @@ private:
     QList<QByteArray> mStrings;
 };
 
-
 ForeignMetaObject::ForeignMetaObject(const SP<ForeignClass> &klass) :
     mForeignClassWP(klass)
 {
@@ -311,6 +310,8 @@ void ForeignMetaObject::dump()
         qDebug() << "return type:" << QMetaType::typeName(m.returnType());
         qDebug() << "param types:" << m.parameterTypes();
         qDebug() << "param names" << m.parameterNames();
+        qDebug() << "method type" << m.methodType();
+        qDebug() << "attributes" << m.attributes();
     }
     qDebug() << "  -- properties";
     for (int i = 0; i < propertyCount(); ++i) {

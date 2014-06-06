@@ -9,16 +9,16 @@ class AccessObject;
 
 namespace Ext {
 
-class AccessComposer : public ExtBase<AccessComposer>
+class AccessSupport : public ExtBase<AccessSupport>
 {
-    friend class ExtBase<AccessComposer>;
+    friend class ExtBase<AccessSupport>;
 public:
-    AccessComposer();
+    AccessSupport();
 
     VALUE initialize(VALUE className, VALUE methodInfos, VALUE signalInfos, VALUE propertyInfos);
     VALUE emitSignal(VALUE obj, VALUE name, VALUE args);
 
-    VALUE prepareAccessObject(VALUE value);
+    VALUE updateAccessObject(VALUE obj, VALUE accessObj);
 
 private:
     void mark() {}

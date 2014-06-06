@@ -17,13 +17,13 @@ module QML
 
     module ClassMethods
 
-      def access_composer
-        @access_composer ||= create_access_composer
+      def access_support
+        @access_composer ||= create_access_support
       end
 
       private
 
-      def create_access_composer
+      def create_access_support
         superclasses = Enumerator.new do |y|
           klass = self
           while klass.include?(Access)
@@ -54,7 +54,7 @@ module QML
         p signals
         p methods
         p properties
-        AccessComposer.new(classname, methods, signals, properties)
+        AccessSupport.new(classname, methods, signals, properties)
       end
     end
 
@@ -64,13 +64,15 @@ module QML
         signal_names = signals + properties.map { |name| :"#{name}_changed" }
         signal_names.each do |name|
           public_send(name).connect do |*args|
-            self.class.access_composer.emit_signal(self, name, args)
+            self.class.access_support.emit_signal(self, name, args)
           end
         end
       end
 
       def access_object
-        self.class.access_composer.prepare_access_object(self)
+        (@_access_object ||= ObjectPointer.new).tap do |accessobj|
+          self.class.access_support.update_access_object(self, accessobj)
+        end
       end
     end
   end

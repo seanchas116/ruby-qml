@@ -40,6 +40,13 @@ end
   add_ldflags `#{pkgconfig} --libs #{mod}`.chomp
 end
 
+qtversion = `#{pkgconfig} --modversion Qt5Core`.chomp
+`#{pkgconfig} --cflags-only-I Qt5Core`.split.map { |i| Pathname(i.gsub("-I", "")) }.each do |dir|
+  private_dir = dir + "#{qtversion}/QtCore"
+  add_cppflags "-I#{private_dir}" if private_dir.exist?
+end
+
+
 headers = %w{
   QtCore/QObject
   QtCore/QVariant

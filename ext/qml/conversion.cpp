@@ -189,13 +189,7 @@ QObject *Conversion<QObject *>::from(VALUE x)
         protect([&] {
             accessptr = rb_funcall(x, rb_intern("access_object"), 0);
         });
-        auto obj = Ext::ObjectPointer::getPointer(accessptr)->fetchQObject();
-        auto accessObj = dynamic_cast<AccessObject *>(obj);
-        qDebug() << "access obj";
-        auto metaobj = accessObj->metaObject();
-        qDebug() << metaobj->className();
-        qDebug() << metaobj->methodCount();
-        return obj;
+        return Ext::ObjectPointer::getPointer(accessptr)->fetchQObject();
     }
 
     VALUE objptr;

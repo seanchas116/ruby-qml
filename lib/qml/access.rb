@@ -51,9 +51,6 @@ module QML
           end
           methods << OpenStruct.new(name: name, params: instance_method(name).parameters.map(&:last))
         end
-        p signals
-        p methods
-        p properties
         AccessSupport.new(classname, methods, signals, properties)
       end
     end

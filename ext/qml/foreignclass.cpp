@@ -49,7 +49,6 @@ void ForeignClass::emitSignal(ForeignObject *obj, std::size_t id, const QVariant
 {
     auto metaobj = metaObject();
     auto metamethod = metaobj->method(metaobj->signalIndexHash()[id] + metaobj->methodOffset());
-    qDebug() << "emitting signal" << metamethod.name();
     if (metamethod.parameterCount() != args.size()) {
         qWarning() << "wrong number of signal arguments";
         return;

@@ -5,7 +5,7 @@
 namespace RubyQml {
 
 class AccessClass;
-class AccessObject;
+class ForeignMetaObject;
 
 namespace Ext {
 
@@ -25,6 +25,7 @@ private:
     static ClassBuilder buildClass();
 
     SP<AccessClass> mAccessClass;
+    SP<ForeignMetaObject> mMetaObject;
 };
 
 } // namespace Ext

@@ -10,13 +10,12 @@ class QByteArray;
 
 namespace RubyQml {
 
-class ForeignMetaObject;
 class ForeignObject;
 
-class ForeignClass : public std::enable_shared_from_this<ForeignClass>
+class ForeignClass
 {
 public:
-    ForeignClass(const SP<ForeignClass> &superclass = SP<ForeignClass>());
+    ForeignClass();
     virtual ~ForeignClass();
 
     struct Method
@@ -64,17 +63,11 @@ public:
     QList<Method> signalMethods() const;
     QList<Method> nonSignalMethods() const;
     QList<Property> properties() const { return mProperties; }
-    SP<ForeignClass> superClass() const { return mSuperclass; }
 
     void setClassName(const QByteArray &name) { mClassName = name; }
     void addMethod(const QByteArray &name, std::size_t id, const QList<QByteArray> &params, Method::Access access = Method::Access::Public, Method::Type type = Method::Type::Method);
     void addSignal(const QByteArray &name, std::size_t id, const QList<QByteArray> &params);
     void addProperty(const QByteArray &name, std::size_t getterId, std::size_t setterId, Property::Flags flags, bool hasNotifySignal = false, std::size_t notifySignalId = 0);
-
-    void createMetaObject();
-    SP<ForeignMetaObject> metaObject();
-
-    void emitSignal(ForeignObject *obj, std::size_t id, const QVariantList &args);
 
     virtual QVariant callMethod(ForeignObject *obj, size_t id, const QVariantList &args);
     virtual void setProperty(ForeignObject *obj, size_t id, const QVariant &value);
@@ -85,11 +78,9 @@ protected:
 
 private:
 
-    SP<ForeignClass> mSuperclass;
     QByteArray mClassName;
     QList<Method> mMethods;
     QList<Property> mProperties;
-    SP<ForeignMetaObject> mMetaObject;
 };
 
 Q_DECLARE_OPERATORS_FOR_FLAGS(ForeignClass::Property::Flags)

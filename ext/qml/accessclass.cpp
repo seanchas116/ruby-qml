@@ -37,11 +37,6 @@ AccessClass::AccessClass(VALUE className, VALUE methodInfos, VALUE signalInfos, 
     }
 }
 
-AccessObject *AccessClass::newAccessObject(VALUE obj)
-{
-    return new AccessObject(shared_from_this(), obj);
-}
-
 QVariant AccessClass::callMethod(ForeignObject *obj, size_t id, const QVariantList &args)
 {
     auto self = static_cast<AccessObject *>(obj)->value();

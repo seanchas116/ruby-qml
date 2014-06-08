@@ -54,8 +54,9 @@ private:
     QList<QByteArray> mStrings;
 };
 
-ForeignMetaObject::ForeignMetaObject(const SP<ForeignClass> &klass) :
-    mForeignClassWP(klass)
+ForeignMetaObject::ForeignMetaObject(const SP<ForeignClass> &klass, const SP<ForeignMetaObject> &superMetaObject) :
+    mForeignClass(klass),
+    mSuperMetaObject(superMetaObject)
 {
     buildData();
 
@@ -67,10 +68,32 @@ ForeignMetaObject::ForeignMetaObject(const SP<ForeignClass> &klass) :
     d.extradata = nullptr;
 }
 
+void ForeignMetaObject::emitSignal(ForeignObject *obj, std::size_t id, const QVariantList &args)
+{
+    auto metamethod = method(mSignalIndexHash[id] + methodOffset());
+    if (metamethod.parameterCount() != args.size()) {
+        qWarning() << "wrong number of signal arguments";
+        return;
+    }
+    QVariantList argsToPass = args;
+    while (argsToPass.size() < 10) {
+        argsToPass << QVariant();
+    }
+    metamethod.invoke(obj,
+                      Q_ARG(QVariant, argsToPass[0]),
+                      Q_ARG(QVariant, argsToPass[1]),
+                      Q_ARG(QVariant, argsToPass[2]),
+                      Q_ARG(QVariant, argsToPass[3]),
+                      Q_ARG(QVariant, argsToPass[4]),
+                      Q_ARG(QVariant, argsToPass[5]),
+                      Q_ARG(QVariant, argsToPass[6]),
+                      Q_ARG(QVariant, argsToPass[7]),
+                      Q_ARG(QVariant, argsToPass[8]),
+                      Q_ARG(QVariant, argsToPass[9]));
+}
+
 int ForeignMetaObject::dynamicMetaCall(ForeignObject *obj, QMetaObject::Call call, int index, void **argv)
 {
-    auto klass = mForeignClassWP.lock();
-
     if (mSuperMetaObject) {
         index = mSuperMetaObject->dynamicMetaCall(obj, call, index, argv);
     } else {
@@ -91,7 +114,7 @@ int ForeignMetaObject::dynamicMetaCall(ForeignObject *obj, QMetaObject::Call cal
                 std::transform(argv + 1, argv + 1 + mMethodArities[index], std::back_inserter(args), [](void *arg) {
                     return *reinterpret_cast<QVariant *>(arg);
                 });
-                auto result = klass->callMethod(obj, mMethodIds[index], args);
+                auto result = mForeignClass->callMethod(obj, mMethodIds[index], args);
                 if (argv[0]) {
                     *static_cast<QVariant *>(argv[0]) = result;
                 }
@@ -102,7 +125,7 @@ int ForeignMetaObject::dynamicMetaCall(ForeignObject *obj, QMetaObject::Call cal
     }
     case QMetaObject::ReadProperty: {
         if (index < mPropertyCount) {
-            auto result = klass->getProperty(obj, mPropertyGetterIds[index]);
+            auto result = mForeignClass->getProperty(obj, mPropertyGetterIds[index]);
             *static_cast<QVariant *>(argv[0]) = result;
         }
         index -= mPropertyCount;
@@ -111,7 +134,7 @@ int ForeignMetaObject::dynamicMetaCall(ForeignObject *obj, QMetaObject::Call cal
     case QMetaObject::WriteProperty: {
         if (index < mPropertyCount) {
             auto variant = *static_cast<QVariant *>(argv[0]);
-            klass->setProperty(obj, mPropertySetterIds[index], variant);
+            mForeignClass->setProperty(obj, mPropertySetterIds[index], variant);
         }
         index -= mPropertyCount;
         break;
@@ -141,8 +164,7 @@ int ForeignMetaObject::dynamicMetaCall(ForeignObject *obj, QMetaObject::Call cal
 
 void ForeignMetaObject::buildData()
 {
-    auto klass = mForeignClassWP.lock();
-
+    auto klass = mForeignClass;
     int index = 0;
     mMethodCount = klass->methods().size();
     for (const auto &signal : klass->signalMethods()) {
@@ -164,15 +186,11 @@ void ForeignMetaObject::buildData()
     StringPool stringPool;
     mData = writeMetaData(stringPool);
     mStringData = stringPool.toMetaStringData();
-
-    if (klass->superClass()) {
-        mSuperMetaObject = klass->superClass()->metaObject();
-    }
 }
 
 QVector<uint> ForeignMetaObject::writeMetaData(StringPool &stringPool)
 {
-    auto klass = mForeignClassWP.lock();
+    auto klass = mForeignClass;
 
     int methodDataSize = 0;
 

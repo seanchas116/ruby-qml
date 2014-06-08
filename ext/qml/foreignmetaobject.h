@@ -2,6 +2,7 @@
 #include <QMetaObject>
 #include <QVector>
 #include <QHash>
+#include <QVariant>
 #include "common.h"
 
 namespace RubyQml {
@@ -12,11 +13,10 @@ class ForeignObject;
 class ForeignMetaObject : public QMetaObject
 {
 public:
-    ForeignMetaObject(const SP<ForeignClass> &foreignClass);
+    ForeignMetaObject(const SP<ForeignClass> &foreignClass, const SP<ForeignMetaObject> &superMetaObject = SP<ForeignMetaObject>());
 
     int dynamicMetaCall(ForeignObject *obj, QMetaObject::Call call, int index, void **argv);
-    QHash<std::size_t, int> signalIndexHash() const { return mSignalIndexHash; }
-
+    void emitSignal(ForeignObject *obj, std::size_t id, const QVariantList &args);
     void dump();
 
 private:
@@ -28,7 +28,7 @@ private:
     QVector<uint8_t> mStringData;
     QVector<uint> mData;
 
-    WP<ForeignClass> mForeignClassWP;
+    SP<ForeignClass> mForeignClass;
     SP<ForeignMetaObject> mSuperMetaObject;
 
     QHash<std::size_t, int> mSignalIndexHash;

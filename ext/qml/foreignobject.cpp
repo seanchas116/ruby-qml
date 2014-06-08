@@ -1,23 +1,22 @@
 #include "foreignobject.h"
 #include "foreignmetaobject.h"
-#include "foreignclass.h"
 
 namespace RubyQml {
 
-ForeignObject::ForeignObject(const SP<ForeignClass> &klass, QObject *parent) :
+ForeignObject::ForeignObject(const SP<ForeignMetaObject> &metaobj, QObject *parent) :
     QObject(parent),
-    mForeignClass(klass)
+    mMetaObject(metaobj)
 {
 }
 
 const QMetaObject *ForeignObject::metaObject() const
 {
-    return mForeignClass->metaObject().get();
+    return mMetaObject.get();
 }
 
 int ForeignObject::qt_metacall(QMetaObject::Call call, int index, void **argv)
 {
-    return mForeignClass->metaObject()->dynamicMetaCall(this, call, index, argv);
+    return mMetaObject->dynamicMetaCall(this, call, index, argv);
 }
 
 } // namespace RubyQml

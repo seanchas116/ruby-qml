@@ -4,11 +4,10 @@
 
 namespace RubyQml {
 
-
 class AccessObject : public ForeignObject
 {
 public:
-    AccessObject(const SP<ForeignClass> &klass, VALUE value);
+    AccessObject(const SP<ForeignMetaObject> &metaobj, VALUE value);
     ~AccessObject();
 
     VALUE value() { return mValue; }

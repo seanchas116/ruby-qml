@@ -22,6 +22,5 @@ module QML
         QML::PluginLoader.new(PATH + name, "rubyqml-#{name}").instance
       end
     end
-
   end
 end

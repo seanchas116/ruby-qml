@@ -17,7 +17,7 @@ module QML
     module ClassMethods
 
       def access_support
-        @access_composer ||= create_access_support
+        @access_support ||= create_access_support
       end
 
       private
@@ -53,9 +53,10 @@ module QML
       def initialize(*args, &block)
         super
         signal_names = signals + properties.map { |name| :"#{name}_changed" }
+        access_support = self.class.access_support
         signal_names.each do |name|
-          public_send(name).connect do |*args|
-            self.class.access_support.emit_signal(self, name, args)
+          __send__(name).connect do |*args|
+            access_support.emit_signal(self, name, args)
           end
         end
       end

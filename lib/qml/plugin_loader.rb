@@ -7,8 +7,7 @@ module QML
     module Extension
 
       def initialize(dirname, libname)
-        dirname = Pathname.new(dirname)
-        dirname += lib_filename(libname)
+        dirname = Pathname.new(dirname) + lib_filename(libname)
         super(dirname.to_s)
       end
 
@@ -27,6 +26,5 @@ module QML
     end
 
     prepend Extension
-
   end
 end

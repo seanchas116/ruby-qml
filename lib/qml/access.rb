@@ -35,21 +35,22 @@ module QML
         signals = instance_signals.grep(ALLOWED_PATTERN)
         properties = instance_properties.grep(ALLOWED_PATTERN)
 
-        signal_infos = signals.map do |name|
-          signal = instance_signal(name)
-          next if signal.variadic?
-          params = signal.parameters.map(&:last)
-          OpenStruct.new(name: name, params: params)
-        end
-        property_infos = properties.map do |name|
-          OpenStruct.new(name: name, getter: name, setter: :"#{name}=", notifier: :"#{name}_changed")
-        end
+        signal_infos = signals
+          .map { |name| instance_signal(name) }
+          .reject(&:variadic?)
+          .map { |signal| OpenStruct.new(name: signal.name, params: signal.parameters.map(&:last)) }
 
-        methods = superclasses.map { |k| k.instance_methods(false) }.inject(&:|).grep(ALLOWED_PATTERN)
+        property_infos = properties
+          .map { |name| OpenStruct.new(name: name, getter: name, setter: :"#{name}=", notifier: :"#{name}_changed") }
+
+        methods = superclasses
+          .map { |k| k.instance_methods(false) }.inject(&:|)
+          .grep(ALLOWED_PATTERN)
         ignored_methods = signals | property_infos.flat_map { |p| [p.getter, p.setter, p.notifier] }
-        method_infos = (methods - ignored_methods).map do |name|
-          OpenStruct.new(name: name, params: instance_method(name).parameters.map(&:last))
-        end
+        method_infos = (methods - ignored_methods)
+          .map { |name| instance_method(name) }
+          .select { |method| method.parameters.all? { |param| param[0] == :req } }
+          .map { |method| OpenStruct.new(name: method.name, params: method.parameters.map(&:last)) }
 
         AccessSupport.new(classname, method_infos, signal_infos, property_infos)
       end

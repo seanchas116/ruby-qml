@@ -10,6 +10,9 @@ describe QML::Access do
     def some_method(a, b)
       a + b
     end
+
+    def variadic_method(*args)
+    end
   end
 
   class Bar < Foo
@@ -63,6 +66,11 @@ describe QML::Access do
         expect(root.qml_eval('bar.some_method(100, 200)')).to eq 'overridden'
       end
     end
+    describe '#variadic_method' do
+      it 'will not be exported' do
+        expect { root.qml_eval('foo.variadic_method()') }.to raise_error(QML::QMLError)
+      end
+    end
     describe 'name property' do
       it 'can get and set value' do
         root.qml_eval('foo.name = "test"')
@@ -82,18 +90,4 @@ describe QML::Access do
       end
     end
   end
-
-  context 'when variadic method is defined' do
-    it 'raises error' do
-      block = proc do
-        Class.new do
-          include QML::Access
-          def variadic_method(*args)
-          end
-        end
-      end
-      expect(&block).to raise_error(QML::AccessError)
-    end
-  end
-
 end

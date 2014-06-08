@@ -64,16 +64,19 @@ module QML
       create unless @klass
       return if @klass.meta_object == @metaobj
 
-      @metaobj.method_names.each do |name|
+      @metaobj.method_names.reject { |name| @metaobj.signal?(name) }.each do |name|
         define_method(name)
+      end
+      @metaobj.method_names.select { |name| @metaobj.signal?(name) }.each do |name|
+        define_signal(name)
       end
       @metaobj.property_names.each do |name|
         define_property(name)
       end
       @metaobj.enumerators.each do |k, v|
-        @klass.send :const_set, k, v
+        define_enum(k, v)
       end
-      @klass.send :meta_object=, @metaobj
+      @klass.__send__ :meta_object=, @metaobj
 
       self
     end
@@ -87,24 +90,28 @@ module QML
 
     def define_method(name)
       metaobj = @metaobj
-      return if @metaobj.private?(name)
-      if @metaobj.signal?(name)
-        @klass.send :variadic_signal, name, factory: proc { |obj|
-          QtSignal.new(@metaobj, obj.object_pointer, name)
-        }
-      else
-        @klass.send :define_method, name do |*args|
-          metaobj.invoke_method(@object_pointer, name, args)
-        end
-        @klass.send :private, name if @metaobj.protected?(name)
+      return if metaobj.private?(name)
+      @klass.__send__ :define_method, name do |*args|
+        metaobj.invoke_method(@object_pointer, name, args)
       end
+      @klass.__send__ :private, name if @metaobj.protected?(name)
+    end
+
+    def define_signal(name)
+      @klass.__send__ :variadic_signal, name, factory: proc { |obj|
+        QtSignal.new(@metaobj, obj.object_pointer, name)
+      }
     end
 
     def define_property(name)
       metaobj = @metaobj
-      @klass.send :property, name, factory: proc { |obj|
+      @klass.__send__ :property, name, factory: proc { |obj|
         QtProperty.new(@metaobj, obj.object_pointer, name)
       }
+    end
+
+    def define_enum(key, value)
+      @klass.__send__ :const_set, key, value
     end
   end
 end

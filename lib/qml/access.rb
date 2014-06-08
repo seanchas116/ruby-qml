@@ -23,13 +23,6 @@ module QML
       private
 
       def create_access_support
-        superclasses = Enumerator.new do |y|
-          klass = self
-          while klass.include?(Access)
-            y << klass
-            klass = klass.superclass
-          end
-        end
         classname = "RubyQml::Access::#{name}"
 
         signals = instance_signals.grep(ALLOWED_PATTERN)
@@ -43,7 +36,7 @@ module QML
         property_infos = properties
           .map { |name| OpenStruct.new(name: name, getter: name, setter: :"#{name}=", notifier: :"#{name}_changed") }
 
-        methods = superclasses
+        methods = ancestors.take_while { |k| k.include?(Access) }
           .map { |k| k.instance_methods(false) }.inject(&:|)
           .grep(ALLOWED_PATTERN)
         ignored_methods = signals | property_infos.flat_map { |p| [p.getter, p.setter, p.notifier] }

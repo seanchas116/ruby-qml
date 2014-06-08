@@ -1,6 +1,6 @@
 require 'logger'
 require 'ropework'
-require 'qml/object_base'
+require 'qml/qt_object_base'
 require 'qml/qml'
 
 module QML
@@ -82,7 +82,7 @@ module QML
 
     def create
       super_metaobj = @metaobj.super_class
-      @klass = Class.new(super_metaobj ? super_metaobj.build_class : ObjectBase)
+      @klass = Class.new(super_metaobj ? super_metaobj.build_class : QtObjectBase)
     end
 
     def define_method(name)

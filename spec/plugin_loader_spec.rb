@@ -11,7 +11,7 @@ describe QML::PluginLoader do
       let(:path) { QML::ROOT_PATH + 'ext/qml/plugins/testobject' }
       it 'creates an object instance' do
         loader.load
-        expect(loader.instance).to be_a QML::ObjectBase
+        expect(loader.instance).to be_a QML::QtObjectBase
       end
     end
 

@@ -5,13 +5,13 @@
 namespace RubyQml {
 namespace Ext {
 
-class ObjectPointer : public ExtBase<ObjectPointer>
+class QtObjectPointer : public ExtBase<QtObjectPointer>
 {
-    friend class ExtBase<ObjectPointer>;
+    friend class ExtBase<QtObjectPointer>;
 
 public:
-    ObjectPointer();
-    ~ObjectPointer();
+    QtObjectPointer();
+    ~QtObjectPointer();
 
     QObject *qObject() { return mObject; }
     QObject *fetchQObject();

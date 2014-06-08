@@ -1,5 +1,5 @@
 #include "ext_pluginloader.h"
-#include "ext_objectpointer.h"
+#include "ext_qtobjectpointer.h"
 #include <QtCore/QPluginLoader>
 #include <QtCore/QSet>
 

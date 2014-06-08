@@ -1,7 +1,7 @@
 #include "ext_metaobject.h"
 #include "conversion.h"
 #include "util.h"
-#include "ext_objectpointer.h"
+#include "ext_qtobjectpointer.h"
 #include "extbase.h"
 #include "signalforwarder.h"
 #include <QtCore/QMetaObject>
@@ -143,8 +143,8 @@ public:
         } else {
             auto ret = toRuby(returnValue);
             // add ownership to ObjectBase unless it has parent or is owned by QML engine
-            if (isKindOf(ret, ObjectPointer::rubyClass())) {
-                auto objectPointer = ObjectPointer::getPointer(ret);
+            if (isKindOf(ret, QtObjectPointer::rubyClass())) {
+                auto objectPointer = QtObjectPointer::getPointer(ret);
                 auto obj = objectPointer->fetchQObject();
                 if (QQmlEngine::objectOwnership(obj) == QQmlEngine::CppOwnership && !obj->parent()) {
                     objectPointer->setOwnership(true);
@@ -165,7 +165,7 @@ VALUE MetaObject::invokeMethod(VALUE object, VALUE methodName, VALUE args) const
     protect([&] {
         args = rb_check_array_type(args);
     });
-    auto obj = ObjectPointer::getPointer(object)->fetchQObject();
+    auto obj = QtObjectPointer::getPointer(object)->fetchQObject();
     for (int i : methodIndexes) {
         MethodInvoker invoker(args, mMetaObject->method(i));
         if (invoker.isArgsCompatible()) {
@@ -189,7 +189,7 @@ VALUE MetaObject::invokeMethod(VALUE object, VALUE methodName, VALUE args) const
 VALUE MetaObject::connectSignal(VALUE object, VALUE signalName, VALUE proc) const
 {
     auto id = idFromValue(signalName);
-    auto obj = ObjectPointer::getPointer(object)->fetchQObject();
+    auto obj = QtObjectPointer::getPointer(object)->fetchQObject();
 
     proc = send(proc, "to_proc");
 
@@ -221,7 +221,7 @@ VALUE MetaObject::getProperty(VALUE object, VALUE name) const
 {
     auto metaProperty = mMetaObject->property(findProperty(name));
 
-    auto qobj = ObjectPointer::getPointer(object)->fetchQObject();
+    auto qobj = QtObjectPointer::getPointer(object)->fetchQObject();
     QVariant result;
     withoutGvl([&] {
         result = metaProperty.read(qobj);
@@ -240,7 +240,7 @@ VALUE MetaObject::setProperty(VALUE object, VALUE name, VALUE newValue) const
         });
     }
 
-    auto qobj = ObjectPointer::getPointer(object)->fetchQObject();
+    auto qobj = QtObjectPointer::getPointer(object)->fetchQObject();
     auto variant = fromRuby<QVariant>(newValue);
     QVariant result;
     withoutGvl([&] {

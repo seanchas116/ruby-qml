@@ -1,5 +1,5 @@
 #include "ext_accesssupport.h"
-#include "ext_objectpointer.h"
+#include "ext_qtobjectpointer.h"
 #include "accessclass.h"
 #include "accessobject.h"
 
@@ -19,7 +19,7 @@ VALUE AccessSupport::initialize(VALUE className, VALUE methodInfos, VALUE signal
 
 VALUE AccessSupport::emitSignal(VALUE obj, VALUE name, VALUE args)
 {
-    auto accessObj = ObjectPointer::getPointer(send(obj, "access_object"))->fetchQObject();
+    auto accessObj = QtObjectPointer::getPointer(send(obj, "access_object"))->fetchQObject();
     auto nameId = SYM2ID(name);
     auto argVariants = fromRuby<QVariantList>(args);
     withoutGvl([&] {
@@ -30,7 +30,7 @@ VALUE AccessSupport::emitSignal(VALUE obj, VALUE name, VALUE args)
 
 VALUE AccessSupport::updateAccessObject(VALUE obj, VALUE accessObj)
 {
-    auto accessObjectPointer = ObjectPointer::getPointer(accessObj);
+    auto accessObjectPointer = QtObjectPointer::getPointer(accessObj);
     if (!accessObjectPointer->qObject()) {
         accessObjectPointer->setQObject(new AccessObject(mAccessClass, obj), false);
     }

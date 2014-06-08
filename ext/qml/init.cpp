@@ -1,5 +1,5 @@
 #include "ext_metaobject.h"
-#include "ext_objectpointer.h"
+#include "ext_qtobjectpointer.h"
 #include "ext_pluginloader.h"
 #include "ext_gcmarker.h"
 #include "ext_accesssupport.h"
@@ -38,7 +38,7 @@ void defineClasses()
 {
     unprotect([&] {
         Ext::MetaObject::defineClass();
-        Ext::ObjectPointer::defineClass();
+        Ext::QtObjectPointer::defineClass();
         Ext::PluginLoader::defineClass();
         Ext::GCMarker::defineClass();
         Ext::AccessSupport::defineClass();

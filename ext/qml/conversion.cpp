@@ -1,5 +1,5 @@
 #include "conversion.h"
-#include "ext_objectpointer.h"
+#include "ext_qtobjectpointer.h"
 #include "ext_metaobject.h"
 #include "objectdata.h"
 #include "accessobject.h"
@@ -189,17 +189,17 @@ QObject *Conversion<QObject *>::from(VALUE x)
         protect([&] {
             accessptr = rb_funcall(x, rb_intern("access_object"), 0);
         });
-        return Ext::ObjectPointer::getPointer(accessptr)->fetchQObject();
+        return Ext::QtObjectPointer::getPointer(accessptr)->fetchQObject();
     }
 
     VALUE objptr;
     protect([&] {
-        if (!rb_obj_is_kind_of(x, Ext::ObjectPointer::objectBaseClass())) {
+        if (!rb_obj_is_kind_of(x, Ext::QtObjectPointer::objectBaseClass())) {
             rb_raise(rb_path2class("QML::ConversionError"), "expected QML::ObjectBase, got %s", rb_obj_classname(x));
         }
         objptr = rb_funcall(x, rb_intern("object_pointer"), 0);
     });
-    auto obj = Ext::ObjectPointer::getPointer(objptr)->fetchQObject();
+    auto obj = Ext::QtObjectPointer::getPointer(objptr)->fetchQObject();
     Ext::MetaObject::getPointer(Ext::MetaObject::fromMetaObject(obj->metaObject()))->buildRubyClass();
     return obj;
 }
@@ -221,8 +221,8 @@ VALUE Conversion<QObject *>::to(QObject *obj)
 
     auto metaobj = Ext::MetaObject::fromMetaObject(obj->metaObject());
 
-    auto objptr = Ext::ObjectPointer::newAsRuby();
-    Ext::ObjectPointer::getPointer(objptr)->setQObject(obj);
+    auto objptr = Ext::QtObjectPointer::newAsRuby();
+    Ext::QtObjectPointer::getPointer(objptr)->setQObject(obj);
 
     auto rubyobj = send(Ext::MetaObject::getPointer(metaobj)->buildRubyClass(), "new", objptr);
     ObjectData::set(obj, std::make_shared<ObjectData>(rubyobj));
@@ -325,7 +325,7 @@ int categoryToMetaType(TypeCategory category)
 
 TypeCategory rubyValueCategory(VALUE x)
 {
-    auto objectBaseClass = Ext::ObjectPointer::objectBaseClass();
+    auto objectBaseClass = Ext::QtObjectPointer::objectBaseClass();
     auto metaObjectClass = Ext::MetaObject::rubyClass();
     TypeCategory category;
     protect([&] {

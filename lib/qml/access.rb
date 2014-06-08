@@ -68,7 +68,7 @@ module QML
       end
 
       def access_object
-        (@_access_object ||= ObjectPointer.new).tap do |accessobj|
+        (@_access_object ||= QtObjectPointer.new).tap do |accessobj|
           self.class.access_support.update_access_object(self, accessobj)
         end
       end

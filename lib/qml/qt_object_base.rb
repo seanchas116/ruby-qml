@@ -2,7 +2,7 @@ require 'ropework'
 require 'qml/context'
 
 module QML
-  class ObjectBase
+  class QtObjectBase
     include Ropework::Object
 
     class << self
@@ -14,7 +14,7 @@ module QML
 
     # @api private
     def initialize(objptr = nil)
-      fail 'ObjectBase#initialize is internal use only' unless objptr.is_a? ObjectPointer
+      fail 'ObjectBase#initialize is internal use only' unless objptr.is_a? QtObjectPointer
       @object_pointer = objptr
       super()
     end

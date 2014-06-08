@@ -1,4 +1,4 @@
-#include "ext_objectpointer.h"
+#include "ext_qtobjectpointer.h"
 #include <QtCore/QObject>
 #include <QtCore/QHash>
 #include <QtQml/QQmlEngine>
@@ -25,18 +25,18 @@ void destroyObject(QObject *obj)
 
 }
 
-ObjectPointer::ObjectPointer()
+QtObjectPointer::QtObjectPointer()
 {
 }
 
-ObjectPointer::~ObjectPointer()
+QtObjectPointer::~QtObjectPointer()
 {
     if (mHasOwnership) {
         destroyObject(mObject);
     }
 }
 
-QObject *ObjectPointer::fetchQObject()
+QObject *QtObjectPointer::fetchQObject()
 {
     if (!mObject) {
         fail("QML::NullObjectError", "referencing already deleted Qt Object");
@@ -44,7 +44,7 @@ QObject *ObjectPointer::fetchQObject()
     return mObject;
 }
 
-void ObjectPointer::setQObject(QObject *obj, bool hasOwnership)
+void QtObjectPointer::setQObject(QObject *obj, bool hasOwnership)
 {
     if (mHasOwnership && mObject) {
         destroyObject(mObject);
@@ -53,49 +53,49 @@ void ObjectPointer::setQObject(QObject *obj, bool hasOwnership)
     mHasOwnership = hasOwnership;
 }
 
-void ObjectPointer::setOwnership(bool ownership)
+void QtObjectPointer::setOwnership(bool ownership)
 {
     if (mObject) {
         mHasOwnership = ownership;
     }
 }
 
-VALUE ObjectPointer::hasOwnership() const
+VALUE QtObjectPointer::hasOwnership() const
 {
     return toRuby(mHasOwnership);
 }
 
-VALUE ObjectPointer::withOwnership() const
+VALUE QtObjectPointer::withOwnership() const
 {
     auto other = send(rubyClass(), "new");
-    ObjectPointer::getPointer(other)->setOwnership(true);
+    QtObjectPointer::getPointer(other)->setOwnership(true);
     return other;
 }
 
-VALUE ObjectPointer::isNull() const
+VALUE QtObjectPointer::isNull() const
 {
     return toRuby(bool(mObject));
 }
 
-VALUE ObjectPointer::toString() const
+VALUE QtObjectPointer::toString() const
 {
     QString name;
     QDebug(&name) << mObject.data();
     return toRuby(name);
 }
 
-VALUE ObjectPointer::mObjectBaseClass = Qnil;
+VALUE QtObjectPointer::mObjectBaseClass = Qnil;
 
-ObjectPointer::ClassBuilder ObjectPointer::buildClass()
+QtObjectPointer::ClassBuilder QtObjectPointer::buildClass()
 {
     protect([&] {
-        mObjectBaseClass = rb_define_class_under(rb_path2class("QML"), "ObjectBase", rb_cObject);
+        mObjectBaseClass = rb_define_class_under(rb_path2class("QML"), "QtObjectBase", rb_cObject);
     });
-    ClassBuilder builder("QML", "ObjectPointer");
-    builder.defineMethod<METHOD_TYPE_NAME(&ObjectPointer::hasOwnership)>("has_ownership?");
-    builder.defineMethod<METHOD_TYPE_NAME(&ObjectPointer::withOwnership)>("with_ownership");
-    builder.defineMethod<METHOD_TYPE_NAME(&ObjectPointer::isNull)>("null?");
-    builder.defineMethod<METHOD_TYPE_NAME(&ObjectPointer::toString)>("to_s");
+    ClassBuilder builder("QML", "QtObjectPointer");
+    builder.defineMethod<METHOD_TYPE_NAME(&QtObjectPointer::hasOwnership)>("has_ownership?");
+    builder.defineMethod<METHOD_TYPE_NAME(&QtObjectPointer::withOwnership)>("with_ownership");
+    builder.defineMethod<METHOD_TYPE_NAME(&QtObjectPointer::isNull)>("null?");
+    builder.defineMethod<METHOD_TYPE_NAME(&QtObjectPointer::toString)>("to_s");
     builder.aliasMethod("to_s", "inspect");
     return builder;
 }

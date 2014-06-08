@@ -20,9 +20,10 @@ public:
 
     VALUE updateAccessObject(VALUE obj, VALUE accessObj);
 
+    static void initClass();
+
 private:
     void mark() {}
-    static ClassBuilder buildClass();
 
     SP<AccessClass> mAccessClass;
     SP<ForeignMetaObject> mMetaObject;

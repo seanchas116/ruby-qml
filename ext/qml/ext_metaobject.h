@@ -45,11 +45,11 @@ public:
     VALUE buildRubyClass();
 
     static VALUE fromMetaObject(const QMetaObject *metaObject);
+    static void initClass();
 
 private:
 
     void mark() {}
-    static ClassBuilder buildClass();
 
     QList<int> findMethods(VALUE name) const;
     int findProperty(VALUE name) const;

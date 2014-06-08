@@ -47,15 +47,7 @@ public:
 
     static VALUE rubyClass()
     {
-        if (mKlass == Qnil) {
-            mKlass = TDerived::buildClass().rubyClass();
-        }
         return mKlass;
-    }
-
-    static void defineClass()
-    {
-        rubyClass();
     }
 
 private:
@@ -83,7 +75,6 @@ private:
     }
 
     VALUE mSelf;
-
     static VALUE mKlass;
 };
 
@@ -170,8 +161,6 @@ private:
             return ret;
         }
     };
-
-    VALUE mKlass = Qnil;
 };
 
 }

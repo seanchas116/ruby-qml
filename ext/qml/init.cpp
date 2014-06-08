@@ -37,11 +37,11 @@ void defineMetaTypes()
 void defineClasses()
 {
     unprotect([&] {
-        Ext::MetaObject::defineClass();
-        Ext::QtObjectPointer::defineClass();
-        Ext::PluginLoader::defineClass();
-        Ext::GCMarker::defineClass();
-        Ext::AccessSupport::defineClass();
+        Ext::MetaObject::initClass();
+        Ext::QtObjectPointer::initClass();
+        Ext::PluginLoader::initClass();
+        Ext::GCMarker::initClass();
+        Ext::AccessSupport::initClass();
     });
 }
 

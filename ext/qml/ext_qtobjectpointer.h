@@ -24,11 +24,11 @@ public:
     VALUE toString() const;
 
     static VALUE objectBaseClass() { return mObjectBaseClass; }
+    static void initClass();
 
 private:
 
     void mark() {}
-    static ClassBuilder buildClass();
 
     bool mHasOwnership = false;
     QPointer<QObject> mObject;

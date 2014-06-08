@@ -38,13 +38,12 @@ VALUE AccessSupport::updateAccessObject(VALUE obj, VALUE accessObj)
     return Qnil;
 }
 
-AccessSupport::ClassBuilder AccessSupport::buildClass()
+void AccessSupport::initClass()
 {
     ClassBuilder builder("QML", "AccessSupport");
     builder.defineMethod<METHOD_TYPE_NAME(&AccessSupport::initialize)>("initialize", MethodAccess::Protected);
     builder.defineMethod<METHOD_TYPE_NAME(&AccessSupport::emitSignal)>("emit_signal");
     builder.defineMethod<METHOD_TYPE_NAME(&AccessSupport::updateAccessObject)>("update_access_object");
-    return builder;
 }
 
 } // namespace Ext

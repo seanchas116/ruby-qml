@@ -370,7 +370,7 @@ VALUE MetaObject::fromMetaObject(const QMetaObject *metaObject)
     return value;
 }
 
-MetaObject::ClassBuilder MetaObject::buildClass()
+void MetaObject::initClass()
 {
     ClassBuilder builder("QML", "MetaObject");
 
@@ -397,8 +397,6 @@ MetaObject::ClassBuilder MetaObject::buildClass()
     builder.defineMethod<METHOD_TYPE_NAME(&MetaObject::isEqual)>("==");
     builder.defineMethod<METHOD_TYPE_NAME(&MetaObject::hash)>("hash");
     builder.aliasMethod("eql?", "==");
-
-    return builder;
 }
 
 } // namespace Ext

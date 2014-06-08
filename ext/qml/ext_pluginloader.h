@@ -20,9 +20,10 @@ public:
     VALUE load();
     VALUE instance();
 
+    static void initClass();
+
 private:
     void mark() {}
-    static ClassBuilder buildClass();
     std::unique_ptr<QPluginLoader> mPluginLoader;
 };
 

@@ -13,10 +13,10 @@ public:
     GCMarker();
 
     void setMarkFunction(const std::function<void()> &func);
+    static void initClass();
 
 private:
     void mark();
-    static ClassBuilder buildClass();
 
     std::function<void ()> mMarkFunc;
 };

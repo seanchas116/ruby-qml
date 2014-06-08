@@ -86,7 +86,7 @@ VALUE QtObjectPointer::toString() const
 
 VALUE QtObjectPointer::mObjectBaseClass = Qnil;
 
-QtObjectPointer::ClassBuilder QtObjectPointer::buildClass()
+void QtObjectPointer::initClass()
 {
     protect([&] {
         mObjectBaseClass = rb_define_class_under(rb_path2class("QML"), "QtObjectBase", rb_cObject);
@@ -97,7 +97,6 @@ QtObjectPointer::ClassBuilder QtObjectPointer::buildClass()
     builder.defineMethod<METHOD_TYPE_NAME(&QtObjectPointer::isNull)>("null?");
     builder.defineMethod<METHOD_TYPE_NAME(&QtObjectPointer::toString)>("to_s");
     builder.aliasMethod("to_s", "inspect");
-    return builder;
 }
 
 } // namespace Ext

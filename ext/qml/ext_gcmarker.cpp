@@ -19,10 +19,10 @@ void GCMarker::mark()
         mMarkFunc();
 }
 
-GCMarker::ClassBuilder GCMarker::buildClass()
+void GCMarker::initClass()
 {
     ClassBuilder builder("QML", "GCProtection");
-    return builder;
+    Q_UNUSED(builder);
 }
 
 } // namespace Ext

@@ -60,14 +60,14 @@ VALUE Conversion<QString>::to(const QString &str)
 
 QDateTime Conversion<QDateTime>::from(VALUE x)
 {
-    QDateTime ret;
+    long long num;
+    long long den;
     protect([&] {
-        auto at = rb_convert_type(x, T_RATIONAL, "Rational", "to_r");
-        long long num = NUM2LL(RRATIONAL(at)->num);
-        long long den = NUM2LL(RRATIONAL(at)->den);
-        ret = QDateTime::fromMSecsSinceEpoch(num * 1000 / den);
+        auto at = rb_funcall(x, rb_intern("to_r"), 0);
+        num = NUM2LL(RRATIONAL(at)->num);
+        den = NUM2LL(RRATIONAL(at)->den);
     });
-    return ret;
+    return QDateTime::fromMSecsSinceEpoch(num * 1000 / den);
 }
 
 VALUE Conversion<QDateTime>::to(const QDateTime &dateTime)

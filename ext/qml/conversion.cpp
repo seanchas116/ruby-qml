@@ -197,7 +197,7 @@ QObject *Conversion<QObject *>::from(VALUE x)
         if (!rb_obj_is_kind_of(x, Ext::ObjectPointer::objectBaseClass())) {
             rb_raise(rb_path2class("QML::ConversionError"), "expected QML::ObjectBase, got %s", rb_obj_classname(x));
         }
-        objptr = rb_ivar_get(x, rb_intern("@objptr"));
+        objptr = rb_funcall(x, rb_intern("object_pointer"), 0);
     });
     auto obj = Ext::ObjectPointer::getPointer(objptr)->fetchQObject();
     Ext::MetaObject::getPointer(Ext::MetaObject::fromMetaObject(obj->metaObject()))->updateClass();

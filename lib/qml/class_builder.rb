@@ -13,80 +13,41 @@ module QML
     alias_method :to_s, :inspect
   end
 
-  class QtProperty < Ropework::Property
-    def initialize(objptr, metaobj, name)
-      super()
-      @objptr = objptr
-      @metaobj = metaobj
-      @name = name
-    end
+  class QtProperty
+    prepend Ropework::Bindable
 
-    alias_method :set_value_orig, :value=
+    attr_reader :changed
+
+    def initialize(metaobj, objptr, name)
+      super()
+      @metaobj = metaobj
+      @objptr = objptr
+      @name = name
+      @changed = QtSignal.new(metaobj, objptr, @metaobj.notify_signal(@name))
+    end
 
     def value=(newval)
-      lazy_initialize
-      write_value(newval)
-    end
-
-    def value
-      lazy_initialize
-      super
-    end
-
-    def changed
-      lazy_initialize
-      super
-    end
-
-    private
-
-    def write_value(newval)
       @metaobj.set_property(@objptr, @name, newval)
     end
 
-    def read_value
-      @metaobj.get_property(@objptr, @name)
-    end
-
-    def lazy_initialize
-      return if @initialized
-
-      begin
-        set_value_orig(read_value)
-        signal = @metaobj.notify_signal(@name)
-        @metaobj.connect_signal(@objptr, signal, method(:set_value_orig)) if signal
-        @initialized = true
-      rescue ConversionError
-        @initialized = true
-        set_value_orig(UnsupportedTypeValue.new)
-      end
+    def value
+      @metaobj.get_property(@objptr, @name) rescue UnsupportedTypeValue.new
     end
   end
 
   class QtSignal < Ropework::Signal
-    def initialize(objptr, metaobj, name)
+    def initialize(metaobj, objptr, name)
       super(variadic: true)
       @objptr = objptr
       @metaobj = metaobj
       @name = name
     end
 
-    def connect(&block)
-      lazy_initialize
-      super
-    end
-
-    alias_method :emit_orig, :emit
-
-    def emit(*args)
-      @metaobj.invoke(@name, args)
-    end
-
     private
 
-    def lazy_initialize
+    def connected(block)
       return if @initialized
-      @metaobj.connect_signal(@objptr, @name, method(:emit_orig))
+      @metaobj.connect_signal(@objptr, @name, method(:emit))
       @initialized = true
     end
   end
@@ -143,10 +104,12 @@ module QML
       return if @metaobj.private?(name)
       if @metaobj.signal?(name)
         @logger.info "signal: #{name}"
-        klass.send :signal, name, signal: proc { QtSignal.new(@objptr, metaobj, name) }
+        klass.send :variadic_signal, name, factory: proc { |obj|
+          QtSignal.new(@metaobj, obj.object_pointer, name)
+        }
       else
         klass.send :define_method, name do |*args|
-          metaobj.invoke_method(@objptr, name, args)
+          metaobj.invoke_method(@object_pointer, name, args)
         end
         klass.send :private, name if @metaobj.protected?(name)
       end
@@ -154,7 +117,9 @@ module QML
 
     def define_property(klass, name)
       metaobj = @metaobj
-      klass.send :property, name, property: proc { QtProperty.new(@objptr, metaobj, name) }
+      klass.send :property, name, factory: proc { |obj|
+        QtProperty.new(@metaobj, obj.object_pointer, name)
+      }
     end
   end
 end

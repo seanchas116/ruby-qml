@@ -6,8 +6,7 @@ module QML
   module Access
     def self.included(derived)
       derived.class_eval do
-        include Ropework::PropertyDef
-        include Ropework::SignalDef
+        include Ropework::Object
         include InstanceMethods
         extend ClassMethods
       end
@@ -32,26 +31,27 @@ module QML
           end
         end
         classname = "RubyQml::Access::#{name}"
-        
-        signals = []
-        methods = []
-        properties = []
-        superclasses.flat_map(&:signals).grep(ALLOWED_PATTERN).each do |name|
-          params = signal_defs(include_super: true)[name].args
-          fail AccessError, "cannot export variadic signal: #{name}" unless params
-          signals << OpenStruct.new(name: name, params: params)
+
+        signals = instance_signals.grep(ALLOWED_PATTERN)
+        properties = instance_properties.grep(ALLOWED_PATTERN)
+
+        signal_infos = signals.map do |name|
+          signal = instance_signal(name)
+          next if signal.variadic?
+          params = signal.parameters.map(&:last)
+          OpenStruct.new(name: name, params: params)
         end
-        superclasses.flat_map(&:properties).grep(ALLOWED_PATTERN).each do |name|
-          properties << OpenStruct.new(name: name, getter: name, setter: :"#{name}=", notifier: :"#{name}_changed")
-          signals << OpenStruct.new(name: :"#{name}_changed", params: [:new_value])
+        property_infos = properties.map do |name|
+          OpenStruct.new(name: name, getter: name, setter: :"#{name}=", notifier: :"#{name}_changed")
         end
-        superclasses.flat_map { |k| k.instance_methods(false) }.grep(ALLOWED_PATTERN).each do |name|
-          if signals.find { |signal| signal.name == name } || properties.find { |property| property.getter == name || property.setter == name || property.notifier == name }
-            next
-          end
-          methods << OpenStruct.new(name: name, params: instance_method(name).parameters.map(&:last))
+
+        methods = superclasses.map { |k| k.instance_methods(false) }.inject(&:|).grep(ALLOWED_PATTERN)
+        ignored_methods = signals | property_infos.flat_map { |p| [p.getter, p.setter, p.notifier] }
+        method_infos = (methods - ignored_methods).map do |name|
+          OpenStruct.new(name: name, params: instance_method(name).parameters.map(&:last))
         end
-        AccessSupport.new(classname, methods, signals, properties)
+
+        AccessSupport.new(classname, method_infos, signal_infos, property_infos)
       end
     end
 

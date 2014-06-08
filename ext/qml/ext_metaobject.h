@@ -42,7 +42,7 @@ public:
     void setMetaObject(const QMetaObject *metaObject);
     const QMetaObject *metaObject() const { return mMetaObject; }
 
-    VALUE updateClass();
+    VALUE buildRubyClass();
 
     static VALUE fromMetaObject(const QMetaObject *metaObject);
 

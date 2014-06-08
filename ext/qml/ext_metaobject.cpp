@@ -358,9 +358,9 @@ void MetaObject::setMetaObject(const QMetaObject *metaObject)
     mPropertyHash = propertyHash;
 }
 
-VALUE MetaObject::updateClass()
+VALUE MetaObject::buildRubyClass()
 {
-    return send(self(), "update_class");
+    return send(self(), "build_class");
 }
 
 VALUE MetaObject::fromMetaObject(const QMetaObject *metaObject)

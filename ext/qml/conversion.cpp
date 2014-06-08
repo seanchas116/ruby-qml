@@ -200,7 +200,7 @@ QObject *Conversion<QObject *>::from(VALUE x)
         objptr = rb_funcall(x, rb_intern("object_pointer"), 0);
     });
     auto obj = Ext::ObjectPointer::getPointer(objptr)->fetchQObject();
-    Ext::MetaObject::getPointer(Ext::MetaObject::fromMetaObject(obj->metaObject()))->updateClass();
+    Ext::MetaObject::getPointer(Ext::MetaObject::fromMetaObject(obj->metaObject()))->buildRubyClass();
     return obj;
 }
 
@@ -224,7 +224,7 @@ VALUE Conversion<QObject *>::to(QObject *obj)
     auto objptr = Ext::ObjectPointer::newAsRuby();
     Ext::ObjectPointer::getPointer(objptr)->setQObject(obj);
 
-    auto rubyobj = send(Ext::MetaObject::getPointer(metaobj)->updateClass(), "new", objptr);
+    auto rubyobj = send(Ext::MetaObject::getPointer(metaobj)->buildRubyClass(), "new", objptr);
     ObjectData::set(obj, std::make_shared<ObjectData>(rubyobj));
     return rubyobj;
 }

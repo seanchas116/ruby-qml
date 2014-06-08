@@ -2,7 +2,6 @@ require 'logger'
 require 'ropework'
 require 'qml/object_base'
 require 'qml/qml'
-require 'qml/null_logger'
 
 module QML
 
@@ -56,68 +55,54 @@ module QML
 
     attr_reader :metaobj, :klass
 
-    def initialize(metaobj)
+    def initialize(metaobj, klass)
       @metaobj = metaobj
-      #@logger = Logger.new(PROJECT_ROOT + 'log/class_builder.log')
-      @logger = NullLogger.new
+      @klass = klass
     end
 
-    def create
-      super_metaobj = @metaobj.super_class
-      klass = Class.new(super_metaobj ? super_metaobj.update_class : ObjectBase)
-      update(klass)
-    end
-
-    def update(klass)
-      return if klass.meta_object == @metaobj
-
-      @logger.info "--------"
-      @logger.info "creating class for #{@metaobj.name}"
-      @logger.info "metaobject id: #{@metaobj.object_id}"
-      @logger.info "--------"
-
-      @logger.info "methods:"
-      @logger.info @metaobj.method_names.inspect
+    def build
+      create unless @klass
+      return if @klass.meta_object == @metaobj
 
       @metaobj.method_names.each do |name|
-        define_method(klass, name)
+        define_method(name)
       end
-
-      @logger.info "properties:"
-      @logger.info @metaobj.property_names.inspect
-
       @metaobj.property_names.each do |name|
-        define_property(klass, name)
+        define_property(name)
       end
       @metaobj.enumerators.each do |k, v|
-        klass.send :const_set, k, v
+        @klass.send :const_set, k, v
       end
-      klass.send :meta_object=, @metaobj
+      @klass.send :meta_object=, @metaobj
 
-      klass
+      self
     end
 
     private
 
-    def define_method(klass, name)
+    def create
+      super_metaobj = @metaobj.super_class
+      @klass = Class.new(super_metaobj ? super_metaobj.build_class : ObjectBase)
+    end
+
+    def define_method(name)
       metaobj = @metaobj
       return if @metaobj.private?(name)
       if @metaobj.signal?(name)
-        @logger.info "signal: #{name}"
-        klass.send :variadic_signal, name, factory: proc { |obj|
+        @klass.send :variadic_signal, name, factory: proc { |obj|
           QtSignal.new(@metaobj, obj.object_pointer, name)
         }
       else
-        klass.send :define_method, name do |*args|
+        @klass.send :define_method, name do |*args|
           metaobj.invoke_method(@object_pointer, name, args)
         end
-        klass.send :private, name if @metaobj.protected?(name)
+        @klass.send :private, name if @metaobj.protected?(name)
       end
     end
 
-    def define_property(klass, name)
+    def define_property(name)
       metaobj = @metaobj
-      klass.send :property, name, factory: proc { |obj|
+      @klass.send :property, name, factory: proc { |obj|
         QtProperty.new(@metaobj, obj.object_pointer, name)
       }
     end

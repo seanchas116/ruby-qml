@@ -15,10 +15,6 @@ module QML
       @extension = Plugins.core.createEngineExtension(qt_engine)
     end
 
-    def qt_engine
-      @extension.engine
-    end
-
     def context
       Context.from_qt(@extension.rootContext)
     end

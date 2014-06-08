@@ -9,7 +9,7 @@ module QML
       @engine = engine
       @data = data
       @path = path
-      @extension = Plugins.core.createComponentExtension(Plugins.core.createComponent(engine.qt_engine))
+      @extension = Plugins.core.createComponentExtension(Plugins.core.createComponent(engine.qt_object))
 
       if data
         @extension.loadString(data, (path && path.to_s) || '')
@@ -22,10 +22,6 @@ module QML
 
     def create
       @extension.create
-    end
-
-    def qt_component
-      @extension.component
     end
   end
 end

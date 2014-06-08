@@ -18,10 +18,6 @@ module QML
       Engine.from_qt(@extension.engine)
     end
 
-    def qt_context
-      @extension.context
-    end
-
     def eval(obj, str)
       @extension.evaluate(obj, str)
     end

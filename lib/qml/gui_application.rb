@@ -13,9 +13,5 @@ module QML
       super(qt_app)
       @extension = Plugins.core.createApplicationExtension(qt_app)
     end
-
-    def qt_application
-      @extension.application
-    end
   end
 end

@@ -26,36 +26,37 @@ describe QML::Access do
   end
 
   let(:engine) { QML::Engine.new }
-  let(:component) do
-    QML::Component.new engine, data: <<-EOS
-      import QtQuick 2.2
-      Item {
-        id: root
-        property string text: foo.text + foo.text
-        Connections {
-          id: connections
-          target: foo
-          property var args
-          onSome_signal: {
-            args = [arg]
+  let(:component) { QML::Component.new engine, data: data }
+  let(:root) { component.create }
+
+  context 'when used in context' do
+
+    let(:data) do
+      <<-EOS
+        import QtQuick 2.2
+        Item {
+          id: root
+          property string text: foo.text + foo.text
+          Connections {
+            id: connections
+            target: foo
+            property var args
+            onSome_signal: {
+              args = [arg]
+            }
           }
         }
-      }
-    EOS
-  end
-  let(:foo) { Foo.new }
-  let(:bar) { Bar.new }
-  let(:root) { component.create }
-  let(:test_object) { QML::Plugins.testobject.createTestObject }
+      EOS
+    end
+    let(:foo) { Foo.new }
+    let(:bar) { Bar.new }
 
-  before do
-    engine.context[:foo] = foo
-    engine.context[:bar] = bar
-    engine.context[:test_object] = test_object
-    root
-  end
+    before do
+      engine.context[:foo] = foo
+      engine.context[:bar] = bar
+      root
+    end
 
-  context 'in QML' do
     describe '#some_method' do
       it 'returns value' do
         expect(root.qml_eval('foo.some_method(100, 200)')).to eq 300
@@ -89,5 +90,8 @@ describe QML::Access do
         expect(root.qml_eval('connections.args')).to eq ['foo']
       end
     end
+  end
+
+  context 'when used as QML type' do
   end
 end

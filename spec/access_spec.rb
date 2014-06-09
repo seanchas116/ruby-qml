@@ -29,6 +29,49 @@ describe QML::Access do
   let(:component) { QML::Component.new engine, data: data }
   let(:root) { component.create }
 
+  describe '.register_to_qml' do
+
+    context 'when namespace, version, name are given' do
+
+      class Hoge
+        include QML::Access
+        register_to_qml under: 'HogeNS', version: '1.2', name: 'Hoge'
+      end
+
+      let(:data) do
+        <<-EOS
+          import HogeNS 1.2
+          Hoge {}
+        EOS
+      end
+      it 'registers the class as a QML type' do
+        expect { component.create }.not_to raise_error
+      end
+    end
+
+    context 'when arguments are omitted' do
+
+      module HogeModule
+        class Hoge
+          include QML::Access
+          register_to_qml
+        end
+        VERSION = '0.1.0'
+      end
+
+      let(:data) do
+        <<-EOS
+          import HogeModule 0.1
+          Hoge {}
+        EOS
+      end
+
+      it 'guesses them from the Ruby class name ,namespace and VERSION constant' do
+        expect { component.create }.not_to raise_error
+      end
+    end
+  end
+
   context 'when used in context' do
 
     let(:data) do

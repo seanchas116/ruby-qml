@@ -16,6 +16,9 @@ module QML
 
     module ClassMethods
 
+      def register_to_qml(under: nil, version: nil, name: nil)
+      end
+
       def access_support
         @access_support ||= create_access_support
       end

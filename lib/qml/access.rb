@@ -16,17 +16,28 @@ module QML
 
     module ClassMethods
 
+      # Registers the class as a QML type.
+      # You must call this method in the bottom of class definition
+      # because it creates the meta object for the class and it is immutable after creation.
+      # @param under [String|nil] The namespece which encapsulates the exported QML type. If not specified, automatically inferred from the module nesting of the class.
+      # @param version [String|nil] The version of the type. Defaults to VERSION constant of the encapsulating module / class of the class.
+      # @param name [String|nil] The name of the type. Defaults to the name of the class.
+      # @example
+      #   class Foo
+      #     # ... definitions
+      #     register_to_qml
+      #   end
       def register_to_qml(under: nil, version: nil, name: nil)
         if !under || !version || !name
           path = self.name.split('::')
         end
         if !under && !version
           fail AccessError, "cannot guess namespace of toplevel class '#{self.name}'" if path.size == 1
-          namespace = path[0, path.size - 1].join('::')
+          encapsulatings = path[0, path.size - 1]
         end
 
-        under ||= namespace
-        version ||= eval("::#{namespace}").const_get(:VERSION)
+        under ||= encapsulatings.join('.')
+        version ||= eval("::#{encapsulatings.join('::')}").const_get(:VERSION)
         versions = version.split('.').map(&method(:Integer))
         fail AccessError, 'insufficient version (major and minor versions required)' unless versions.size >= 2
         name ||= path.last

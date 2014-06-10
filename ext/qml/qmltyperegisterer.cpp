@@ -57,8 +57,7 @@ void QmlTypeRegisterer::registerType(const char *uri, int versionMajor, int vers
 
         uri, versionMajor, versionMinor, qmlName, mMetaObject.get(),
 
-        QQmlPrivate::attachedPropertiesFunc<AccessObject>(),
-        QQmlPrivate::attachedPropertiesMetaObject<AccessObject>(),
+        0, 0,
 
         QQmlPrivate::StaticCastSelector<AccessObject,QQmlParserStatus>::cast(),
         QQmlPrivate::StaticCastSelector<AccessObject,QQmlPropertyValueSource>::cast(),

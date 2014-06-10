@@ -35,13 +35,9 @@ VALUE AccessSupport::emitSignal(VALUE obj, VALUE name, VALUE args)
     return Qnil;
 }
 
-VALUE AccessSupport::updateAccessObject(VALUE obj, VALUE accessObj)
+VALUE AccessSupport::createAccessObject(VALUE access)
 {
-    auto accessObjectPointer = QtObjectPointer::getPointer(accessObj);
-    if (!accessObjectPointer->qObject()) {
-        accessObjectPointer->setQObject(new AccessObject(mMetaObject, obj), false);
-    }
-    return Qnil;
+    return QtObjectPointer::fromQObject(new AccessObject(mMetaObject, access), false);
 }
 
 VALUE AccessSupport::registerToQml(VALUE path, VALUE majorVersion, VALUE minorVersion, VALUE name)
@@ -49,7 +45,8 @@ VALUE AccessSupport::registerToQml(VALUE path, VALUE majorVersion, VALUE minorVe
     if (!mTypeRegisterer) {
         mTypeRegisterer = makeSP<QmlTypeRegisterer>(mMetaObject, [this](void *where) {
             auto value = send(mRubyClass, "new");
-            new(where) AccessObject(mMetaObject, value);
+            auto obj = QtObjectPointer::fromQObject(new(where) AccessObject(mMetaObject, value), false);
+            send(value, "access_object=", obj);
         });
         mTypeRegisterer->registerType(fromRuby<QByteArray>(path), fromRuby<int>(majorVersion), fromRuby<int>(minorVersion), fromRuby<QByteArray>(name));
     }
@@ -61,7 +58,7 @@ void AccessSupport::initClass()
     ClassBuilder builder("QML", "AccessSupport");
     builder.defineMethod<METHOD_TYPE_NAME(&AccessSupport::initialize)>("initialize", MethodAccess::Protected);
     builder.defineMethod<METHOD_TYPE_NAME(&AccessSupport::emitSignal)>("emit_signal");
-    builder.defineMethod<METHOD_TYPE_NAME(&AccessSupport::updateAccessObject)>("update_access_object");
+    builder.defineMethod<METHOD_TYPE_NAME(&AccessSupport::createAccessObject)>("create_access_object");
     builder.defineMethod<METHOD_TYPE_NAME(&AccessSupport::registerToQml)>("register_to_qml");
 }
 

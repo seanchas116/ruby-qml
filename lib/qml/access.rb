@@ -77,12 +77,18 @@ module QML
             access_support.emit_signal(self, name, args)
           end
         end
+        @_access_object = QtObjectPointer.new
       end
 
       def access_object
-        (@_access_object ||= QtObjectPointer.new).tap do |accessobj|
-          self.class.access_support.update_access_object(self, accessobj)
+        if @_access_object.null?
+          @_access_object = self.class.access_support.create_access_object(self)
         end
+        @_access_object
+      end
+
+      def access_object=(obj)
+        @_access_object = obj
       end
     end
   end

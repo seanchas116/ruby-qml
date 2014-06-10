@@ -20,8 +20,7 @@ public:
     VALUE initialize(VALUE rubyClass, VALUE className, VALUE methodInfos, VALUE signalInfos, VALUE propertyInfos);
     VALUE emitSignal(VALUE obj, VALUE name, VALUE args);
     VALUE registerToQml(VALUE path, VALUE majorVersion, VALUE minorVersion, VALUE name);
-
-    VALUE updateAccessObject(VALUE obj, VALUE accessObj);
+    VALUE createAccessObject(VALUE access);
 
     static void initClass();
 

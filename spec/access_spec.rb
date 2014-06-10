@@ -35,6 +35,8 @@ describe QML::Access do
 
       class Hoge
         include QML::Access
+        property :text
+
         def some_method(a, b)
           a + b
         end
@@ -46,6 +48,8 @@ describe QML::Access do
           import QtQuick 2.2
           import HogeNS 1.2
           Item {
+            id: root
+            property var bound: hoge.text + hoge.text
             Hoge { id: hoge }
           }
         EOS
@@ -56,6 +60,14 @@ describe QML::Access do
       describe 'Hoge#some_method' do
         it 'returns value' do
           expect(root.qml_eval('hoge.some_method(100, 200)')).to eq 300
+        end
+      end
+      describe 'Hoge text property' do
+        it 'can be used to property binding' do
+          root.qml_eval('hoge').text = "foo"
+          expect(root.qml_eval('root').bound).to eq 'foofoo'
+          root.qml_eval('hoge').text = "bar"
+          expect(root.qml_eval('root').bound).to eq 'barbar'
         end
       end
     end

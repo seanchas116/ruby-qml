@@ -36,6 +36,13 @@ QtObjectPointer::~QtObjectPointer()
     }
 }
 
+VALUE QtObjectPointer::fromQObject(QObject *obj, bool hasOwnership)
+{
+    auto ptr = newAsRuby();
+    QtObjectPointer::getPointer(ptr)->setQObject(obj, hasOwnership);
+    return ptr;
+}
+
 QObject *QtObjectPointer::fetchQObject()
 {
     if (!mObject) {
@@ -74,7 +81,7 @@ VALUE QtObjectPointer::withOwnership() const
 
 VALUE QtObjectPointer::isNull() const
 {
-    return toRuby(bool(mObject));
+    return toRuby(!mObject);
 }
 
 VALUE QtObjectPointer::toString() const

@@ -13,6 +13,8 @@ public:
     QtObjectPointer();
     ~QtObjectPointer();
 
+    static VALUE fromQObject(QObject *obj, bool hasOwnership);
+
     QObject *qObject() { return mObject; }
     QObject *fetchQObject();
     void setQObject(QObject *obj, bool hasOwnership = false);

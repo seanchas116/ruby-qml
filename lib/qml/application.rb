@@ -1,6 +1,6 @@
-require 'qml/gui_application'
+require 'qml/simple_application'
 
 module QML
-  class Application < GUIApplication
+  class Application < SimpleApplication
   end
 end

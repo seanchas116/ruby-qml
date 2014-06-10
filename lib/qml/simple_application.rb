@@ -2,7 +2,7 @@ require 'qml/plugins'
 require 'qml/unique_wrapper'
 
 module QML
-  class GUIApplication < UniqueWrapper
+  class SimpleApplication < UniqueWrapper
 
     def self.wrap(qt_app)
       new(qt_app: qt_app)

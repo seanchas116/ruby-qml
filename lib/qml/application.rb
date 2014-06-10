@@ -3,6 +3,14 @@ require 'qml/simple_application'
 module QML
   class Application < SimpleApplication
 
+    def initialize(qt_app: nil)
+      super(qt_app: qt_app)
+      if block_given?
+        yield self
+        exec
+      end
+    end
+
     def engine
       @engine ||= Engine.new
     end

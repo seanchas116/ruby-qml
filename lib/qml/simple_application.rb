@@ -13,7 +13,7 @@ module QML
     end
 
     def initialize(qt_app: nil)
-      qt_app ||= Plugins.core.createGuiApplication(ARGV)
+      qt_app ||= Plugins.core.createApplication(ARGV)
       super(qt_app)
       @extension = Plugins.core.createApplicationExtension(qt_app)
     end

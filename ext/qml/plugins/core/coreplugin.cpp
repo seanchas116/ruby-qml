@@ -3,7 +3,7 @@
 #include "engineextension.h"
 #include "componentextension.h"
 #include "contextextension.h"
-#include <QGuiApplication>
+#include <QApplication>
 #include <QQmlEngine>
 #include <QQmlComponent>
 #include <QQmlContext>
@@ -17,19 +17,19 @@ CorePlugin::CorePlugin(QObject *parent) :
     qRegisterMetaType<EngineExtension *>();
     qRegisterMetaType<ComponentExtension *>();
     qRegisterMetaType<ContextExtension *>();
-    qRegisterMetaType<QGuiApplication *>();
+    qRegisterMetaType<QApplication *>();
     qRegisterMetaType<QCoreApplication *>();
     qRegisterMetaType<QQmlEngine *>();
     qRegisterMetaType<QQmlComponent *>();
     qRegisterMetaType<QQmlContext *>();
 }
 
-QGuiApplication *CorePlugin::applicationInstance()
+QApplication *CorePlugin::applicationInstance()
 {
-    return qobject_cast<QGuiApplication *>(qApp);
+    return qApp;
 }
 
-QGuiApplication *CorePlugin::createGuiApplication(const QVariantList &args)
+QApplication *CorePlugin::createApplication(const QVariantList &args)
 {
     static bool created = false;
     static QList<QByteArray> staticArgs;
@@ -49,7 +49,7 @@ QGuiApplication *CorePlugin::createGuiApplication(const QVariantList &args)
     std::transform(staticArgs.begin(), staticArgs.end(), argv, [](QByteArray &ba) {
         return ba.data();
     });
-    auto app = new QGuiApplication(argc, argv);
+    auto app = new QApplication(argc, argv);
     created = true;
     return app;
 }
@@ -69,7 +69,7 @@ QQmlContext *CorePlugin::createContext(QQmlEngine *engine)
     return new QQmlContext(engine);
 }
 
-ApplicationExtension *CorePlugin::createApplicationExtension(QGuiApplication *app)
+ApplicationExtension *CorePlugin::createApplicationExtension(QApplication *app)
 {
     return new ApplicationExtension(app);
 }

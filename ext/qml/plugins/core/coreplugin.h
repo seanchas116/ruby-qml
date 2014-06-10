@@ -2,7 +2,7 @@
 
 #include <QObject>
 
-class QGuiApplication;
+class QApplication;
 class QQmlEngine;
 class QQmlComponent;
 class QQmlContext;
@@ -23,12 +23,12 @@ public:
     CorePlugin(QObject *parent = 0);
 
 public slots:
-    QGuiApplication *applicationInstance();
-    QGuiApplication *createGuiApplication(const QVariantList &args);
+    QApplication *applicationInstance();
+    QApplication *createApplication(const QVariantList &args);
     QQmlEngine *createEngine();
     QQmlComponent *createComponent(QQmlEngine *engine);
     QQmlContext *createContext(QQmlEngine *engine);
-    RubyQml::ApplicationExtension *createApplicationExtension(QGuiApplication *app);
+    RubyQml::ApplicationExtension *createApplicationExtension(QApplication *app);
     RubyQml::EngineExtension *createEngineExtension(QQmlEngine *engine);
     RubyQml::ComponentExtension *createComponentExtension(QQmlComponent *component);
     RubyQml::ContextExtension *createContextExtension(QQmlContext *context);

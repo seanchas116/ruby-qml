@@ -11,17 +11,17 @@ class ApplicationExtension : public QObject
 {
     Q_OBJECT
 public:
-    explicit ApplicationExtension(QGuiApplication *app);
+    explicit ApplicationExtension(QApplication *app);
 
 signals:
     void eventLoopProcessed();
 
 public slots:
-    QGuiApplication *application() { return mApp; }
+    QApplication *application() { return mApp; }
     void exec();
 
 private:
-    QGuiApplication *mApp;
+    QApplication *mApp;
 };
 
 } // namespace RubyQml

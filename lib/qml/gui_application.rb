@@ -8,6 +8,10 @@ module QML
       new(qt_app: qt_app)
     end
 
+    def self.instance
+      from_qt(Plugins.core.applicationInstance)
+    end
+
     def initialize(qt_app: nil)
       qt_app ||= Plugins.core.createGuiApplication(ARGV)
       super(qt_app)

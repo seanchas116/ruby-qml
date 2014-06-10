@@ -24,6 +24,11 @@ CorePlugin::CorePlugin(QObject *parent) :
     qRegisterMetaType<QQmlContext *>();
 }
 
+QGuiApplication *CorePlugin::applicationInstance()
+{
+    return qobject_cast<QGuiApplication *>(qApp);
+}
+
 QGuiApplication *CorePlugin::createGuiApplication(const QVariantList &args)
 {
     static bool created = false;

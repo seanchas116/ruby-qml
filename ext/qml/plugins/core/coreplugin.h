@@ -23,6 +23,7 @@ public:
     CorePlugin(QObject *parent = 0);
 
 public slots:
+    QGuiApplication *applicationInstance();
     QGuiApplication *createGuiApplication(const QVariantList &args);
     QQmlEngine *createEngine();
     QQmlComponent *createComponent(QQmlEngine *engine);

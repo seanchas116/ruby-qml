@@ -12,4 +12,9 @@ ApplicationExtension::ApplicationExtension(QGuiApplication *app) :
     connect(timer, SIGNAL(timeout()), this, SIGNAL(eventLoopProcessed()));
 }
 
+void ApplicationExtension::exec()
+{
+    mApp->exec();
+}
+
 } // namespace RubyQml

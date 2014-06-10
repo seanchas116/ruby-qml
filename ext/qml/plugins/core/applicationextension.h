@@ -18,6 +18,7 @@ signals:
 
 public slots:
     QGuiApplication *application() { return mApp; }
+    void exec();
 
 private:
     QGuiApplication *mApp;

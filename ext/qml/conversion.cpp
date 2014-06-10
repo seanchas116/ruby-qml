@@ -220,10 +220,7 @@ VALUE Conversion<QObject *>::to(QObject *obj)
     }
 
     auto metaobj = Ext::MetaObject::fromMetaObject(obj->metaObject());
-
-    auto objptr = Ext::QtObjectPointer::newAsRuby();
-    Ext::QtObjectPointer::getPointer(objptr)->setQObject(obj);
-
+    auto objptr = Ext::QtObjectPointer::fromQObject(obj, false);
     auto rubyobj = send(Ext::MetaObject::getPointer(metaobj)->buildRubyClass(), "new", objptr);
     ObjectData::set(obj, std::make_shared<ObjectData>(rubyobj));
     return rubyobj;

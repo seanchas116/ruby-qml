@@ -142,7 +142,7 @@ public:
             return Qnil;
         } else {
             auto ret = toRuby(returnValue);
-            // add ownership to ObjectBase unless it has parent or is owned by QML engine
+            // add ownership to QtObjectPointer unless it has parent or is owned by QML engine
             if (isKindOf(ret, QtObjectPointer::rubyClass())) {
                 auto objectPointer = QtObjectPointer::getPointer(ret);
                 auto obj = objectPointer->fetchQObject();

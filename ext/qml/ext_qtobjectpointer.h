@@ -17,7 +17,7 @@ public:
 
     QObject *qObject() { return mObject; }
     QObject *fetchQObject();
-    void setQObject(QObject *obj, bool hasOwnership = false);
+    void setQObject(QObject *obj, bool hasOwnership);
     void setOwnership(bool ownership);
 
     VALUE hasOwnership() const;

@@ -44,9 +44,11 @@ VALUE AccessSupport::registerToQml(VALUE path, VALUE majorVersion, VALUE minorVe
 {
     if (!mTypeRegisterer) {
         mTypeRegisterer = makeSP<QmlTypeRegisterer>(mMetaObject, [this](void *where) {
-            auto value = send(mRubyClass, "new");
-            auto obj = QtObjectPointer::fromQObject(new(where) AccessObject(mMetaObject, value), false);
-            send(value, "access_object=", obj);
+            withGvl([&] {
+                auto value = send(mRubyClass, "new");
+                auto obj = QtObjectPointer::fromQObject(new(where) AccessObject(mMetaObject, value), false);
+                send(value, "access_object=", obj);
+            });
         });
         mTypeRegisterer->registerType(fromRuby<QByteArray>(path), fromRuby<int>(majorVersion), fromRuby<int>(minorVersion), fromRuby<QByteArray>(name));
     }

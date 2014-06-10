@@ -17,6 +17,21 @@ module QML
     module ClassMethods
 
       def register_to_qml(under: nil, version: nil, name: nil)
+        if !under || !version || !name
+          path = self.name.split('::')
+        end
+        if !under && !version
+          fail AccessError, "cannot guess namespace of toplevel class '#{self.name}'" if path.size == 1
+          namespace = path[0, path.size - 1].join('::')
+        end
+
+        under ||= namespace
+        version ||= eval("::#{namespace}").const_get(:VERSION)
+        versions = version.split('.').map(&method(:Integer))
+        fail AccessError, 'insufficient version (major and minor versions required)' unless versions.size >= 2
+        name ||= path.last
+
+        access_support.register_to_qml(under, versions[0], versions[1], name)
       end
 
       def access_support
@@ -48,7 +63,7 @@ module QML
           .select { |method| method.parameters.all? { |param| param[0] == :req } }
           .map { |method| OpenStruct.new(name: method.name, params: method.parameters.map(&:last)) }
 
-        AccessSupport.new(classname, method_infos, signal_infos, property_infos)
+        AccessSupport.new(self, classname, method_infos, signal_infos, property_infos)
       end
     end
 

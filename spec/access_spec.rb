@@ -35,28 +35,39 @@ describe QML::Access do
 
       class Hoge
         include QML::Access
+        def some_method(a, b)
+          a + b
+        end
         register_to_qml under: 'HogeNS', version: '1.2', name: 'Hoge'
       end
 
       let(:data) do
         <<-EOS
+          import QtQuick 2.2
           import HogeNS 1.2
-          Hoge {}
+          Item {
+            Hoge { id: hoge }
+          }
         EOS
       end
       it 'registers the class as a QML type' do
         expect { component.create }.not_to raise_error
+      end
+      describe 'Hoge#some_method' do
+        it 'returns value' do
+          expect(root.qml_eval('hoge.some_method(100, 200)')).to eq 300
+        end
       end
     end
 
     context 'when arguments are omitted' do
 
       module HogeModule
+        VERSION = '0.1.0'
         class Hoge
           include QML::Access
           register_to_qml
         end
-        VERSION = '0.1.0'
       end
 
       let(:data) do
@@ -66,7 +77,7 @@ describe QML::Access do
         EOS
       end
 
-      it 'guesses them from the Ruby class name ,namespace and VERSION constant' do
+      it 'guesses them from the Ruby class name, namespace and VERSION constant' do
         expect { component.create }.not_to raise_error
       end
     end
@@ -100,22 +111,22 @@ describe QML::Access do
       root
     end
 
-    describe '#some_method' do
+    describe 'Foo#some_method' do
       it 'returns value' do
         expect(root.qml_eval('foo.some_method(100, 200)')).to eq 300
       end
     end
-    describe 'subclass #some_method' do
+    describe 'Bar#some_method' do
       it 'returns value' do
         expect(root.qml_eval('bar.some_method(100, 200)')).to eq 'overridden'
       end
     end
-    describe '#variadic_method' do
+    describe 'Foo#variadic_method' do
       it 'will not be exported' do
         expect { root.qml_eval('foo.variadic_method()') }.to raise_error(QML::QMLError)
       end
     end
-    describe 'name property' do
+    describe 'Foo name property' do
       it 'can get and set value' do
         root.qml_eval('foo.name = "test"')
         expect(root.qml_eval('foo.name')).to eq 'test'
@@ -127,14 +138,11 @@ describe QML::Access do
         expect(root.qml_eval('root.text')).to eq 'piyopiyo'
       end
     end
-    describe 'some_signal signal' do
+    describe 'Foo some_signal signal' do
       it 'can be connected' do
         foo.some_signal.emit('foo')
         expect(root.qml_eval('connections.args')).to eq ['foo']
       end
     end
-  end
-
-  context 'when used as QML type' do
   end
 end

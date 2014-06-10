@@ -4,11 +4,14 @@ require 'pathname'
 pkgconfig = with_config('pkg-config') || find_executable('pkg-config')
 abort 'pkg-config executable not found' unless pkgconfig
 
-qt_include, qt_lib = dir_config('qt')
-qt_path = qt_include && Pathname(qt_include).parent.realpath
+qt_path = with_config('qt-dir')
+qt_path &&= Pathname(qt_path).realpath
 
-if qt_path
-  ENV['PKG_CONFIG_PATH'] = "#{ENV['PKG_CONFIG_PATH']}:#{qt_path + 'lib/pkgconfig'}"
+ffi_path = with_config('ffi-dir')
+ffi_path &&= Pathname(ffi_path).realpath
+
+[qt_path, ffi_path].reject(&:nil?).each do |path|
+  ENV['PKG_CONFIG_PATH'] = "#{path + 'lib/pkgconfig'}:#{ENV['PKG_CONFIG_PATH']}"
 end
 
 qmake = qt_path ? qt_path + 'bin/qmake' : find_executable('qmake')
@@ -35,7 +38,7 @@ def add_ldflags(flags)
   $LDFLAGS += " #{flags}"
 end
 
-%w{Qt5Core Qt5Gui Qt5Qml Qt5Quick}.each do |mod|
+%w{Qt5Core Qt5Gui Qt5Qml Qt5Quick libffi}.each do |mod|
   add_cppflags `#{pkgconfig} --cflags #{mod}`.chomp
   add_ldflags `#{pkgconfig} --libs #{mod}`.chomp
 end
@@ -54,6 +57,7 @@ headers = %w{
   QtQml/QQmlEngine
   QtQml/QQmlComponent
   QtQml/QQmlContext
+  ffi.h
 }
 headers.each do |h|
   abort "header not found: #{h}" unless have_header(h)

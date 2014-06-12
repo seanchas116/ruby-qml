@@ -118,7 +118,7 @@ module QML
     end
 
     def define_enum(name, value)
-      name = name[0].capitalize + name[1..-1]
+      name = (name[0].capitalize + name[1..-1]).to_sym
       @klass.__send__ :const_set, name, value
       underscore = NameHelper.to_upper_underscore(name)
       @klass.__send__ :const_set, underscore, value if underscore != name

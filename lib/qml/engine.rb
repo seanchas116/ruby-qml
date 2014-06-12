@@ -1,22 +1,21 @@
 require 'qml/plugins'
-require 'qml/context'
-require 'qml/unique_wrapper'
 
 module QML
-  class Engine < UniqueWrapper
+  Engine = Plugins.core.metaObjects['QQmlEngine'].build_class
 
-    def self.wrap(qt_engine)
-      new(qt_engine: qt_engine)
+  class Engine
+
+    def self.new
+      Plugins.core.createEngine
     end
 
-    def initialize(qt_engine: nil)
-      qt_engine ||= Plugins.core.createEngine
-      super(qt_engine)
-      @extension = Plugins.core.createEngineExtension(qt_engine)
+    def initialize
+      super()
+      @extension = Plugins.core.createEngineExtension(self)
     end
 
     def context
-      Context.from_qt(@extension.rootContext)
+      @extension.rootContext
     end
   end
 end

@@ -1,14 +1,30 @@
-require 'qml/simple_application'
+require 'qml/plugins'
 
 module QML
-  class Application < SimpleApplication
+  Application = Plugins.core.metaObjects['QApplication'].build_class
 
-    def initialize(qt_app: nil)
-      super(qt_app: qt_app)
-      if block_given?
-        yield self
-        exec
+  class Application
+
+    def self.instance
+      Plugins.core.applicationInstance
+    end
+
+    def self.notify_error(error)
+      instance.notify_error(error)
+    end
+
+    def self.new
+      Plugins.core.createApplication(ARGV).tap do |app|
+        if block_given?
+          yield app
+          app.exec
+        end
       end
+    end
+
+    def initialize
+      super()
+      @extension = Plugins.core.createApplicationExtension(self)
     end
 
     def engine
@@ -39,5 +55,24 @@ module QML
     def root
       @root or fail "QML data or file has not been loaded"
     end
+
+    # Starts the event loop of the application.
+    # This method never returns until the application quits.
+    def exec
+      @extension.exec
+    end
+
+    # Called when an Ruby error is occured in executing Qt code.
+    # @param error The error (or the exception)
+    def notify_error(error)
+      warn "-- An error occured when running Ruby code from Qt --"
+      warn "#{error.class.name}: #{error.message}"
+      warn "Backtrace: \n\t#{error.backtrace.join("\n\t")}"
+    end
   end
+
+  def application
+    Application.instance
+  end
+  module_function :application
 end

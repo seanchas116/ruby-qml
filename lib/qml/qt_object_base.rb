@@ -1,5 +1,4 @@
 require 'ropework'
-require 'qml/context'
 
 module QML
   class QtObjectBase
@@ -10,14 +9,8 @@ module QML
       private :meta_object=
     end
 
-    attr_reader :object_pointer
-
-    # @api private
-    def initialize(objptr = nil)
-      fail 'ObjectBase#initialize is internal use only' unless objptr.is_a? QtObjectPointer
-      @object_pointer = objptr
-      super()
-    end
+    attr_accessor :object_pointer
+    private :object_pointer=
 
     def custom_data
       @custom_data ||= {}

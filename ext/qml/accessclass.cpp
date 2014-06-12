@@ -49,7 +49,7 @@ QVariant AccessClass::callMethod(ForeignObject *obj, size_t id, const QVariantLi
             rescue([&] {
                 retValue = rb_funcallv(self, id, values.size(), values.data());
             }, [&](VALUE excObject) {
-                rb_funcall(rb_path2class("QML::SimpleApplication"), rb_intern("notify_error"), 1, excObject);
+                rb_funcall(rb_path2class("QML::Application"), rb_intern("notify_error"), 1, excObject);
             });
         });
         ret = fromRuby<QVariant>(retValue);

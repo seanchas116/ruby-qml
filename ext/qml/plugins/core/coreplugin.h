@@ -1,6 +1,7 @@
 #pragma once
 
 #include <QObject>
+#include <QVariant>
 
 class QApplication;
 class QQmlEngine;
@@ -23,6 +24,8 @@ public:
     CorePlugin(QObject *parent = 0);
 
 public slots:
+    QVariantHash metaObjects() { return mMetaObjects; }
+
     QApplication *applicationInstance();
     QApplication *createApplication(const QVariantList &args);
     QQmlEngine *createEngine();
@@ -33,6 +36,9 @@ public slots:
     RubyQml::ComponentExtension *createComponentExtension(QQmlComponent *component);
     RubyQml::ContextExtension *createContextExtension(QQmlContext *context);
     QQmlContext *contextForObject(QObject *object);
+
+private:
+    QVariantHash mMetaObjects;
 };
 
 

@@ -1,21 +1,21 @@
 require 'qml/plugins'
-require 'qml/unique_wrapper'
 
 module QML
-  class Context < UniqueWrapper
+  Context = Plugins.core.metaObjects['QQmlContext'].build_class
 
-    def self.wrap(qt_context)
-      new(nil, qt_context: qt_context)
+  class Context
+
+    def self.new(engine)
+      Plugins.core.createContext(engine)
     end
 
-    def initialize(engine, qt_context: nil)
-      qt_context ||= Plugins.core.createContext(engine.qt_engine)
-      super(qt_context)
-      @extension = Plugins.core.createContextExtension(qt_context)
+    def initialize
+      super()
+      @extension = Plugins.core.createContextExtension(self)
     end
 
     def engine
-      Engine.from_qt(@extension.engine)
+      @extension.engine
     end
 
     def eval(obj, str)
@@ -32,8 +32,7 @@ module QML
     end
 
     def self.for_object(obj)
-      qt_context = Plugins.core.contextForObject(obj)
-      qt_context && from_qt(qt_context)
+      Plugins.core.contextForObject(obj)
     end
   end
 end

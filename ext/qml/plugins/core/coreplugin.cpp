@@ -8,6 +8,8 @@
 #include <QQmlComponent>
 #include <QQmlContext>
 
+Q_DECLARE_METATYPE(const QMetaObject*)
+
 namespace RubyQml {
 
 CorePlugin::CorePlugin(QObject *parent) :
@@ -22,6 +24,16 @@ CorePlugin::CorePlugin(QObject *parent) :
     qRegisterMetaType<QQmlEngine *>();
     qRegisterMetaType<QQmlComponent *>();
     qRegisterMetaType<QQmlContext *>();
+
+    const QMetaObject *metaObjects[] = {
+        &staticQtMetaObject,
+        &QApplication::staticMetaObject,
+        &QQmlEngine::staticMetaObject,
+        &QQmlComponent::staticMetaObject,
+        &QQmlContext::staticMetaObject};
+    for (auto metaobj : metaObjects) {
+        mMetaObjects[metaobj->className()] = QVariant::fromValue(metaobj);
+    }
 }
 
 QApplication *CorePlugin::applicationInstance()

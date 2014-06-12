@@ -111,7 +111,7 @@ module QML
     end
 
     def define_enum(key, value)
-      @klass.__send__ :const_set, key, value
+      @klass.__send__ :const_set, key.capitalize, value
     end
   end
 end

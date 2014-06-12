@@ -24,6 +24,12 @@ describe "test object" do
     end
   end
 
+  describe '#normal_method' do
+    it 'is same as #normalMethod' do
+      expect(obj.normalMethod(1, "23")).to eq(24)
+    end
+  end
+
   describe '#variantMethod' do
 
     it 'should call the method with QVariant arguments' do
@@ -45,18 +51,21 @@ describe "test object" do
     end
   end
 
-  describe '#emitSomeSignal' do
+  describe '#someSignal signal' do
 
     it 'should emit the signal' do
-      result = nil
-      obj.someSignal.connect do |str|
-        result = str
-      end
+      spy = Ropework::SignalSpy.new(obj.someSignal)
       obj.emitSomeSignal('poyopoyo')
-      expect(result).to eq 'poyopoyo'
-      # spy = Ropework::SignalSpy.new(@obj.someSignal)
-      # @obj.emitSomeSignal('poyopoyo')
-      # expect(spy.args.first).to eq(['poyopoyo'])
+      expect(spy.args.first).to eq(['poyopoyo'])
+    end
+  end
+
+  describe '#some_signal signal' do
+
+    it 'is same as #someSignal' do
+      spy = Ropework::SignalSpy.new(obj.some_signal)
+      obj.emit_some_signal('poyopoyo')
+      expect(spy.args.first).to eq(['poyopoyo'])
     end
   end
 
@@ -78,7 +87,7 @@ describe "test object" do
     end
   end
 
-  describe 'name property' do
+  describe '#name property' do
 
     it 'should be set' do
       obj.name = 'abcd'
@@ -99,13 +108,23 @@ describe "test object" do
     end
   end
 
+  describe '#someValue property' do
+    context 'as #some_value' do
+      it 'can be set and get' do
+        obj.some_value = 123.0
+        expect(obj.some_value).to eq 123.0
+      end
+    end
+  end
+
   describe 'enums' do
     
     it 'should be set' do
       k = obj.class
-      expect(k::Apple).to eq(0)
-      expect(k::Banana).to eq(1)
-      expect(k::Orange).to eq(2)
+      expect(k::Foo).to eq(0)
+      expect(k::Bar).to eq(1)
+      expect(k::FooBar).to eq(2)
+      expect(k::FOO_BAR).to eq(2)
     end
   end
 

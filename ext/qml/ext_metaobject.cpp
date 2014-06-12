@@ -236,7 +236,7 @@ VALUE MetaObject::setProperty(VALUE object, VALUE name, VALUE newValue) const
         protect([&] {
             rb_raise(rb_path2class("QML::PropertyError"),
                      "type mismatch (%s for %s)",
-                     rb_obj_classname(newValue), mMetaObject->className());
+                     rb_obj_classname(newValue), metaProperty.typeName());
         });
     }
 

@@ -2,6 +2,7 @@ require 'logger'
 require 'ropework'
 require 'qml/qt_object_base'
 require 'qml/qml'
+require 'qml/name_helper'
 
 module QML
 
@@ -95,12 +96,16 @@ module QML
         metaobj.invoke_method(@object_pointer, name, args)
       end
       @klass.__send__ :private, name if @metaobj.protected?(name)
+      underscore = NameHelper.to_underscore(name)
+      @klass.__send__ :alias_method, underscore, name if underscore != name
     end
 
     def define_signal(name)
       @klass.__send__ :variadic_signal, name, factory: proc { |obj|
         QtSignal.new(@metaobj, obj.object_pointer, name)
       }
+      underscore = NameHelper.to_underscore(name)
+      @klass.__send__ :alias_signal, underscore, name if underscore != name
     end
 
     def define_property(name)
@@ -108,10 +113,15 @@ module QML
       @klass.__send__ :property, name, factory: proc { |obj|
         QtProperty.new(@metaobj, obj.object_pointer, name)
       }
+      underscore = NameHelper.to_underscore(name)
+      @klass.__send__ :alias_property, underscore, name if underscore != name
     end
 
-    def define_enum(key, value)
-      @klass.__send__ :const_set, key.capitalize, value
+    def define_enum(name, value)
+      name = name[0].capitalize + name[1..-1]
+      @klass.__send__ :const_set, name, value
+      underscore = NameHelper.to_upper_underscore(name)
+      @klass.__send__ :const_set, underscore, value if underscore != name
     end
   end
 end

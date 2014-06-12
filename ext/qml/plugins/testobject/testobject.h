@@ -11,17 +11,18 @@ class TestObject : public QObject
 {
     Q_OBJECT
     Q_PROPERTY(QString name MEMBER mName NOTIFY nameChanged)
+    Q_PROPERTY(double someValue MEMBER mSomeValue NOTIFY someValueChanged)
 
 public:
     explicit TestObject(QObject *parent = 0) : QObject(parent)
     {
     }
 
-    enum Fruits
+    enum Enums
     {
-        Apple = 0,
-        Banana = 1,
-        Orange = 2
+        Foo = 0,
+        Bar = 1,
+        FooBar = 2,
     };
 
 public slots:
@@ -89,11 +90,13 @@ signals:
 
     void someSignal(const QString &arg);
     void nameChanged(const QString &name);
+    void someValueChanged(double value);
 
 private:
 
-    Q_ENUMS(Fruits)
+    Q_ENUMS(Enums)
     QString mName;
+    double mSomeValue = 0;
 };
 
 } // RubyQml

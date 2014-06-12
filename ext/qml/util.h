@@ -23,6 +23,8 @@ void protect(const std::function<void()> &callback);
 // Other C++ exceptions are not allowed to be thrown out of this function.
 void unprotect(const std::function<void()> &callback) noexcept;
 
+void rescue(const std::function<void ()> &doAction, const std::function<void (VALUE)> &handleException);
+
 // call function with GVL unlocked
 void withoutGvl(const std::function<void()> &callback);
 

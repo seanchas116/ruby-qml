@@ -58,6 +58,19 @@ void unprotect(const std::function<void ()> &callback) noexcept
     }
 }
 
+void rescue(const std::function<void ()> &doAction, const std::function<void (VALUE)> &handleException)
+{
+    VALUE (*callback)(VALUE) = [](VALUE data) {
+        (*reinterpret_cast<std::function<void ()> *>(data))();
+        return Qnil;
+    };
+    VALUE (*rescueCallback)(VALUE, VALUE) = [](VALUE data, VALUE excObject) {
+        (*reinterpret_cast<std::function<void (VALUE)>*>(data))(excObject);
+        return Qnil;
+    };
+    rb_rescue((VALUE (*)(...))callback, (VALUE)&doAction, (VALUE (*)(...))rescueCallback, (VALUE)&handleException);
+}
+
 namespace {
 
 void withOrWithoutGvl(const std::function<void ()> &callback, bool with)

@@ -44,9 +44,13 @@ QVariant AccessClass::callMethod(ForeignObject *obj, size_t id, const QVariantLi
     withGvl([&] {
         std::vector<VALUE> values(args.size());
         std::transform(args.begin(), args.end(), values.begin(), toRuby<QVariant>);
-        VALUE retValue;
+        VALUE retValue = Qnil;
         protect([&] {
-            retValue = rb_funcallv(self, id, values.size(), values.data());
+            rescue([&] {
+                retValue = rb_funcallv(self, id, values.size(), values.data());
+            }, [&](VALUE excObject) {
+                rb_funcall(rb_path2class("QML::SimpleApplication"), rb_intern("notify_error"), 1, excObject);
+            });
         });
         ret = fromRuby<QVariant>(retValue);
     });

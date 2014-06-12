@@ -95,6 +95,7 @@ VALUE QtObjectPointer::destroy()
 {
     destroyObject(mObject);
     mHasOwnership = false;
+    return self();
 }
 
 VALUE QtObjectPointer::mObjectBaseClass = Qnil;

@@ -160,7 +160,7 @@ Q_GLOBAL_STATIC(ConverterHash, converterHash)
 
 QVariant Conversion<QVariant>::from(VALUE x)
 {
-    return fromRuby(x, -1);
+    return fromRuby(x, defaultMetaTypeFor(x));
 }
 
 VALUE Conversion<QVariant>::to(const QVariant &variant)
@@ -180,6 +180,10 @@ VALUE Conversion<QVariant>::to(const QVariant &variant)
 
 QObject *Conversion<QObject *>::from(VALUE x)
 {
+    if (x == Qnil) {
+        return nullptr;
+    }
+
     bool isAccess;
     protect([&] {
         isAccess = rb_obj_is_kind_of(x, rb_path2class("QML::Access"));
@@ -231,6 +235,9 @@ VALUE Conversion<QObject *>::to(QObject *obj)
 
 const QMetaObject *Conversion<const QMetaObject *>::from(VALUE x)
 {
+    if (x == Qnil) {
+        return nullptr;
+    }
     return Ext::MetaObject::getPointer(x)->metaObject();
 }
 
@@ -244,142 +251,146 @@ VALUE Conversion<const QMetaObject *>::to(const QMetaObject *metaobj)
 
 } // namespace detail
 
-TypeCategory metaTypeToCategory(int metaType)
+bool convertibleTo(VALUE x, int metaType)
 {
-    switch (metaType) {
-
-    case QMetaType::Bool:
-        return TypeCategory::Boolean;
-
-    case QMetaType::Char:
-    case QMetaType::Short:
-    case QMetaType::Long:
-    case QMetaType::LongLong:
-
-    case QMetaType::UChar:
-    case QMetaType::UShort:
-    case QMetaType::ULong:
-    case QMetaType::ULongLong:
-
-    case QMetaType::Int:
-    case QMetaType::UInt:
-        return TypeCategory::Integer;
-
-    case QMetaType::Float:
-    case QMetaType::Double:
-        return TypeCategory::Float;
-
-    case QMetaType::QByteArray:
-    case QMetaType::QString:
-        return TypeCategory::String;
-
-    case QMetaType::QVariantList:
-        return TypeCategory::Array;
-
-    case QMetaType::QVariantHash:
-    case QMetaType::QVariantMap:
-        return TypeCategory::Hash;
-
-    case QMetaType::QDateTime:
-        return TypeCategory::Time;
-
-    case QMetaType::QObjectStar:
-        return TypeCategory::QtObject;
-
-    default:
-        if (QMetaType::metaObjectForType(metaType)) {
-            return TypeCategory::QtObject;
-        }
-        if (metaType == QMetaType::type("const QMetaObject*")) {
-            return TypeCategory::QtMetaObject;
-        }
-        return TypeCategory::Invalid;
+    if (metaType == QMetaType::QVariant) {
+        return true;
     }
-}
+    switch (rb_type(x)) {
+    case T_NIL:
+        return metaType == QMetaType::QObjectStar || metaType == QMetaType::type("const QMetaObject*");
+    case T_TRUE:
+    case T_FALSE:
+        return metaType == QMetaType::Bool;
+    case T_FIXNUM:
+    case T_BIGNUM:
+        switch (metaType) {
+        case QMetaType::Char:
+        case QMetaType::Short:
+        case QMetaType::Long:
+        case QMetaType::LongLong:
 
-int categoryToMetaType(TypeCategory category)
-{
-    switch (category) {
-    case TypeCategory::Boolean:
-        return QMetaType::Bool;
-    case TypeCategory::Integer:
-        return QMetaType::Int;
-    case TypeCategory::Float:
-        return QMetaType::Double;
-    case TypeCategory::String:
-        return QMetaType::QString;
-    case TypeCategory::Array:
-        return QMetaType::QVariantList;
-    case TypeCategory::Hash:
-        return QMetaType::QVariantHash;
-    case TypeCategory::Time:
-        return QMetaType::QDateTime;
-    case TypeCategory::QtObject:
-        return QMetaType::QObjectStar;
-    case TypeCategory::QtMetaObject:
-        return QMetaType::type("const QMetaObject*");
-    default:
-        return QMetaType::UnknownType;
-    }
-}
+        case QMetaType::UChar:
+        case QMetaType::UShort:
+        case QMetaType::ULong:
+        case QMetaType::ULongLong:
 
-TypeCategory rubyValueCategory(VALUE x)
-{
-    auto objectBaseClass = Ext::QtObjectPointer::objectBaseClass();
-    auto metaObjectClass = Ext::MetaObject::rubyClass();
-    TypeCategory category;
-    protect([&] {
-        switch (rb_type(x)) {
-        case T_TRUE:
-        case T_FALSE:
-            category = TypeCategory::Boolean;
-            return;
-        case T_FIXNUM:
-        case T_BIGNUM:
-            category = TypeCategory::Integer;
-            return;
-        case T_FLOAT:
-            category = TypeCategory::Float;
-            return;
-        case T_SYMBOL:
-        case T_STRING:
-            category = TypeCategory::String;
-            return;
-        case T_ARRAY:
-            category = TypeCategory::Array;
-            return;
-        case T_HASH:
-            category = TypeCategory::Hash;
-            return;
+        case QMetaType::Int:
+        case QMetaType::UInt:
+
+        case QMetaType::Float:
+        case QMetaType::Double:
+            return true;
         default:
-            break;
+            return false;
         }
+    case T_FLOAT:
+        switch (metaType) {
+        case QMetaType::Float:
+        case QMetaType::Double:
+            return true;
+        default:
+            return false;
+        }
+    case T_SYMBOL:
+    case T_STRING:
+        switch (metaType) {
+        case QMetaType::QByteArray:
+        case QMetaType::QString:
+            return true;
+        default:
+            return false;
+        }
+    case T_ARRAY:
+        switch (metaType) {
+        case QMetaType::QVariantList:
+            return true;
+        default:
+            return false;
+        }
+    case T_HASH:
+        switch (metaType) {
+        case QMetaType::QVariantHash:
+        case QMetaType::QVariantMap:
+            return true;
+        default:
+            return false;
+        }
+    default:
+
+        break;
+    }
+    auto test = [&] {
         if (rb_obj_is_kind_of(x, rb_cTime)) {
-            category = TypeCategory::Time;
-            return;
+            return metaType == QMetaType::QDateTime;
         }
-        if (rb_obj_is_kind_of(x, objectBaseClass)) {
-            category = TypeCategory::QtObject;
-            return;
+        if (rb_obj_is_kind_of(x, Ext::QtObjectPointer::objectBaseClass())) {
+            if (metaType == QMetaType::QObjectStar) {
+                return true;
+            }
+            if (QMetaType::metaObjectForType(metaType)) {
+                auto metaObj = QMetaType::metaObjectForType(metaType);
+                if (fromRuby<QObject *>(x)->inherits(metaObj->className())) {
+                    return true;
+                }
+            }
+            return false;
         }
-        if (rb_obj_is_kind_of(x, metaObjectClass)) {
-            category = TypeCategory::QtMetaObject;
-            return;
+        if (rb_obj_is_kind_of(x, Ext::MetaObject::rubyClass())) {
+            return metaType == QMetaType::type("const QMetaObject*");
         }
         if (rb_obj_is_kind_of(x, rb_path2class("QML::Access"))) {
-            category = TypeCategory::QtObject;
-            return;
+            return metaType == QMetaType::QObjectStar;
         }
-        category = TypeCategory::Invalid;
+        return false;
+    };
+    bool result;
+    protect([&] {
+        result = test();
     });
-    return category;
+    return result;
+}
+
+int defaultMetaTypeFor(VALUE x)
+{
+    switch (rb_type(x)) {
+    case T_NIL:
+        return QMetaType::UnknownType;
+    case T_TRUE:
+    case T_FALSE:
+        return QMetaType::Bool;
+    case T_FIXNUM:
+    case T_BIGNUM:
+        return QMetaType::Int;
+    case T_FLOAT:
+        return QMetaType::Double;
+    case T_SYMBOL:
+    case T_STRING:
+        return QMetaType::QString;
+    case T_ARRAY:
+        return QMetaType::QVariantList;
+    case T_HASH:
+        return QMetaType::QVariantHash;
+    default:
+        break;
+    }
+    if (rb_obj_is_kind_of(x, rb_cTime)) {
+        return QMetaType::QDateTime;
+    }
+    if (rb_obj_is_kind_of(x, Ext::QtObjectPointer::objectBaseClass())) {
+        return QMetaType::QObjectStar;
+    }
+    if (rb_obj_is_kind_of(x, Ext::MetaObject::rubyClass())) {
+        return QMetaType::type("const QMetaObject*");
+    }
+    if (rb_obj_is_kind_of(x, rb_path2class("QML::Access"))) {
+        return QMetaType::QObjectStar;
+    }
+    return QMetaType::UnknownType;
 }
 
 QVariant fromRuby(VALUE x, int type)
 {
-    if (type < 0) {
-        type = categoryToMetaType(rubyValueCategory(x));
-    }
     auto &hash = detail::converterHash->fromRubyHash;
     if (!hash.contains(type)) {
         auto metaobj = QMetaType::metaObjectForType(type);

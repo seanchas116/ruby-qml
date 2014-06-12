@@ -54,6 +54,11 @@ struct Conversion<T, typename std::enable_if<std::is_floating_point<T>::value>::
 {
     static T from(VALUE x)
     {
+        auto type = rb_type(x);
+        if (type == T_FIXNUM || type == T_BIGNUM) {
+            return NUM2LL(x);
+        }
+
         T ret;
         protect([&] {
             ret = rb_float_value(x);
@@ -214,26 +219,11 @@ inline VALUE toRuby(const T &value)
     return detail::Conversion<T>::to(value);
 }
 
-enum class TypeCategory
-{
-    Invalid,
-    Boolean,
-    Integer,
-    Float,
-    String,
-    Array,
-    Hash,
-    Time,
-    QtObject,
-    QtMetaObject,
-    Access
-};
-
-TypeCategory metaTypeToCategory(int metaType);
-int categoryToMetaType(TypeCategory category);
-TypeCategory rubyValueCategory(VALUE x);
+bool convertibleTo(VALUE value, int metaType);
+int defaultMetaTypeFor(VALUE value);
 
 QVariant fromRuby(VALUE x, int type);
+
 
 ID idFromValue(VALUE sym);
 

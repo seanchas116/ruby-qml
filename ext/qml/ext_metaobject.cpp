@@ -82,23 +82,9 @@ public:
         }
         for (int i = 0; i < count; ++i) {
             auto metaType = mMethod.parameterType(i);
-            if (metaType == QMetaType::QVariant) {
-                return true;
-            }
-            auto paramCategory = metaTypeToCategory(metaType);
             auto arg = RARRAY_AREF(mArgs, i);
-            auto argCategory = rubyValueCategory(arg);
-            if (argCategory == TypeCategory::Invalid) {
+            if (!convertibleTo(arg, metaType)) {
                 return false;
-            }
-            if (paramCategory != argCategory) {
-                return false;
-            }
-            if (paramCategory == TypeCategory::QtObject) {
-                auto paramMetaobj = QMetaType::metaObjectForType(metaType);
-                if (!fromRuby<QObject *>(arg)->inherits(paramMetaobj->className())) {
-                    return false;
-                }
             }
         }
         return true;
@@ -232,7 +218,7 @@ VALUE MetaObject::getProperty(VALUE object, VALUE name) const
 VALUE MetaObject::setProperty(VALUE object, VALUE name, VALUE newValue) const
 {
     auto metaProperty = mMetaObject->property(findProperty(name));
-    if (rubyValueCategory(newValue) != metaTypeToCategory(metaProperty.userType())) {
+    if (!convertibleTo(newValue, metaProperty.userType())) {
         protect([&] {
             rb_raise(rb_path2class("QML::PropertyError"),
                      "type mismatch (%s for %s)",

@@ -111,8 +111,8 @@ describe "test object" do
   describe '#someValue property' do
     context 'as #some_value' do
       it 'can be set and get' do
-        obj.some_value = 123.0
-        expect(obj.some_value).to eq 123.0
+        obj.some_value = 123
+        expect(obj.some_value).to eq 123
       end
     end
   end

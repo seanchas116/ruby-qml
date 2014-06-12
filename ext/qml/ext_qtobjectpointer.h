@@ -24,6 +24,7 @@ public:
     VALUE withOwnership() const;
     VALUE isNull() const;
     VALUE toString() const;
+    VALUE destroy();
 
     static VALUE objectBaseClass() { return mObjectBaseClass; }
     static void initClass();

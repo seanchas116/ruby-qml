@@ -91,6 +91,12 @@ VALUE QtObjectPointer::toString() const
     return toRuby(name);
 }
 
+VALUE QtObjectPointer::destroy()
+{
+    destroyObject(mObject);
+    mHasOwnership = false;
+}
+
 VALUE QtObjectPointer::mObjectBaseClass = Qnil;
 
 void QtObjectPointer::initClass()
@@ -103,6 +109,7 @@ void QtObjectPointer::initClass()
     builder.defineMethod<METHOD_TYPE_NAME(&QtObjectPointer::withOwnership)>("with_ownership");
     builder.defineMethod<METHOD_TYPE_NAME(&QtObjectPointer::isNull)>("null?");
     builder.defineMethod<METHOD_TYPE_NAME(&QtObjectPointer::toString)>("to_s");
+    builder.defineMethod<METHOD_TYPE_NAME(&QtObjectPointer::destroy)>("destroy!");
     builder.aliasMethod("to_s", "inspect");
 }
 

@@ -28,6 +28,11 @@ module QML
       @extension.exec
     end
 
+    # Quits the application.
+    def quit
+      qt_object.quit
+    end
+
     # Called when an Ruby error is occured in executing Qt code.
     # @param error The error (or the exception)
     def notify_error(error)

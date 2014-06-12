@@ -33,6 +33,12 @@ ApplicationWindow {
         Item {
             Layout.fillHeight: true
         }
+        Button {
+            text: 'Quit'
+            onClicked: {
+                fizzbuzz.quit()
+            }
+        }
     }
     FizzBuzz {
         id: fizzbuzz

@@ -26,6 +26,11 @@ module Examples
         end
       end
 
+      def quit
+        puts "quitting..."
+        QML::Application.instance.quit
+      end
+
       register_to_qml
     end
   end

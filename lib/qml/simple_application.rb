@@ -41,4 +41,9 @@ module QML
       warn "Backtrace: \n\t#{error.backtrace.join("\n\t")}"
     end
   end
+
+  def application
+    SimpleApplication.instance
+  end
+  module_function :application
 end

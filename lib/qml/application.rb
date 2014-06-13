@@ -14,6 +14,7 @@ module QML
     end
 
     def self.new
+      fail ApplicationError, "cannot create multiple Application instance" if instance
       Plugins.core.createApplication(ARGV).tap do |app|
         if block_given?
           yield app
@@ -36,7 +37,7 @@ module QML
     end
 
     def root_component
-      @root_component or fail "QML data or file has not been loaded"
+      @root_component or fail ApplicationError, "QML data or file has not been loaded"
     end
 
     def load(data: nil, path: nil)

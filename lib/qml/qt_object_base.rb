@@ -23,8 +23,20 @@ module QML
     end
 
     def inspect
-      property_inspect = properties.map { |name| "#{name}=#{property(name).value.inspect}" }.join(' ')
-      "#<QML::ObjectBase[#{self.class.meta_object.name}]:#{object_id} #{property_inspect}>"
+      klass = self.class
+      property_inspect = klass.instance_properties.sort
+        .reject { |name| klass.instance_property(name).alias? }
+        .map do |name|
+          "#{name}=" +
+            begin
+              property(name).value.inspect
+            rescue ConversionError
+              "<unsupported type>"
+            end
+        end
+        .join(' ')
+      classname = klass.name || "[class for #{klass.meta_object.name}]"
+      "#<#{classname}:#{__id__} #{property_inspect}>"
     end
 
     alias_method :to_s, :inspect

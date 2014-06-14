@@ -6,13 +6,6 @@ require 'qml/name_helper'
 
 module QML
 
-  class UnsupportedTypeValue
-    def inspect
-      "<unsupported type>"
-    end
-    alias_method :to_s, :inspect
-  end
-
   class QtProperty
     prepend Ropework::Bindable
 
@@ -31,7 +24,7 @@ module QML
     end
 
     def value
-      @metaobj.get_property(@objptr, @name) rescue UnsupportedTypeValue.new
+      @metaobj.get_property(@objptr, @name)
     end
   end
 

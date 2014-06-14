@@ -128,6 +128,12 @@ describe "test object" do
     end
   end
 
+  describe 'QtObjectBase#inspect' do
+    it 'inspects the class name and property values' do
+      expect(obj.inspect).to eq %{#<[class for RubyQml::TestObject]:#{obj.__id__} name="" objectName="" someValue=0.0>}
+    end
+  end
+
   context 'in subclass' do
     let(:subobj) { loader.instance.createTestObject }
     it "can call TestObject's method" do

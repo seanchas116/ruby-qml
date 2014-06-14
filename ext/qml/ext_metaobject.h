@@ -16,43 +16,43 @@ public:
 
     MetaObject();
 
-    VALUE className() const;
+    RubyValue className() const;
 
-    VALUE methodNames() const;
-    VALUE isPublic(VALUE name) const;
-    VALUE isProtected(VALUE name) const;
-    VALUE isPrivate(VALUE name) const;
-    VALUE isSignal(VALUE name) const;
+    RubyValue methodNames() const;
+    RubyValue isPublic(RubyValue name) const;
+    RubyValue isProtected(RubyValue name) const;
+    RubyValue isPrivate(RubyValue name) const;
+    RubyValue isSignal(RubyValue name) const;
 
-    VALUE invokeMethod(VALUE object, VALUE methodName, VALUE args) const;
-    VALUE connectSignal(VALUE object, VALUE signalName, VALUE proc) const;
+    RubyValue invokeMethod(RubyValue object, RubyValue methodName, RubyValue args) const;
+    RubyValue connectSignal(RubyValue object, RubyValue signalName, RubyValue proc) const;
 
-    VALUE propertyNames() const;
-    VALUE getProperty(VALUE object, VALUE name) const;
-    VALUE setProperty(VALUE object, VALUE name, VALUE newValue) const;
-    VALUE notifySignal(VALUE name) const;
+    RubyValue propertyNames() const;
+    RubyValue getProperty(RubyValue object, RubyValue name) const;
+    RubyValue setProperty(RubyValue object, RubyValue name, RubyValue newValue) const;
+    RubyValue notifySignal(RubyValue name) const;
 
-    VALUE enumerators() const;
+    RubyValue enumerators() const;
 
-    VALUE superClass() const;
+    RubyValue superClass() const;
 
-    VALUE isEqual(VALUE other) const;
-    VALUE hash() const;
+    RubyValue isEqual(RubyValue other) const;
+    RubyValue hash() const;
 
     void setMetaObject(const QMetaObject *metaObject);
     const QMetaObject *metaObject() const { return mMetaObject; }
 
-    VALUE buildRubyClass();
+    RubyValue buildRubyClass();
 
-    static VALUE fromMetaObject(const QMetaObject *metaObject);
+    static RubyValue fromMetaObject(const QMetaObject *metaObject);
     static void initClass();
 
 private:
 
     void mark() {}
 
-    QList<int> findMethods(VALUE name) const;
-    int findProperty(VALUE name) const;
+    QList<int> findMethods(RubyValue name) const;
+    int findProperty(RubyValue name) const;
 
     const QMetaObject *mMetaObject = nullptr;
     QMultiHash<ID, int> mMethodHash;

@@ -16,7 +16,7 @@ AccessSupport::~AccessSupport()
 {
 }
 
-VALUE AccessSupport::initialize(VALUE rubyClass, VALUE className, VALUE methodInfos, VALUE signalInfos, VALUE propertyInfos)
+RubyValue AccessSupport::initialize(RubyValue rubyClass, RubyValue className, RubyValue methodInfos, RubyValue signalInfos, RubyValue propertyInfos)
 {
     mRubyClass = rubyClass;
     mAccessClass = makeSP<AccessClass>(className, methodInfos, signalInfos, propertyInfos);
@@ -24,33 +24,33 @@ VALUE AccessSupport::initialize(VALUE rubyClass, VALUE className, VALUE methodIn
     return self();
 }
 
-VALUE AccessSupport::emitSignal(VALUE obj, VALUE name, VALUE args)
+RubyValue AccessSupport::emitSignal(RubyValue obj, RubyValue name, RubyValue args)
 {
-    auto accessObj = QtObjectPointer::getPointer(send(obj, "access_object"))->fetchQObject();
-    auto nameId = SYM2ID(name);
-    auto argVariants = fromRuby<QVariantList>(args);
+    auto accessObj = QtObjectPointer::getPointer(obj.send("access_object"))->fetchQObject();
+    auto nameId = name.toID();
+    auto argVariants = args.to<QVariantList>();
     withoutGvl([&] {
         mMetaObject->emitSignal(dynamic_cast<ForeignObject *>(accessObj), nameId, argVariants);
     });
     return Qnil;
 }
 
-VALUE AccessSupport::createAccessObject(VALUE access)
+RubyValue AccessSupport::createAccessObject(RubyValue access)
 {
     return QtObjectPointer::fromQObject(new AccessObject(mMetaObject, access), false);
 }
 
-VALUE AccessSupport::registerToQml(VALUE path, VALUE majorVersion, VALUE minorVersion, VALUE name)
+RubyValue AccessSupport::registerToQml(RubyValue path, RubyValue majorVersion, RubyValue minorVersion, RubyValue name)
 {
     if (!mTypeRegisterer) {
         mTypeRegisterer = makeSP<QmlTypeRegisterer>(mMetaObject, [this](void *where) {
             withGvl([&] {
-                auto value = send(mRubyClass, "new");
+                auto value = mRubyClass.send("new");
                 auto obj = QtObjectPointer::fromQObject(new(where) AccessObject(mMetaObject, value), false);
-                send(value, "access_object=", obj);
+                value.send("access_object=", obj);
             });
         });
-        mTypeRegisterer->registerType(fromRuby<QByteArray>(path), fromRuby<int>(majorVersion), fromRuby<int>(minorVersion), fromRuby<QByteArray>(name));
+        mTypeRegisterer->registerType(path.to<QByteArray>(), majorVersion.to<int>(), minorVersion.to<int>(), name.to<QByteArray>());
     }
     return self();
 }

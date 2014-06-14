@@ -4,7 +4,7 @@
 
 namespace RubyQml {
 
-AccessObject::AccessObject(const SP<ForeignMetaObject> &metaobj, VALUE value) :
+AccessObject::AccessObject(const SP<ForeignMetaObject> &metaobj, RubyValue value) :
     ForeignObject(metaobj),
     mValue(value)
 {

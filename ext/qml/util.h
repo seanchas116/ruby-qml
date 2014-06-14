@@ -1,10 +1,11 @@
 #pragma once
 
-#include <ruby.h>
-#include <QtCore/QMetaType>
+#include <QMetaType>
 #include <functional>
 
 namespace RubyQml {
+
+class RubyValue;
 
 class RubyException
 {
@@ -23,7 +24,7 @@ void protect(const std::function<void()> &callback);
 // Other C++ exceptions are not allowed to be thrown out of this function.
 void unprotect(const std::function<void()> &callback) noexcept;
 
-void rescue(const std::function<void ()> &doAction, const std::function<void (VALUE)> &handleException);
+void rescue(const std::function<void ()> &doAction, const std::function<void (RubyValue)> &handleException);
 
 // call function with GVL unlocked
 void withoutGvl(const std::function<void()> &callback);
@@ -31,22 +32,10 @@ void withoutGvl(const std::function<void()> &callback);
 // call function with GVL locked
 void withGvl(const std::function<void()> &callback);
 
-template <typename ... TArgs>
-VALUE send(VALUE self, const char *method, TArgs && ... args)
-{
-    VALUE ret;
-    protect([&] {
-        ret = rb_funcall(self, rb_intern(method), sizeof...(args), args...);
-    });
-    return ret;
-}
-
 void fail(const char *errorClassName, const QString &message);
 
-bool isKindOf(VALUE obj, VALUE klass);
-
 // set of VALUEs that are marked in every GC
-QSet<VALUE> &globalMarkValues();
+QSet<RubyValue> &globalMarkValues();
 
 } // namespace RubyQml
 

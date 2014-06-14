@@ -16,9 +16,9 @@ public:
     PluginLoader();
     ~PluginLoader();
 
-    VALUE initialize(VALUE path);
-    VALUE load();
-    VALUE instance();
+    RubyValue initialize(RubyValue path);
+    RubyValue load();
+    RubyValue instance();
 
     static void initClass();
 

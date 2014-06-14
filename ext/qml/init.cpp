@@ -18,13 +18,14 @@ void defineTestUtil()
         Q_UNUSED(klass);
         VALUE ret;
         unprotect([&] {
-            ret = echoConversion(value);
+            auto variant = RubyValue(value).to<QVariant>();
+            ret = RubyValue::from(variant);
         });
         return ret;
     };
 
     rb_define_module_function(rb_path2class("QML::TestUtil"), "echo_conversion",
-                              (VALUE (*)(...))(VALUE (*)(VALUE, VALUE))echo_conversion, 1);
+                              (VALUE(*)(...))(VALUE (*)(VALUE, VALUE))echo_conversion, 1);
 }
 
 void defineMetaTypes()

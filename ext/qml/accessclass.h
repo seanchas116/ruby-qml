@@ -1,6 +1,6 @@
 #pragma once
 #include "foreignclass.h"
-#include <ruby.h>
+#include "rubyvalue.h"
 
 namespace RubyQml {
 
@@ -9,7 +9,7 @@ class AccessObject;
 class AccessClass : public ForeignClass
 {
 public:
-    AccessClass(VALUE className, VALUE methodInfos, VALUE signalInfos, VALUE propertyInfos);
+    AccessClass(RubyValue className, RubyValue methodInfos, RubyValue signalInfos, RubyValue propertyInfos);
 
     QVariant callMethod(ForeignObject *obj, size_t id, const QVariantList &args) override;
     void setProperty(ForeignObject *obj, size_t id, const QVariant &value) override;

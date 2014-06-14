@@ -36,7 +36,7 @@ QtObjectPointer::~QtObjectPointer()
     }
 }
 
-VALUE QtObjectPointer::fromQObject(QObject *obj, bool hasOwnership)
+RubyValue QtObjectPointer::fromQObject(QObject *obj, bool hasOwnership)
 {
     auto ptr = newAsRuby();
     QtObjectPointer::getPointer(ptr)->setQObject(obj, hasOwnership);
@@ -67,38 +67,38 @@ void QtObjectPointer::setOwnership(bool ownership)
     }
 }
 
-VALUE QtObjectPointer::hasOwnership() const
+RubyValue QtObjectPointer::hasOwnership() const
 {
-    return toRuby(mHasOwnership);
+    return RubyValue::from(mHasOwnership);
 }
 
-VALUE QtObjectPointer::withOwnership() const
+RubyValue QtObjectPointer::withOwnership() const
 {
-    auto other = send(rubyClass(), "new");
+    auto other = rubyClass().send("new");
     QtObjectPointer::getPointer(other)->setOwnership(true);
     return other;
 }
 
-VALUE QtObjectPointer::isNull() const
+RubyValue QtObjectPointer::isNull() const
 {
-    return toRuby(!mObject);
+    return RubyValue::from(!mObject);
 }
 
-VALUE QtObjectPointer::toString() const
+RubyValue QtObjectPointer::toString() const
 {
     QString name;
     QDebug(&name) << mObject.data();
-    return toRuby(name);
+    return RubyValue::from(name);
 }
 
-VALUE QtObjectPointer::destroy()
+RubyValue QtObjectPointer::destroy()
 {
     destroyObject(mObject);
     mHasOwnership = false;
     return self();
 }
 
-VALUE QtObjectPointer::mObjectBaseClass = Qnil;
+RubyValue QtObjectPointer::mObjectBaseClass = Qnil;
 
 void QtObjectPointer::initClass()
 {

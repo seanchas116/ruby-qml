@@ -6,7 +6,7 @@
 
 namespace RubyQml {
 
-ObjectData::ObjectData(VALUE rubyObject) :
+ObjectData::ObjectData(RubyValue rubyObject) :
     mRubyObject(rubyObject)
 {
     globalMarkValues() << mRubyObject;

@@ -1,14 +1,14 @@
 #pragma once
-#include <QtCore/QObject>
-#include <QtCore/QMetaMethod>
-#include <ruby.h>
+#include "rubyvalue.h"
+#include <QObject>
+#include <QMetaMethod>
 
 namespace RubyQml {
 
 class SignalForwarder : public QObject
 {
 public:
-    SignalForwarder(QObject *obj, const QMetaMethod &signal, VALUE proc);
+    SignalForwarder(QObject *obj, const QMetaMethod &signal, RubyValue proc);
     ~SignalForwarder();
 
     int qt_metacall(QMetaObject::Call call, int id, void **args) override;
@@ -19,7 +19,7 @@ private:
     void callProc(const QVariantList &list);
 
     QMetaMethod mSignal;
-    VALUE mProc;
+    RubyValue mProc;
     static QSet<SignalForwarder *> mInstances;
 };
 

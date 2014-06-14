@@ -1,5 +1,5 @@
 #include "util.h"
-#include "conversion.h"
+#include "rubyvalue.h"
 #include <QtCore/QString>
 #include <QtCore/QSet>
 #include <ruby/thread.h>
@@ -58,7 +58,7 @@ void unprotect(const std::function<void ()> &callback) noexcept
     }
 }
 
-void rescue(const std::function<void ()> &doAction, const std::function<void (VALUE)> &handleException)
+void rescue(const std::function<void ()> &doAction, const std::function<void (RubyValue)> &handleException)
 {
     VALUE (*callback)(VALUE) = [](VALUE data) {
         (*reinterpret_cast<std::function<void ()> *>(data))();
@@ -117,18 +117,9 @@ void fail(const char *errorClassName, const QString &message)
     });
 }
 
-bool isKindOf(VALUE obj, VALUE klass)
+QSet<RubyValue> &globalMarkValues()
 {
-    VALUE result;
-    protect([&] {
-        result = rb_obj_is_kind_of(obj, klass);
-    });
-    return fromRuby<bool>(result);
-}
-
-QSet<VALUE> &globalMarkValues()
-{
-    static QSet<VALUE> values;
+    static QSet<RubyValue> values;
     return values;
 }
 

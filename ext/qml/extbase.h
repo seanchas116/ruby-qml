@@ -1,6 +1,6 @@
 #pragma once
 #include "util.h"
-#include "conversion.h"
+#include "rubyvalue.h"
 
 #define METHOD_TYPE_NAME(name) decltype(name), name
 
@@ -18,9 +18,9 @@ class ExtBase
 {
 public:
 
-    VALUE self() { return mSelf; }
+    RubyValue self() { return mSelf; }
 
-    static TDerived *getPointer(VALUE value)
+    static TDerived *getPointer(RubyValue value)
     {
         auto klass = rubyClass();
         protect([&] {
@@ -29,14 +29,14 @@ public:
             }
         });
         TDerived *ptr;
-        Data_Get_Struct(value, TDerived, ptr);
+        Data_Get_Struct(VALUE(value), TDerived, ptr);
         return ptr;
     }
 
-    static VALUE newAsRuby()
+    static RubyValue newAsRuby()
     {
         auto klass = rubyClass();
-        VALUE ret;
+        RubyValue ret;
         protect([&] {
             ret = rb_obj_alloc(klass);
         });
@@ -45,7 +45,7 @@ public:
 
     class ClassBuilder;
 
-    static VALUE rubyClass()
+    static RubyValue rubyClass()
     {
         return mKlass;
     }
@@ -74,12 +74,12 @@ private:
         return self;
     }
 
-    VALUE mSelf;
-    static VALUE mKlass;
+    RubyValue mSelf;
+    static RubyValue mKlass;
 };
 
 template <typename TDerived>
-VALUE ExtBase<TDerived>::mKlass = Qnil;
+RubyValue ExtBase<TDerived>::mKlass = Qnil;
 
 template <typename TDerived>
 class ExtBase<TDerived>::ClassBuilder
@@ -94,7 +94,7 @@ public:
         });
     }
 
-    VALUE rubyClass() { return mKlass; }
+    RubyValue rubyClass() { return mKlass; }
 
     template <typename TMemberFunction, TMemberFunction memfn>
     ClassBuilder &defineMethod(const char *name, MethodAccess access = MethodAccess::Public)
@@ -129,17 +129,23 @@ public:
 
 private:
 
+    template <typename T>
+    struct ToVALUE
+    {
+        using type = VALUE;
+    };
+
     template <typename TMemberFunction, TMemberFunction memfn>
     struct MethodWrapper;
 
-    template <typename ... TArgs, VALUE (TDerived::*memfn)(TArgs ...)>
-    struct MethodWrapper<VALUE (TDerived::*)(TArgs ...), memfn>
+    template <typename ... TArgs, RubyValue (TDerived::*memfn)(TArgs ...)>
+    struct MethodWrapper<RubyValue (TDerived::*)(TArgs ...), memfn>
     {
         static constexpr size_t argc = sizeof...(TArgs);
 
-        static VALUE apply(VALUE self, TArgs ... args)
+        static VALUE apply(RubyValue self, typename ToVALUE<TArgs>::type ... args)
         {
-            VALUE ret;
+            RubyValue ret;
             unprotect([&] {
                 ret = (getPointer(self)->*memfn)(args ...);
             });
@@ -147,14 +153,14 @@ private:
         }
     };
 
-    template <typename ... TArgs, VALUE (TDerived::*memfn)(TArgs ...) const>
-    struct MethodWrapper<VALUE (TDerived::*)(TArgs ...) const, memfn>
+    template <typename ... TArgs, RubyValue (TDerived::*memfn)(TArgs ...) const>
+    struct MethodWrapper<RubyValue (TDerived::*)(TArgs ...) const, memfn>
     {
         static constexpr size_t argc = sizeof...(TArgs);
 
-        static VALUE apply(VALUE self, TArgs ... args)
+        static VALUE apply(RubyValue self, typename ToVALUE<TArgs>::type ... args)
         {
-            VALUE ret;
+            RubyValue ret;
             unprotect([&] {
                 ret = (getPointer(self)->*memfn)(args ...);
             });

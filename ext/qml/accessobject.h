@@ -1,5 +1,5 @@
 #pragma once
-#include <ruby.h>
+#include "rubyvalue.h"
 #include "foreignobject.h"
 
 namespace RubyQml {
@@ -7,13 +7,13 @@ namespace RubyQml {
 class AccessObject : public ForeignObject
 {
 public:
-    AccessObject(const SP<ForeignMetaObject> &metaobj, VALUE value);
+    AccessObject(const SP<ForeignMetaObject> &metaobj, RubyValue value);
     ~AccessObject();
 
-    VALUE value() { return mValue; }
+    RubyValue value() { return mValue; }
 
 private:
-    VALUE mValue;
+    RubyValue mValue;
 };
 
 } // namespace RubyQml

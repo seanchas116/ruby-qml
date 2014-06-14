@@ -15,13 +15,13 @@ PluginLoader::~PluginLoader()
 {
 }
 
-VALUE PluginLoader::initialize(VALUE path)
+RubyValue PluginLoader::initialize(RubyValue path)
 {
-    mPluginLoader->setFileName(fromRuby<QString>(path));
+    mPluginLoader->setFileName(path.to<QString>());
     return self();
 }
 
-VALUE PluginLoader::load()
+RubyValue PluginLoader::load()
 {
     auto ok = mPluginLoader->load();
     if (!ok) {
@@ -30,12 +30,12 @@ VALUE PluginLoader::load()
     return self();
 }
 
-VALUE PluginLoader::instance()
+RubyValue PluginLoader::instance()
 {
-    send(self(), "load");
+    self().send("load");
     auto instance = mPluginLoader->instance();
     if (instance) {
-        return toRuby<QObject *>(instance);
+        return RubyValue::from(instance);
     } else {
         return Qnil;
     }

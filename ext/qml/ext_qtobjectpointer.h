@@ -13,20 +13,20 @@ public:
     QtObjectPointer();
     ~QtObjectPointer();
 
-    static VALUE fromQObject(QObject *obj, bool hasOwnership);
+    static RubyValue fromQObject(QObject *obj, bool hasOwnership);
 
     QObject *qObject() { return mObject; }
     QObject *fetchQObject();
     void setQObject(QObject *obj, bool hasOwnership);
     void setOwnership(bool ownership);
 
-    VALUE hasOwnership() const;
-    VALUE withOwnership() const;
-    VALUE isNull() const;
-    VALUE toString() const;
-    VALUE destroy();
+    RubyValue hasOwnership() const;
+    RubyValue withOwnership() const;
+    RubyValue isNull() const;
+    RubyValue toString() const;
+    RubyValue destroy();
 
-    static VALUE objectBaseClass() { return mObjectBaseClass; }
+    static RubyValue objectBaseClass() { return mObjectBaseClass; }
     static void initClass();
 
 private:
@@ -36,7 +36,7 @@ private:
     bool mHasOwnership = false;
     QPointer<QObject> mObject;
 
-    static VALUE mObjectBaseClass;
+    static RubyValue mObjectBaseClass;
 };
 
 } // namespace Ext

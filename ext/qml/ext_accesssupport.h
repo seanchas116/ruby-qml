@@ -17,17 +17,17 @@ public:
     AccessSupport();
     ~AccessSupport();
 
-    VALUE initialize(VALUE rubyClass, VALUE className, VALUE methodInfos, VALUE signalInfos, VALUE propertyInfos);
-    VALUE emitSignal(VALUE obj, VALUE name, VALUE args);
-    VALUE registerToQml(VALUE path, VALUE majorVersion, VALUE minorVersion, VALUE name);
-    VALUE createAccessObject(VALUE access);
+    RubyValue initialize(RubyValue rubyClass, RubyValue className, RubyValue methodInfos, RubyValue signalInfos, RubyValue propertyInfos);
+    RubyValue emitSignal(RubyValue obj, RubyValue name, RubyValue args);
+    RubyValue registerToQml(RubyValue path, RubyValue majorVersion, RubyValue minorVersion, RubyValue name);
+    RubyValue createAccessObject(RubyValue access);
 
     static void initClass();
 
 private:
     void mark() {}
 
-    VALUE mRubyClass = Qnil;
+    RubyValue mRubyClass = Qnil;
     SP<AccessClass> mAccessClass;
     SP<ForeignMetaObject> mMetaObject;
     SP<QmlTypeRegisterer> mTypeRegisterer;

@@ -6,14 +6,8 @@ namespace RubyQml {
 
 AccessObject::AccessObject(const SP<ForeignMetaObject> &metaobj, RubyValue value) :
     ForeignObject(metaobj),
-    mValue(value)
+    mRef(value)
 {
-    globalMarkValues() << value;
-}
-
-AccessObject::~AccessObject()
-{
-    globalMarkValues().remove(mValue);
 }
 
 } // namespace RubyQml

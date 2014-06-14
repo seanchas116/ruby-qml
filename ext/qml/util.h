@@ -34,9 +34,6 @@ void withGvl(const std::function<void()> &callback);
 
 void fail(const char *errorClassName, const QString &message);
 
-// set of VALUEs that are marked in every GC
-QSet<RubyValue> &globalMarkValues();
-
 } // namespace RubyQml
 
 Q_DECLARE_METATYPE(const QMetaObject*)

@@ -1,7 +1,6 @@
 #include "util.h"
 #include "rubyvalue.h"
 #include <QtCore/QString>
-#include <QtCore/QSet>
 #include <ruby/thread.h>
 #include <string>
 #include <cxxabi.h>
@@ -115,12 +114,6 @@ void fail(const char *errorClassName, const QString &message)
     protect([&] {
         rb_raise(rb_path2class(errorClassName), "%s", msg.data());
     });
-}
-
-QSet<RubyValue> &globalMarkValues()
-{
-    static QSet<RubyValue> values;
-    return values;
 }
 
 }

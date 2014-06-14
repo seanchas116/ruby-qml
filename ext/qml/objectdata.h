@@ -1,6 +1,6 @@
 #pragma once
 #include <QtCore/QMetaType>
-#include "rubyvalue.h"
+#include "valuereference.h"
 
 namespace RubyQml {
 
@@ -8,16 +8,15 @@ class ObjectData
 {
 public:
     ObjectData(RubyValue rubyObject);
-    ~ObjectData();
 
-    RubyValue rubyObject() { return mRubyObject; }
+    RubyValue rubyObject() { return mRubyObjectRef.value(); }
 
     static std::shared_ptr<ObjectData> get(QObject *obj);
     static void set(QObject *obj, const std::shared_ptr<ObjectData> &data);
 
 private:
 
-    RubyValue mRubyObject = Qnil;
+    ValueReference mRubyObjectRef;
 };
 
 } // namespace RubyQml

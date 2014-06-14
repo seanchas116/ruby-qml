@@ -1,5 +1,5 @@
 #pragma once
-#include "rubyvalue.h"
+#include "valuereference.h"
 #include <QObject>
 #include <QMetaMethod>
 
@@ -19,7 +19,7 @@ private:
     void callProc(const QVariantList &list);
 
     QMetaMethod mSignal;
-    RubyValue mProc;
+    ValueReference mProcRef;
     static QSet<SignalForwarder *> mInstances;
 };
 

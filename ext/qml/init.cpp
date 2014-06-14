@@ -4,6 +4,7 @@
 #include "ext_gcmarker.h"
 #include "ext_accesssupport.h"
 #include "signalforwarder.h"
+#include "valuereference.h"
 #include <QtCore/QSet>
 
 using namespace RubyQml;
@@ -48,12 +49,7 @@ void defineClasses()
 
 void setupGlobalGCMarking()
 {
-    auto marker = Ext::GCMarker::newAsRuby();
-    Ext::GCMarker::getPointer(marker)->setMarkFunction([]{
-        for (auto value : globalMarkValues()) {
-            rb_gc_mark(value);
-        }
-    });
+    auto marker = Ext::GCMarker::fromMarkFunction(&ValueReference::markAllReferences);
     rb_gc_register_mark_object(marker);
 }
 

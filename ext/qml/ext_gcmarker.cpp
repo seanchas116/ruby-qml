@@ -13,6 +13,13 @@ void GCMarker::setMarkFunction(const std::function<void ()> &func)
     mMarkFunc = func;
 }
 
+RubyValue GCMarker::fromMarkFunction(const std::function<void ()> &func)
+{
+    auto marker = newAsRuby();
+    getPointer(marker)->setMarkFunction(func);
+    return marker;
+}
+
 void GCMarker::mark()
 {
     if (mMarkFunc)

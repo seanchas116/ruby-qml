@@ -14,6 +14,7 @@ public:
 
     void setMarkFunction(const std::function<void()> &func);
     static void initClass();
+    static RubyValue fromMarkFunction(const std::function<void ()> &func);
 
 private:
     void mark();

@@ -7,14 +7,8 @@
 namespace RubyQml {
 
 ObjectData::ObjectData(RubyValue rubyObject) :
-    mRubyObject(rubyObject)
+    mRubyObjectRef(rubyObject)
 {
-    globalMarkValues() << mRubyObject;
-}
-
-ObjectData::~ObjectData()
-{
-    globalMarkValues().remove(mRubyObject);
 }
 
 std::shared_ptr<ObjectData> ObjectData::get(QObject *obj)

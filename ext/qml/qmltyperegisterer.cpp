@@ -26,15 +26,14 @@ QmlTypeRegisterer::QmlTypeRegisterer(const SP<ForeignMetaObject> &metaObject, co
     };
 
     if (ffi_prep_closure_loc(mFactoryClosure, &mFactoryCif, callback, this, (void *)mFactoryFunc) != FFI_OK) {
+        ffi_closure_free(mFactoryClosure);
         throw std::runtime_error("failed to prepare FFI closure");
     }
 }
 
 QmlTypeRegisterer::~QmlTypeRegisterer()
 {
-    if (mFactoryClosure) {
-        ffi_closure_free(mFactoryClosure);
-    }
+    ffi_closure_free(mFactoryClosure);
 }
 
 void QmlTypeRegisterer::registerType(const char *uri, int versionMajor, int versionMinor, const char *qmlName)

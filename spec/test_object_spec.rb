@@ -2,8 +2,8 @@ require 'spec_helper'
 
 describe "test object" do
 
-  let(:loader) { QML::PluginLoader.new QML::ROOT_PATH + 'ext/qml/plugins/testobject', 'rubyqml-testobject' }
-  let(:obj) { loader.instance.createTestObject }
+  let(:plugin) { QML::Plugins.testobject }
+  let(:obj) { plugin.createTestObject }
 
   describe '#normalMethod' do
 
@@ -135,7 +135,7 @@ describe "test object" do
   end
 
   context 'in subclass' do
-    let(:subobj) { loader.instance.createTestObject }
+    let(:subobj) { plugin.createTestObject }
     it "can call TestObject's method" do
       expect(subobj.normalMethod(1, "23")).to eq(24)
     end

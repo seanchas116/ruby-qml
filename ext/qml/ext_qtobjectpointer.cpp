@@ -43,7 +43,7 @@ void QtObjectPointer::setQObject(QObject *obj, bool owned)
         destroy();
     }
     auto context = QQmlEngine::contextForObject(obj);
-    if (context) {
+    if (context && QQmlEngine::objectOwnership(obj) == QQmlEngine::JavaScriptOwnership) {
         mJSValue = context->engine()->newQObject(obj);
         mIsOwned = false;
     }

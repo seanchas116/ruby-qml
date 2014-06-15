@@ -1,4 +1,5 @@
 #include "ext_qtobjectpointer.h"
+#include "markable.h"
 #include <QObject>
 #include <QHash>
 #include <QQmlEngine>
@@ -105,6 +106,23 @@ RubyValue QtObjectPointer::ext_destroy()
 {
     destroy();
     return self();
+}
+
+static void markQObject(QObject *obj) {
+    auto markable = dynamic_cast<Markable *>(obj);
+    if (markable) {
+        markable->gc_mark();
+    }
+    for (auto child : obj->children()) {
+        markQObject(child);
+    }
+}
+
+void QtObjectPointer::mark()
+{
+    if (mObject) {
+        markQObject(mObject);
+    }
 }
 
 RubyValue QtObjectPointer::mObjectBaseClass = Qnil;

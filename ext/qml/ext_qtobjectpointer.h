@@ -35,7 +35,7 @@ public:
 
 private:
 
-    void mark() {}
+    void mark();
 
     bool mIsOwned = false;
     QPointer<QObject> mObject;

@@ -1,18 +1,20 @@
 #pragma once
-#include "valuereference.h"
+#include "rubyvalue.h"
 #include "foreignobject.h"
+#include "markable.h"
 
 namespace RubyQml {
 
-class AccessObject : public ForeignObject
+class AccessObject : public ForeignObject, public Markable
 {
 public:
     AccessObject(const SP<ForeignMetaObject> &metaobj, RubyValue value);
 
-    RubyValue value() { return mRef.value(); }
+    RubyValue value() { return mValue; }
+    void gc_mark() override;
 
 private:
-    ValueReference mRef;
+    RubyValue mValue;
 };
 
 } // namespace RubyQml

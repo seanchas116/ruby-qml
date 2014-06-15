@@ -7,7 +7,7 @@ namespace RubyQml {
 SignalForwarder::SignalForwarder(QObject *obj, const QMetaMethod &signal, RubyValue proc) :
     QObject(obj),
     mSignal(signal),
-    mProcRef(proc)
+    mProc(proc)
 {
     QMetaObject::connect(obj, signal.methodIndex(), this, QObject::staticMetaObject.methodCount());
     mInstances << this;
@@ -33,6 +33,11 @@ int SignalForwarder::qt_metacall(QMetaObject::Call call, int id, void **args)
     return id;
 }
 
+void SignalForwarder::gc_mark()
+{
+    rb_gc_mark(mProc);
+}
+
 void SignalForwarder::forwardArgs(void **args)
 {
     QVariantList list;
@@ -53,7 +58,7 @@ void SignalForwarder::callProc(const QVariantList &list)
     withGvl([&] {
         auto args = RubyValue::from(list);
         protect([&] {
-            rb_funcallv(mProcRef.value(), rb_intern("call"), RARRAY_LEN(VALUE(args)), RARRAY_PTR(VALUE(args)));
+            rb_funcallv(mProc, rb_intern("call"), RARRAY_LEN(VALUE(args)), RARRAY_PTR(VALUE(args)));
         });
     });
 }

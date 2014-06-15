@@ -1,11 +1,12 @@
 #pragma once
-#include "valuereference.h"
+#include "rubyvalue.h"
+#include "markable.h"
 #include <QObject>
 #include <QMetaMethod>
 
 namespace RubyQml {
 
-class SignalForwarder : public QObject
+class SignalForwarder : public QObject, public Markable
 {
 public:
     SignalForwarder(QObject *obj, const QMetaMethod &signal, RubyValue proc);
@@ -14,12 +15,14 @@ public:
     int qt_metacall(QMetaObject::Call call, int id, void **args) override;
     static void deleteAll();
 
+    void gc_mark() override;
+
 private:
     void forwardArgs(void **args);
     void callProc(const QVariantList &list);
 
     QMetaMethod mSignal;
-    ValueReference mProcRef;
+    RubyValue mProc;
     static QSet<SignalForwarder *> mInstances;
 };
 

@@ -40,6 +40,7 @@ describe QML::QtObjectPointer do
       it 'destroyes the object' do
         pointer = lambda do
           owned_pointer = create_test_object.call.object_pointer
+          owned_pointer.owned = true
           pointer = owned_pointer.dup
           pointer.owned = false
           pointer

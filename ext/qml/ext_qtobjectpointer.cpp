@@ -8,24 +8,6 @@
 namespace RubyQml {
 namespace Ext {
 
-namespace {
-
-void destroyObject(QObject *obj)
-{
-    // owned by JS
-    if (QQmlEngine::objectOwnership(obj) == QQmlEngine::JavaScriptOwnership) {
-        return;
-    }
-    // owned by parent
-    if (obj->parent()) {
-        return;
-    }
-
-    obj->deleteLater();
-}
-
-}
-
 QtObjectPointer::QtObjectPointer()
 {
 }
@@ -33,7 +15,7 @@ QtObjectPointer::QtObjectPointer()
 QtObjectPointer::~QtObjectPointer()
 {
     if (mIsOwned) {
-        destroyObject(mObject);
+        destroy();
     }
 }
 
@@ -57,8 +39,8 @@ void QtObjectPointer::setQObject(QObject *obj, bool owned)
     if (!obj) {
         throw std::logic_error("null object");
     }
-    if (mIsOwned && mObject) {
-        destroyObject(mObject);
+    if (mIsOwned) {
+        destroy();
     }
     auto context = QQmlEngine::contextForObject(obj);
     if (context) {

@@ -58,18 +58,14 @@ void QtObjectPointer::setOwned(bool owned)
     }
 }
 
-void QtObjectPointer::destroy(bool later)
+void QtObjectPointer::destroy()
 {
     if (!mIsOwned) {
         fail("QML::QtObjectError", "destroying non-owned Qt object");
     }
 
     if (mObject && !mObject->parent()) {
-        if (later) {
-            mObject->deleteLater();
-        } else {
-            delete mObject;
-        }
+        mObject->deleteLater();
     }
 
     mIsOwned = false;
@@ -107,13 +103,7 @@ RubyValue QtObjectPointer::ext_toString() const
 
 RubyValue QtObjectPointer::ext_destroy()
 {
-    destroy(false);
-    return self();
-}
-
-RubyValue QtObjectPointer::ext_destroyLater()
-{
-    destroy(true);
+    destroy();
     return self();
 }
 
@@ -131,7 +121,6 @@ void QtObjectPointer::initClass()
     builder.defineMethod<METHOD_TYPE_NAME(&QtObjectPointer::ext_isNull)>("null?");
     builder.defineMethod<METHOD_TYPE_NAME(&QtObjectPointer::ext_toString)>("to_s");
     builder.defineMethod<METHOD_TYPE_NAME(&QtObjectPointer::ext_destroy)>("destroy!");
-    builder.defineMethod<METHOD_TYPE_NAME(&QtObjectPointer::ext_destroyLater)>("destroy_later!");
     builder.aliasMethod("to_s", "inspect");
 }
 

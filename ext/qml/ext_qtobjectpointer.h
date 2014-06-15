@@ -21,7 +21,7 @@ public:
     void setQObject(QObject *obj, bool owned);
     bool isOwned() const { return mIsOwned; }
     void setOwned(bool owned);
-    void destroy(bool later = true);
+    void destroy();
 
     RubyValue ext_initializeCopy(RubyValue other);
     RubyValue ext_isOwned() const;
@@ -29,7 +29,6 @@ public:
     RubyValue ext_isNull() const;
     RubyValue ext_toString() const;
     RubyValue ext_destroy();
-    RubyValue ext_destroyLater();
 
     static RubyValue objectBaseClass() { return mObjectBaseClass; }
     static void initClass();

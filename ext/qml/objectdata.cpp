@@ -7,7 +7,7 @@
 namespace RubyQml {
 
 ObjectData::ObjectData(RubyValue rubyObject) :
-    mRubyObjectRef(rubyObject)
+    mRubyObject(rubyObject)
 {
 }
 

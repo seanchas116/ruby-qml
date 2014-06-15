@@ -9,14 +9,14 @@ class ObjectData
 public:
     ObjectData(RubyValue rubyObject);
 
-    RubyValue rubyObject() { return mRubyObjectRef.value(); }
+    RubyValue rubyObject() { return mRubyObject; }
 
     static std::shared_ptr<ObjectData> get(QObject *obj);
     static void set(QObject *obj, const std::shared_ptr<ObjectData> &data);
 
 private:
 
-    ValueReference mRubyObjectRef;
+    RubyValue mRubyObject;
 };
 
 } // namespace RubyQml

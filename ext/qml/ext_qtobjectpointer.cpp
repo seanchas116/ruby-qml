@@ -1,8 +1,9 @@
 #include "ext_qtobjectpointer.h"
-#include <QtCore/QObject>
-#include <QtCore/QHash>
-#include <QtQml/QQmlEngine>
-#include <QtCore/QDebug>
+#include <QObject>
+#include <QHash>
+#include <QQmlEngine>
+#include <QQmlContext>
+#include <QDebug>
 
 namespace RubyQml {
 namespace Ext {
@@ -31,70 +32,106 @@ QtObjectPointer::QtObjectPointer()
 
 QtObjectPointer::~QtObjectPointer()
 {
-    if (mHasOwnership) {
+    if (mIsOwned) {
         destroyObject(mObject);
     }
 }
 
-RubyValue QtObjectPointer::fromQObject(QObject *obj, bool hasOwnership)
+RubyValue QtObjectPointer::fromQObject(QObject *obj, bool owned)
 {
     auto ptr = newAsRuby();
-    QtObjectPointer::getPointer(ptr)->setQObject(obj, hasOwnership);
+    QtObjectPointer::getPointer(ptr)->setQObject(obj, owned);
     return ptr;
 }
 
 QObject *QtObjectPointer::fetchQObject()
 {
     if (!mObject) {
-        fail("QML::NullObjectError", "referencing already deleted Qt Object");
+        fail("QML::QtObjectError", "referencing already deleted Qt Object");
     }
     return mObject;
 }
 
-void QtObjectPointer::setQObject(QObject *obj, bool hasOwnership)
+void QtObjectPointer::setQObject(QObject *obj, bool owned)
 {
-    if (mHasOwnership && mObject) {
+    if (!obj) {
+        throw std::logic_error("null object");
+    }
+    if (mIsOwned && mObject) {
         destroyObject(mObject);
     }
+    auto context = QQmlEngine::contextForObject(obj);
+    if (context) {
+        mJSValue = context->engine()->newQObject(obj);
+        mIsOwned = false;
+    }
     mObject = obj;
-    mHasOwnership = hasOwnership;
+    mIsOwned = owned;
 }
 
-void QtObjectPointer::setOwnership(bool ownership)
+void QtObjectPointer::setOwned(bool owned)
 {
     if (mObject) {
-        mHasOwnership = ownership;
+        mIsOwned = owned;
     }
 }
 
-RubyValue QtObjectPointer::hasOwnership() const
+void QtObjectPointer::destroy(bool later)
 {
-    return RubyValue::from(mHasOwnership);
+    if (!mIsOwned) {
+        fail("QML::QtObjectError", "destroying non-owned Qt object");
+    }
+
+    if (mObject && !mObject->parent()) {
+        if (later) {
+            mObject->deleteLater();
+        } else {
+            delete mObject;
+        }
+    }
+
+    mIsOwned = false;
 }
 
-RubyValue QtObjectPointer::withOwnership() const
+RubyValue QtObjectPointer::ext_initializeCopy(RubyValue other)
 {
-    auto other = rubyClass().send("new");
-    QtObjectPointer::getPointer(other)->setOwnership(true);
-    return other;
+    callSuper(other);
+    *this = *getPointer(other);
+    return self();
 }
 
-RubyValue QtObjectPointer::isNull() const
+RubyValue QtObjectPointer::ext_isOwned() const
+{
+    return RubyValue::from(mIsOwned);
+}
+
+RubyValue QtObjectPointer::ext_setOwned(RubyValue owned)
+{
+    setOwned(owned.to<bool>());
+    return ext_isOwned();
+}
+
+RubyValue QtObjectPointer::ext_isNull() const
 {
     return RubyValue::from(!mObject);
 }
 
-RubyValue QtObjectPointer::toString() const
+RubyValue QtObjectPointer::ext_toString() const
 {
     QString name;
     QDebug(&name) << mObject.data();
     return RubyValue::from(name);
 }
 
-RubyValue QtObjectPointer::destroy()
+RubyValue QtObjectPointer::ext_destroy()
 {
-    destroyObject(mObject);
-    mHasOwnership = false;
+    destroy(false);
+    return self();
+}
+
+RubyValue QtObjectPointer::ext_destroyLater()
+{
+    destroy(true);
     return self();
 }
 
@@ -106,11 +143,13 @@ void QtObjectPointer::initClass()
         mObjectBaseClass = rb_define_class_under(rb_path2class("QML"), "QtObjectBase", rb_cObject);
     });
     ClassBuilder builder("QML", "QtObjectPointer");
-    builder.defineMethod<METHOD_TYPE_NAME(&QtObjectPointer::hasOwnership)>("has_ownership?");
-    builder.defineMethod<METHOD_TYPE_NAME(&QtObjectPointer::withOwnership)>("with_ownership");
-    builder.defineMethod<METHOD_TYPE_NAME(&QtObjectPointer::isNull)>("null?");
-    builder.defineMethod<METHOD_TYPE_NAME(&QtObjectPointer::toString)>("to_s");
-    builder.defineMethod<METHOD_TYPE_NAME(&QtObjectPointer::destroy)>("destroy!");
+    builder.defineMethod<METHOD_TYPE_NAME(&QtObjectPointer::ext_initializeCopy)>("initialize_copy", MethodAccess::Private);
+    builder.defineMethod<METHOD_TYPE_NAME(&QtObjectPointer::ext_isOwned)>("owned?");
+    builder.defineMethod<METHOD_TYPE_NAME(&QtObjectPointer::ext_setOwned)>("owned=");
+    builder.defineMethod<METHOD_TYPE_NAME(&QtObjectPointer::ext_isNull)>("null?");
+    builder.defineMethod<METHOD_TYPE_NAME(&QtObjectPointer::ext_toString)>("to_s");
+    builder.defineMethod<METHOD_TYPE_NAME(&QtObjectPointer::ext_destroy)>("destroy!");
+    builder.defineMethod<METHOD_TYPE_NAME(&QtObjectPointer::ext_destroyLater)>("destroy_later!");
     builder.aliasMethod("to_s", "inspect");
 }
 

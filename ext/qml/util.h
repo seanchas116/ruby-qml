@@ -2,6 +2,7 @@
 
 #include <QMetaType>
 #include <functional>
+#include <ruby.h>
 
 namespace RubyQml {
 
@@ -33,6 +34,15 @@ void withoutGvl(const std::function<void()> &callback);
 void withGvl(const std::function<void()> &callback);
 
 void fail(const char *errorClassName, const QString &message);
+
+template <typename ... TArgs>
+void callSuper(TArgs ... args)
+{
+    protect([&] {
+        VALUE argv[] = { args... };
+        rb_call_super(sizeof...(args), argv);
+    });
+}
 
 } // namespace RubyQml
 

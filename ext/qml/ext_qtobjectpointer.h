@@ -1,6 +1,7 @@
 #pragma once
 #include "extbase.h"
-#include <QtCore/QPointer>
+#include <QPointer>
+#include <QJSValue>
 
 namespace RubyQml {
 namespace Ext {
@@ -13,18 +14,22 @@ public:
     QtObjectPointer();
     ~QtObjectPointer();
 
-    static RubyValue fromQObject(QObject *obj, bool hasOwnership);
+    static RubyValue fromQObject(QObject *obj, bool owned);
 
     QObject *qObject() { return mObject; }
     QObject *fetchQObject();
-    void setQObject(QObject *obj, bool hasOwnership);
-    void setOwnership(bool ownership);
+    void setQObject(QObject *obj, bool owned);
+    bool isOwned() const { return mIsOwned; }
+    void setOwned(bool owned);
+    void destroy(bool later = true);
 
-    RubyValue hasOwnership() const;
-    RubyValue withOwnership() const;
-    RubyValue isNull() const;
-    RubyValue toString() const;
-    RubyValue destroy();
+    RubyValue ext_initializeCopy(RubyValue other);
+    RubyValue ext_isOwned() const;
+    RubyValue ext_setOwned(RubyValue owned);
+    RubyValue ext_isNull() const;
+    RubyValue ext_toString() const;
+    RubyValue ext_destroy();
+    RubyValue ext_destroyLater();
 
     static RubyValue objectBaseClass() { return mObjectBaseClass; }
     static void initClass();
@@ -33,8 +38,9 @@ private:
 
     void mark() {}
 
-    bool mHasOwnership = false;
+    bool mIsOwned = false;
     QPointer<QObject> mObject;
+    QJSValue mJSValue;
 
     static RubyValue mObjectBaseClass;
 };

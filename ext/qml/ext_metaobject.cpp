@@ -132,7 +132,7 @@ public:
                 auto objectPointer = QtObjectPointer::getPointer(ret);
                 auto obj = objectPointer->fetchQObject();
                 if (QQmlEngine::objectOwnership(obj) == QQmlEngine::CppOwnership && !obj->parent()) {
-                    objectPointer->setOwnership(true);
+                    objectPointer->setOwned(true);
                 }
             }
             return ret;

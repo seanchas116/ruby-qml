@@ -11,6 +11,7 @@ describe QML::QtObjectPointer do
       end
       it 'destroyes the object' do
         pointer.destroy!
+        QML.application.force_deferred_deletes
         expect(pointer.null?).to eq true
       end
     end
@@ -46,6 +47,7 @@ describe QML::QtObjectPointer do
           pointer
         end.call
         GC.start
+        QML.application.force_deferred_deletes
         expect(pointer.null?).to eq true
       end
     end
@@ -59,6 +61,7 @@ describe QML::QtObjectPointer do
           pointer
         end.call
         GC.start
+        QML.application.force_deferred_deletes
         expect(pointer.null?).to eq false
       end
     end

@@ -63,6 +63,10 @@ module QML
       @extension.exec
     end
 
+    def force_deferred_deletes
+      @extension.force_deferred_deletes
+    end
+
     # Called when an Ruby error is occured in executing Qt code.
     # @param error The error (or the exception)
     def notify_error(error)

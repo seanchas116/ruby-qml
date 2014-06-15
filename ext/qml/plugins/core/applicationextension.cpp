@@ -17,4 +17,9 @@ void ApplicationExtension::exec()
     mApp->exec();
 }
 
+void ApplicationExtension::forceDeferredDeletes()
+{
+    QCoreApplication::sendPostedEvents(0, QEvent::DeferredDelete);
+}
+
 } // namespace RubyQml

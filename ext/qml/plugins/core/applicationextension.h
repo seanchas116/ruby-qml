@@ -19,6 +19,7 @@ signals:
 public slots:
     QApplication *application() { return mApp; }
     void exec();
+    void forceDeferredDeletes();
 
 private:
     QApplication *mApp;

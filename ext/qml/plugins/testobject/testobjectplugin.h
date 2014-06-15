@@ -5,6 +5,7 @@ namespace RubyQml {
 
 class TestObject;
 class TestObjectSubclass;
+class OwnershipTest;
 
 class TestObjectPlugin : public QObject
 {
@@ -17,6 +18,7 @@ signals:
 public slots:
     RubyQml::TestObject *createTestObject();
     RubyQml::TestObjectSubclass *createTestObjectSubclass();
+    RubyQml::OwnershipTest *createOwnershipTest();
 
 private:
 

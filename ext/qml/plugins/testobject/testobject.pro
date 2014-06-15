@@ -8,9 +8,11 @@ INCLUDEPATH += .
 # Input
 SOURCES += testobject.cpp \
     testobjectplugin.cpp \
-    testobjectsubclass.cpp
+    testobjectsubclass.cpp \
+    ownershiptest.cpp
 
 HEADERS += \
     testobjectplugin.h \
     testobject.h \
-    testobjectsubclass.h
+    testobjectsubclass.h \
+    ownershiptest.h

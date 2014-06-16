@@ -7,6 +7,7 @@
 #include <QQmlEngine>
 #include <QQmlComponent>
 #include <QQmlContext>
+#include <stdexcept>
 
 Q_DECLARE_METATYPE(const QMetaObject*)
 

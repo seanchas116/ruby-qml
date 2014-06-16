@@ -63,6 +63,6 @@ headers.each do |h|
   abort "header not found: #{h}" unless have_header(h)
 end
 
-add_cppflags '-std=c++11 -Wall -Wextra -g'
+add_cppflags '-std=c++11 -Wall -Wextra -g -pipe'
 
 create_makefile "qml/qml"

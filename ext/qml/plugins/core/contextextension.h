@@ -16,7 +16,6 @@ public:
 
 public slots:
 
-    QQmlContext *context() { return mContext; }
     QQmlEngine *engine();
     QVariant evaluate(QObject *obj, const QString &str);
     void setContextProperty(const QString &key, const QVariant &value);

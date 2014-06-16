@@ -17,7 +17,6 @@ signals:
     void eventLoopProcessed();
 
 public slots:
-    QApplication *application() { return mApp; }
     void exec();
     void forceDeferredDeletes();
 

@@ -128,8 +128,8 @@ public:
         } else {
             auto ret = RubyValue::from(returnValue);
             // add ownership to QtObjectPointer unless it has parent or is owned by QML engine
-            if (ret.isKindOf(QtObjectPointer::rubyClass())) {
-                auto objectPointer = QtObjectPointer::getPointer(ret);
+            if (ret.isKindOf(QtObjectPointer::objectBaseClass())) {
+                auto objectPointer = QtObjectPointer::getPointer(ret.send("object_pointer"));
                 auto obj = objectPointer->fetchQObject();
                 if (QQmlEngine::objectOwnership(obj) == QQmlEngine::CppOwnership && !obj->parent()) {
                     objectPointer->setOwned(true);

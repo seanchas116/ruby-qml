@@ -207,9 +207,9 @@ RubyValue Conversion<QObject *>::to(QObject *obj)
         return accessObj->value();
     }
 
-    auto data = ObjectData::get(obj);
-    if (data) {
-        return data->rubyObject();
+    auto data = ObjectData::getOrCreate(obj);
+    if (data->rubyObject) {
+        return data->rubyObject;
     }
 
     auto metaobj = Ext::MetaObject::fromMetaObject(obj->metaObject());
@@ -218,7 +218,7 @@ RubyValue Conversion<QObject *>::to(QObject *obj)
     rubyobj.send("object_pointer=", objptr);
     rubyobj.send("initialize");
 
-    ObjectData::set(obj, std::make_shared<ObjectData>(rubyobj));
+    data->rubyObject = rubyobj;
     return rubyobj;
 }
 

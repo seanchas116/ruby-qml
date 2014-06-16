@@ -10,11 +10,12 @@ namespace RubyQml {
 class EngineExtension : public QObject
 {
     Q_OBJECT
+    Q_PROPERTY(QQmlContext* rootContext READ rootContext)
 public:
     explicit EngineExtension(QQmlEngine *engine);
+    QQmlContext *rootContext();
 
 public slots:
-    QQmlContext *rootContext();
 
 private:
     QQmlEngine *mEngine;

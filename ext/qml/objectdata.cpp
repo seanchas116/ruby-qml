@@ -1,24 +1,28 @@
 #include "objectdata.h"
-#include "util.h"
-#include <QtCore/QSet>
-#include <QtCore/QObject>
-#include <QtCore/QVariant>
 
 namespace RubyQml {
 
-ObjectData::ObjectData(RubyValue rubyObject) :
-    mRubyObject(rubyObject)
+ObjectData::ObjectData(QObject *target) :
+    QObject(target)
 {
 }
 
-std::shared_ptr<ObjectData> ObjectData::get(QObject *obj)
+ObjectData *ObjectData::getOrCreate(QObject *target)
 {
-    return obj->property("rubyqml_data").value<std::shared_ptr<ObjectData>>();
+    for (auto child : target->children()) {
+        auto data = dynamic_cast<ObjectData *>(child);
+        if (data) {
+            return data;
+        }
+    }
+    return new ObjectData(target);
 }
 
-void ObjectData::set(QObject *obj, const std::shared_ptr<ObjectData> &data)
+void ObjectData::gc_mark()
 {
-    obj->setProperty("rubyqml_data", QVariant::fromValue(data));
+    if (owned) {
+        rb_gc_mark(rubyObject);
+    }
 }
 
 } // namespace RubyQml

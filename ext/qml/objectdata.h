@@ -1,25 +1,20 @@
 #pragma once
-#include <QtCore/QMetaType>
-#include "valuereference.h"
+#include <QObject>
+#include "rubyvalue.h"
+#include "markable.h"
 
 namespace RubyQml {
 
-class ObjectData
+class ObjectData : public QObject, public Markable
 {
 public:
-    ObjectData(RubyValue rubyObject);
+    ObjectData(QObject *target);
+    RubyValue rubyObject;
+    bool owned = false;
 
-    RubyValue rubyObject() { return mRubyObject; }
+    void gc_mark() override;
 
-    static std::shared_ptr<ObjectData> get(QObject *obj);
-    static void set(QObject *obj, const std::shared_ptr<ObjectData> &data);
-
-private:
-
-    RubyValue mRubyObject;
+    static ObjectData *getOrCreate(QObject *target);
 };
 
 } // namespace RubyQml
-
-Q_DECLARE_METATYPE(std::shared_ptr<RubyQml::ObjectData>)
-

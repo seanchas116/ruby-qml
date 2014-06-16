@@ -5,6 +5,7 @@
 #include "ext_accesssupport.h"
 #include "signalforwarder.h"
 #include "valuereference.h"
+#include "objectgc.h"
 #include <QtCore/QSet>
 
 using namespace RubyQml;
@@ -49,13 +50,17 @@ void defineClasses()
 
 void setupGlobalGCMarking()
 {
-    auto marker = Ext::GCMarker::fromMarkFunction(&ValueReference::markAllReferences);
+    auto marker = Ext::GCMarker::fromMarkFunction([] {
+        ValueReference::markAllReferences();
+        ObjectGC::instance()->markNonOwnedObjects();
+    });
     rb_gc_register_mark_object(marker);
 }
 
 void cleanup()
 {
     SignalForwarder::deleteAll();
+    ObjectGC::cleanUp();
 }
 
 void setupEndProc()

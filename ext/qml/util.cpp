@@ -1,6 +1,6 @@
 #include "util.h"
 #include "rubyvalue.h"
-#include <QtCore/QString>
+#include <QString>
 #include <ruby/thread.h>
 #include <string>
 #include <cxxabi.h>

@@ -1,10 +1,13 @@
 #include "ext_qtobjectpointer.h"
 #include "markable.h"
+#include "objectdata.h"
+#include "objectgc.h"
 #include <QObject>
 #include <QHash>
 #include <QQmlEngine>
 #include <QQmlContext>
 #include <QDebug>
+#include <QCoreApplication>
 
 namespace RubyQml {
 namespace Ext {
@@ -44,17 +47,20 @@ void QtObjectPointer::setQObject(QObject *obj, bool owned)
         destroy();
     }
     auto context = QQmlEngine::contextForObject(obj);
-    if (context && QQmlEngine::objectOwnership(obj) == QQmlEngine::JavaScriptOwnership) {
+    if (context) {
+        QQmlEngine::setObjectOwnership(obj, QQmlEngine::JavaScriptOwnership);
         mJSValue = context->engine()->newQObject(obj);
         mIsOwned = false;
     }
     mObject = obj;
-    mIsOwned = owned;
+    ObjectGC::instance()->addObject(obj);
+    setOwned(owned);
 }
 
 void QtObjectPointer::setOwned(bool owned)
 {
     if (mObject) {
+        ObjectData::getOrCreate(mObject)->owned = owned;
         mIsOwned = owned;
     }
 }
@@ -64,12 +70,11 @@ void QtObjectPointer::destroy()
     if (!mIsOwned) {
         fail("QML::QtObjectError", "destroying non-owned Qt object");
     }
+    setOwned(false);
 
-    if (mObject && !mObject->parent()) {
-        mObject->deleteLater();
+    if (mObject && !mObject->parent() && !qobject_cast<QCoreApplication *>(mObject)) {
+        delete mObject;
     }
-
-    mIsOwned = false;
 }
 
 RubyValue QtObjectPointer::ext_initializeCopy(RubyValue other)
@@ -108,20 +113,10 @@ RubyValue QtObjectPointer::ext_destroy()
     return self();
 }
 
-static void markQObject(QObject *obj) {
-    auto markable = dynamic_cast<Markable *>(obj);
-    if (markable) {
-        markable->gc_mark();
-    }
-    for (auto child : obj->children()) {
-        markQObject(child);
-    }
-}
-
 void QtObjectPointer::mark()
 {
-    if (mObject) {
-        markQObject(mObject);
+    if (mIsOwned) {
+        ObjectGC::instance()->markOwnedObject(mObject);
     }
 }
 

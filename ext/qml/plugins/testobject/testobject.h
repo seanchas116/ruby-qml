@@ -4,6 +4,7 @@
 #include <QVariant>
 #include <QDebug>
 #include <QtPlugin>
+#include <stdexcept>
 
 namespace RubyQml {
 

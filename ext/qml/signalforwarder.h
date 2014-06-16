@@ -1,5 +1,6 @@
 #pragma once
 #include "rubyvalue.h"
+#include "weakvaluereference.h"
 #include "markable.h"
 #include <QObject>
 #include <QMetaMethod>
@@ -22,7 +23,7 @@ private:
     void callProc(const QVariantList &list);
 
     QMetaMethod mSignal;
-    RubyValue mProc;
+    WeakValueReference mProcRef;
     static QSet<SignalForwarder *> mInstances;
 };
 

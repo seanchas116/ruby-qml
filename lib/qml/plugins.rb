@@ -12,8 +12,8 @@ module QML
         @core ||= load('core')
       end
 
-      def testobject
-        @testobject ||= load('testobject')
+      def test_util
+        @test_util ||= load('testutil')
       end
 
       private

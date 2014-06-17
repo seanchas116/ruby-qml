@@ -30,7 +30,7 @@ describe QML::QtObjectBase do
     end
 
     context 'when object does not belong to context' do
-      let(:object) { QML::Plugins.testobject.createTestObject }
+      let(:object) { QML::Plugins.test_util.createTestObject }
       it 'raises QML::QMLError' do
         expect { result }.to raise_error(QML::QMLError)
       end

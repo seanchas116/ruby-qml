@@ -2,8 +2,7 @@ require 'spec_helper'
 
 describe QML::QtObjectBase do
 
-  let(:testobject_plugin) { QML::Plugins.testobject }
-  let(:ownership_test) { testobject_plugin.create_ownership_test }
+  let(:ownership_test) { QML::Plugins.test_util.create_ownership_test }
 
   context 'when it is returned from a method' do
     it 'gets ownership of the object' do

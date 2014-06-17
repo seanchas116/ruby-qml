@@ -2,7 +2,7 @@ require 'spec_helper'
 
 describe "test object" do
 
-  let(:plugin) { QML::Plugins.testobject }
+  let(:plugin) { QML::Plugins.test_util }
   let(:obj) { plugin.createTestObject }
 
   describe '#normalMethod' do

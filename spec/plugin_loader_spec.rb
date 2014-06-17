@@ -2,13 +2,13 @@ require 'spec_helper'
 
 describe QML::PluginLoader do
 
-  let(:loader) { QML::PluginLoader.new path, 'rubyqml-testobject' }
+  let(:loader) { QML::PluginLoader.new path, 'rubyqml-testutil' }
 
   describe 'load' do
 
     context 'with correct file path' do
 
-      let(:path) { QML::ROOT_PATH + 'ext/qml/plugins/testobject' }
+      let(:path) { QML::ROOT_PATH + 'ext/qml/plugins/testutil' }
       it 'creates an object instance' do
         loader.load
         expect(loader.instance).to be_a QML::QtObjectBase

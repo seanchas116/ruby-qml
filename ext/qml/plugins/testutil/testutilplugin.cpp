@@ -1,4 +1,4 @@
-#include "testobjectplugin.h"
+#include "testutilplugin.h"
 #include "testobject.h"
 #include "testobjectsubclass.h"
 #include "ownershiptest.h"
@@ -6,7 +6,7 @@
 
 namespace RubyQml {
 
-TestObjectPlugin::TestObjectPlugin(QObject *parent) :
+TestUtilPlugin::TestUtilPlugin(QObject *parent) :
     QObject(parent)
 {
     qRegisterMetaType<TestObject *>();
@@ -14,17 +14,17 @@ TestObjectPlugin::TestObjectPlugin(QObject *parent) :
     qRegisterMetaType<OwnershipTest *>();
 }
 
-TestObject *TestObjectPlugin::createTestObject()
+TestObject *TestUtilPlugin::createTestObject()
 {
     return new TestObject();
 }
 
-TestObjectSubclass *TestObjectPlugin::createTestObjectSubclass()
+TestObjectSubclass *TestUtilPlugin::createTestObjectSubclass()
 {
     return new TestObjectSubclass();
 }
 
-OwnershipTest *TestObjectPlugin::createOwnershipTest()
+OwnershipTest *TestUtilPlugin::createOwnershipTest()
 {
     return new OwnershipTest();
 }

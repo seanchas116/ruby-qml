@@ -1,7 +1,7 @@
 require 'spec_helper'
 
 describe QML::QtObjectPointer do
-  let(:create_test_object) { -> { QML::Plugins.testobject.create_test_object } }
+  let(:create_test_object) { -> { QML::Plugins.test_util.create_test_object } }
   let(:pointer) { create_test_object.call.object_pointer }
 
   describe '#destroy!' do

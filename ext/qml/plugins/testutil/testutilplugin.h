@@ -7,12 +7,12 @@ class TestObject;
 class TestObjectSubclass;
 class OwnershipTest;
 
-class TestObjectPlugin : public QObject
+class TestUtilPlugin : public QObject
 {
     Q_OBJECT
     Q_PLUGIN_METADATA(IID "org.ruby-qml.RubyQml.TestObject")
 public:
-    explicit TestObjectPlugin(QObject *parent = 0);
+    explicit TestUtilPlugin(QObject *parent = 0);
 signals:
 
 public slots:

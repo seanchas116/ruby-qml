@@ -17,7 +17,7 @@ private:
     ObjectGC() {}
     void mark(QObject *obj, bool markOwned);
 
-    QSet<QObject *> mRootObjects;
+    QSet<QObject *> mObjects;
 };
 
 } // namespace RubyQml

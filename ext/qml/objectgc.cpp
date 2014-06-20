@@ -7,13 +7,9 @@ namespace RubyQml {
 
 void ObjectGC::addObject(QObject *obj)
 {
-    auto rootObject = obj;
-    while (rootObject->parent()) {
-        rootObject = rootObject->parent();
-    }
-    mRootObjects << rootObject;
-    connect(rootObject, &QObject::destroyed, this, [this](QObject *obj) {
-        mRootObjects.remove(obj);
+    mObjects << obj;
+    connect(obj, &QObject::destroyed, this, [this](QObject *obj) {
+        mObjects.remove(obj);
     });
 }
 
@@ -44,7 +40,7 @@ void ObjectGC::markOwnedObject(QObject *obj)
 
 void ObjectGC::markNonOwnedObjects()
 {
-    for (auto obj : mRootObjects) {
+    for (auto obj : mObjects) {
         mark(obj, false);
     }
 }

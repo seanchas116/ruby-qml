@@ -79,10 +79,10 @@ describe QML::QtObjectBase do
       end
     end
 
-    context 'when garbage collected' do
+    context 'on garbage collection' do
 
       context 'when owned' do
-        it 'destroyes the object' do
+        it 'gets destroyed' do
           checker = -> {
             obj = ownership_test.create_object
             obj.owned_by_ruby = true
@@ -95,7 +95,7 @@ describe QML::QtObjectBase do
       end
 
       context 'when not owned' do
-        it 'does not destroy the object' do
+        it 'does not get destroyed' do
           checker = -> {
             obj = ownership_test.create_object
             obj.owned_by_ruby = false

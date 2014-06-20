@@ -77,13 +77,6 @@ void QtObjectPointer::destroy()
     }
 }
 
-RubyValue QtObjectPointer::ext_initializeCopy(RubyValue other)
-{
-    callSuper(other);
-    *this = *getPointer(other);
-    return self();
-}
-
 RubyValue QtObjectPointer::ext_isOwned() const
 {
     return RubyValue::from(mIsOwned);
@@ -128,7 +121,6 @@ void QtObjectPointer::initClass()
         mObjectBaseClass = rb_define_class_under(rb_path2class("QML"), "QtObjectBase", rb_cObject);
     });
     ClassBuilder builder("QML", "QtObjectPointer");
-    builder.defineMethod<METHOD_TYPE_NAME(&QtObjectPointer::ext_initializeCopy)>("initialize_copy", MethodAccess::Private);
     builder.defineMethod<METHOD_TYPE_NAME(&QtObjectPointer::ext_isOwned)>("owned?");
     builder.defineMethod<METHOD_TYPE_NAME(&QtObjectPointer::ext_setOwned)>("owned=");
     builder.defineMethod<METHOD_TYPE_NAME(&QtObjectPointer::ext_isNull)>("null?");

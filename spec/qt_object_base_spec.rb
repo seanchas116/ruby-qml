@@ -36,4 +36,76 @@ describe QML::QtObjectBase do
       end
     end
   end
+
+  describe 'ownership' do
+    let(:ownership_test) { QML::Plugins.test_util.create_ownership_test }
+
+    context 'when it is returned from a method' do
+      it 'gets ownership of the object' do
+        checker = -> { QML::TestUtil::ObjectLifeChecker.new(ownership_test.create_object) }.call
+        GC.start
+        QML.application.force_deferred_deletes
+        expect(checker.alive?).to eq false
+      end
+    end
+
+    context 'when it is obtained from a property' do
+      it 'does not get ownership of the object' do
+        checker = -> { QML::TestUtil::ObjectLifeChecker.new(ownership_test.property_object) }.call
+        GC.start
+        QML.application.force_deferred_deletes
+        expect(checker.alive?).to eq true
+      end
+    end
+
+    context 'when it has a parent' do
+      it 'does not get ownership of the object' do
+        checker = -> { QML::TestUtil::ObjectLifeChecker.new(ownership_test.sub_object) }.call
+        GC.start
+        QML.application.force_deferred_deletes
+        expect(checker.alive?).to eq true
+      end
+    end
+
+    describe '#owned_by_ruby?' do
+      [true, false].each do |cond|
+        context "when owned_by_ruby = #{cond}" do
+          it "returns #{cond}" do
+            obj = ownership_test.create_object
+            obj.owned_by_ruby = cond
+            expect(obj.owned_by_ruby?).to eq cond
+          end
+        end
+      end
+    end
+
+    context 'when garbage collected' do
+
+      context 'when owned' do
+        it 'destroyes the object' do
+          checker = -> {
+            obj = ownership_test.create_object
+            obj.owned_by_ruby = true
+            QML::TestUtil::ObjectLifeChecker.new(obj)
+          }.call
+          GC.start
+          QML.application.force_deferred_deletes
+          expect(checker.alive?).to eq false
+        end
+      end
+
+      context 'when not owned' do
+        it 'does not destroy the object' do
+          checker = -> {
+            obj = ownership_test.create_object
+            obj.owned_by_ruby = false
+            QML::TestUtil::ObjectLifeChecker.new(obj)
+          }.call
+          GC.start
+          QML.application.force_deferred_deletes
+          expect(checker.alive?).to eq true
+        end
+      end
+    end
+  end
 end

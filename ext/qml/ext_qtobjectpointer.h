@@ -23,7 +23,6 @@ public:
     void setOwned(bool owned);
     void destroy();
 
-    RubyValue ext_initializeCopy(RubyValue other);
     RubyValue ext_isOwned() const;
     RubyValue ext_setOwned(RubyValue owned);
     RubyValue ext_isNull() const;

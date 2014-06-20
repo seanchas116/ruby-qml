@@ -40,5 +40,13 @@ module QML
     end
 
     alias_method :to_s, :inspect
+
+    def owned_by_ruby?
+      object_pointer.owned?
+    end
+
+    def owned_by_ruby=(owned)
+      object_pointer.owned = owned
+    end
   end
 end

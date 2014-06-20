@@ -9,10 +9,12 @@ INCLUDEPATH += .
 SOURCES += testobject.cpp \
     testobjectsubclass.cpp \
     ownershiptest.cpp \
-    testutilplugin.cpp
+    testutilplugin.cpp \
+    objectlifechecker.cpp
 
 HEADERS += \
     testobject.h \
     testobjectsubclass.h \
     ownershiptest.h \
-    testutilplugin.h
+    testutilplugin.h \
+    objectlifechecker.h

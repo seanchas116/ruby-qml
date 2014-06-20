@@ -1,11 +1,13 @@
 #pragma once
 #include <QObject>
+#include <QVariant>
 
 namespace RubyQml {
 
 class TestObject;
 class TestObjectSubclass;
 class OwnershipTest;
+class ObjectLifeChecker;
 
 class TestUtilPlugin : public QObject
 {
@@ -16,12 +18,15 @@ public:
 signals:
 
 public slots:
+    QVariantHash metaObjects() { return mMetaObjects; }
+
     RubyQml::TestObject *createTestObject();
     RubyQml::TestObjectSubclass *createTestObjectSubclass();
     RubyQml::OwnershipTest *createOwnershipTest();
+    RubyQml::ObjectLifeChecker *createObjectLifeChecker(QObject *target);
 
 private:
-
+    QVariantHash mMetaObjects;
 };
 
 } // namespace RubyQml

@@ -2,7 +2,10 @@
 #include "testobject.h"
 #include "testobjectsubclass.h"
 #include "ownershiptest.h"
+#include "objectlifechecker.h"
 #include <QtQml>
+
+Q_DECLARE_METATYPE(const QMetaObject*)
 
 namespace RubyQml {
 
@@ -12,6 +15,12 @@ TestUtilPlugin::TestUtilPlugin(QObject *parent) :
     qRegisterMetaType<TestObject *>();
     qRegisterMetaType<TestObjectSubclass *>();
     qRegisterMetaType<OwnershipTest *>();
+    qRegisterMetaType<ObjectLifeChecker *>();
+
+    auto metaObjects = { &TestObject::staticMetaObject, &ObjectLifeChecker::staticMetaObject};
+    for (auto metaobj : metaObjects) {
+        mMetaObjects[metaobj->className()] = QVariant::fromValue(metaobj);
+    }
 }
 
 TestObject *TestUtilPlugin::createTestObject()
@@ -27,6 +36,11 @@ TestObjectSubclass *TestUtilPlugin::createTestObjectSubclass()
 OwnershipTest *TestUtilPlugin::createOwnershipTest()
 {
     return new OwnershipTest();
+}
+
+ObjectLifeChecker *TestUtilPlugin::createObjectLifeChecker(QObject *target)
+{
+    return new ObjectLifeChecker(target);
 }
 
 } // namespace RubyQml

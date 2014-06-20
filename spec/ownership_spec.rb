@@ -6,38 +6,26 @@ describe QML::QtObjectBase do
 
   context 'when it is returned from a method' do
     it 'gets ownership of the object' do
-      deleted = false
-      ownership_test.created_object_deleted.each do
-        deleted = true
-      end
-      ownership_test.create_object
+      checker = -> { QML::TestUtil::ObjectLifeChecker.new(ownership_test.create_object) }.call
       GC.start
       QML.application.force_deferred_deletes
-      expect(deleted).to eq true
+      expect(checker.alive?).to eq false
     end
   end
   context 'when it is obtained from a property' do
     it 'does not get ownership of the object' do
-      deleted = false
-      ownership_test.property_object_deleted.each do
-        deleted = true
-      end
-      ownership_test.property_object
+      checker = -> { QML::TestUtil::ObjectLifeChecker.new(ownership_test.property_object) }.call
       GC.start
       QML.application.force_deferred_deletes
-      expect(deleted).to eq false
+      expect(checker.alive?).to eq true
     end
   end
   context 'when it has a parent' do
     it 'does not get ownership of the object' do
-      deleted = false
-      ownership_test.sub_object_deleted.each do
-        deleted = true
-      end
-      ownership_test.sub_object
+      checker = -> { QML::TestUtil::ObjectLifeChecker.new(ownership_test.sub_object) }.call
       GC.start
       QML.application.force_deferred_deletes
-      expect(deleted).to eq false
+      expect(checker.alive?).to eq true
     end
   end
 end

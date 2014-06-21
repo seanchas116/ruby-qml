@@ -1,7 +1,7 @@
 #include "ext_metaobject.h"
 #include "util.h"
 #include "ext_qtobjectpointer.h"
-#include "extbase.h"
+#include "rubyclass.h"
 #include "signalforwarder.h"
 #include <QtCore/QMetaObject>
 #include <QtCore/QMetaMethod>
@@ -31,7 +31,8 @@ RubyValue idListToArray(const QList<ID> &xs)
 
 }
 
-MetaObject::MetaObject()
+MetaObject::MetaObject(RubyValue self) :
+    self(self)
 {
     setMetaObject(&QObject::staticMetaObject);
 }
@@ -129,7 +130,7 @@ public:
             auto ret = RubyValue::from(returnValue);
             // add ownership to QtObjectPointer unless it has parent or is owned by QML engine
             if (ret.isKindOf(QtObjectPointer::objectBaseClass())) {
-                auto objectPointer = QtObjectPointer::getPointer(ret.send("object_pointer"));
+                auto objectPointer = wrapperRubyClass<QtObjectPointer>()->unwrap(ret.send("object_pointer"));
                 auto obj = objectPointer->fetchQObject();
                 if (QQmlEngine::objectOwnership(obj) == QQmlEngine::CppOwnership && !obj->parent()) {
                     objectPointer->setOwned(true);
@@ -150,7 +151,7 @@ RubyValue MetaObject::invokeMethod(RubyValue object, RubyValue methodName, RubyV
     protect([&] {
         args = rb_check_array_type(args);
     });
-    auto obj = QtObjectPointer::getPointer(object)->fetchQObject();
+    auto obj = wrapperRubyClass<QtObjectPointer>()->unwrap(object)->fetchQObject();
     for (int i : methodIndexes) {
         MethodInvoker invoker(args, mMetaObject->method(i));
         if (invoker.isArgsCompatible()) {
@@ -174,7 +175,7 @@ RubyValue MetaObject::invokeMethod(RubyValue object, RubyValue methodName, RubyV
 RubyValue MetaObject::connectSignal(RubyValue object, RubyValue signalName, RubyValue proc) const
 {
     auto id = signalName.toID();
-    auto obj = QtObjectPointer::getPointer(object)->fetchQObject();
+    auto obj = wrapperRubyClass<QtObjectPointer>()->unwrap(object)->fetchQObject();
 
     proc = proc.send("to_proc");
 
@@ -206,7 +207,7 @@ RubyValue MetaObject::getProperty(RubyValue object, RubyValue name) const
 {
     auto metaProperty = mMetaObject->property(findProperty(name));
 
-    auto qobj = QtObjectPointer::getPointer(object)->fetchQObject();
+    auto qobj = wrapperRubyClass<QtObjectPointer>()->unwrap(object)->fetchQObject();
     QVariant result;
     withoutGvl([&] {
         result = metaProperty.read(qobj);
@@ -225,7 +226,7 @@ RubyValue MetaObject::setProperty(RubyValue object, RubyValue name, RubyValue ne
         });
     }
 
-    auto qobj = QtObjectPointer::getPointer(object)->fetchQObject();
+    auto qobj = wrapperRubyClass<QtObjectPointer>()->unwrap(object)->fetchQObject();
     auto variant = newValue.to<QVariant>();
     QVariant result;
     withoutGvl([&] {
@@ -306,7 +307,7 @@ RubyValue MetaObject::superClass() const
 
 RubyValue MetaObject::isEqual(RubyValue other) const
 {
-    return RubyValue::from(mMetaObject == MetaObject::getPointer(other)->mMetaObject);
+    return RubyValue::from(mMetaObject == wrapperRubyClass<MetaObject>()->unwrap(other)->mMetaObject);
 }
 
 RubyValue MetaObject::hash() const
@@ -359,43 +360,45 @@ void MetaObject::setMetaObject(const QMetaObject *metaObject)
 
 RubyValue MetaObject::buildRubyClass()
 {
-    return self().send("build_class");
+    return self.send("build_class");
 }
 
 RubyValue MetaObject::fromMetaObject(const QMetaObject *metaObject)
 {
-    auto value = newAsRuby();
-    getPointer(value)->setMetaObject(metaObject);
+    auto klass = wrapperRubyClass<MetaObject>();
+    auto value = klass->newInstance();
+    klass->unwrap(value)->setMetaObject(metaObject);
     return value;
 }
 
-void MetaObject::initClass()
+void MetaObject::defineClass()
 {
-    ClassBuilder builder("QML", "MetaObject");
+    WrapperRubyClass<MetaObject> klass("QML", "MetaObject");
 
-    builder.defineMethod<METHOD_TYPE_NAME(&MetaObject::className)>("name");
+    klass.defineMethod("name", RUBYQML_MEMBER_FUNCTION_INFO(&MetaObject::className));
 
-    builder.defineMethod<METHOD_TYPE_NAME(&MetaObject::methodNames)>("method_names");
-    builder.defineMethod<METHOD_TYPE_NAME(&MetaObject::isPublic)>("public?");
-    builder.defineMethod<METHOD_TYPE_NAME(&MetaObject::isProtected)>("protected?");
-    builder.defineMethod<METHOD_TYPE_NAME(&MetaObject::isPrivate)>("private?");
-    builder.defineMethod<METHOD_TYPE_NAME(&MetaObject::isSignal)>("signal?");
+    klass.defineMethod("method_names", RUBYQML_MEMBER_FUNCTION_INFO(&MetaObject::methodNames));
+    klass.defineMethod("public?", RUBYQML_MEMBER_FUNCTION_INFO(&MetaObject::isPublic));
+    klass.defineMethod("protected?", RUBYQML_MEMBER_FUNCTION_INFO(&MetaObject::isProtected));
+    klass.defineMethod("private?", RUBYQML_MEMBER_FUNCTION_INFO(&MetaObject::isPrivate));
+    klass.defineMethod("signal?", RUBYQML_MEMBER_FUNCTION_INFO(&MetaObject::isSignal));
 
-    builder.defineMethod<METHOD_TYPE_NAME(&MetaObject::invokeMethod)>("invoke_method");
-    builder.defineMethod<METHOD_TYPE_NAME(&MetaObject::connectSignal)>("connect_signal");
+    klass.defineMethod("invoke_method", RUBYQML_MEMBER_FUNCTION_INFO(&MetaObject::invokeMethod));
+    klass.defineMethod("connect_signal", RUBYQML_MEMBER_FUNCTION_INFO(&MetaObject::connectSignal));
 
-    builder.defineMethod<METHOD_TYPE_NAME(&MetaObject::propertyNames)>("property_names");
-    builder.defineMethod<METHOD_TYPE_NAME(&MetaObject::getProperty)>("get_property");
-    builder.defineMethod<METHOD_TYPE_NAME(&MetaObject::setProperty)>("set_property");
-    builder.defineMethod<METHOD_TYPE_NAME(&MetaObject::notifySignal)>("notify_signal");
+    klass.defineMethod("property_names", RUBYQML_MEMBER_FUNCTION_INFO(&MetaObject::propertyNames));
+    klass.defineMethod("get_property", RUBYQML_MEMBER_FUNCTION_INFO(&MetaObject::getProperty));
+    klass.defineMethod("set_property", RUBYQML_MEMBER_FUNCTION_INFO(&MetaObject::setProperty));
+    klass.defineMethod("notify_signal", RUBYQML_MEMBER_FUNCTION_INFO(&MetaObject::notifySignal));
 
-    builder.defineMethod<METHOD_TYPE_NAME(&MetaObject::enumerators)>("enumerators");
+    klass.defineMethod("enumerators", RUBYQML_MEMBER_FUNCTION_INFO(&MetaObject::enumerators));
 
-    builder.defineMethod<METHOD_TYPE_NAME(&MetaObject::superClass)>("super_class");
+    klass.defineMethod("super_class", RUBYQML_MEMBER_FUNCTION_INFO(&MetaObject::superClass));
 
-    builder.defineMethod<METHOD_TYPE_NAME(&MetaObject::isEqual)>("==");
-    builder.defineMethod<METHOD_TYPE_NAME(&MetaObject::hash)>("hash");
-    builder.aliasMethod("eql?", "==");
+    klass.defineMethod("==", RUBYQML_MEMBER_FUNCTION_INFO(&MetaObject::isEqual));
+    klass.defineMethod("hash", RUBYQML_MEMBER_FUNCTION_INFO(&MetaObject::hash));
+
+    klass.aliasMethod("eql?", "==");
 }
 
 } // namespace Ext

@@ -1,6 +1,6 @@
 #pragma once
-#include "extbase.h"
 #include "common.h"
+#include "rubyvalue.h"
 
 namespace RubyQml {
 
@@ -10,11 +10,10 @@ class QmlTypeRegisterer;
 
 namespace Ext {
 
-class AccessSupport : public ExtBase<AccessSupport>
+class AccessSupport
 {
-    friend class ExtBase<AccessSupport>;
 public:
-    AccessSupport();
+    AccessSupport(RubyValue self);
     ~AccessSupport();
 
     RubyValue initialize(RubyValue rubyClass, RubyValue className, RubyValue methodInfos, RubyValue signalInfos, RubyValue propertyInfos);
@@ -22,12 +21,13 @@ public:
     RubyValue registerToQml(RubyValue path, RubyValue majorVersion, RubyValue minorVersion, RubyValue name);
     RubyValue createAccessObject(RubyValue access);
 
-    static void initClass();
+    void gc_mark() {}
+    static void defineClass();
 
 private:
-    void mark() {}
 
-    RubyValue mRubyClass = Qnil;
+    const RubyValue self;
+    RubyValue mRubyClass;
     SP<AccessClass> mAccessClass;
     SP<ForeignMetaObject> mMetaObject;
     SP<QmlTypeRegisterer> mTypeRegisterer;

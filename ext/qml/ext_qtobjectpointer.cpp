@@ -12,7 +12,8 @@
 namespace RubyQml {
 namespace Ext {
 
-QtObjectPointer::QtObjectPointer()
+QtObjectPointer::QtObjectPointer(RubyValue self) :
+    self(self)
 {
 }
 
@@ -25,8 +26,9 @@ QtObjectPointer::~QtObjectPointer()
 
 RubyValue QtObjectPointer::fromQObject(QObject *obj, bool owned)
 {
-    auto ptr = newAsRuby();
-    QtObjectPointer::getPointer(ptr)->setQObject(obj, owned);
+    auto klass = wrapperRubyClass<QtObjectPointer>();
+    auto ptr = klass->newInstance();
+    klass->unwrap(ptr)->setQObject(obj, owned);
     return ptr;
 }
 
@@ -103,30 +105,29 @@ RubyValue QtObjectPointer::ext_toString() const
 RubyValue QtObjectPointer::ext_destroy()
 {
     destroy();
-    return self();
+    return self;
 }
 
-void QtObjectPointer::mark()
+void QtObjectPointer::gc_mark()
 {
     if (mIsOwned) {
         ObjectGC::instance()->markOwnedObject(mObject);
     }
 }
 
-RubyValue QtObjectPointer::mObjectBaseClass = Qnil;
+RubyClass QtObjectPointer::mObjectBaseClass;
 
-void QtObjectPointer::initClass()
+void QtObjectPointer::defineClass()
 {
-    protect([&] {
-        mObjectBaseClass = rb_define_class_under(rb_path2class("QML"), "QtObjectBase", rb_cObject);
-    });
-    ClassBuilder builder("QML", "QtObjectPointer");
-    builder.defineMethod<METHOD_TYPE_NAME(&QtObjectPointer::ext_isOwned)>("owned?");
-    builder.defineMethod<METHOD_TYPE_NAME(&QtObjectPointer::ext_setOwned)>("owned=");
-    builder.defineMethod<METHOD_TYPE_NAME(&QtObjectPointer::ext_isNull)>("null?");
-    builder.defineMethod<METHOD_TYPE_NAME(&QtObjectPointer::ext_toString)>("to_s");
-    builder.defineMethod<METHOD_TYPE_NAME(&QtObjectPointer::ext_destroy)>("destroy!");
-    builder.aliasMethod("to_s", "inspect");
+    mObjectBaseClass = RubyClass("QML", "QtObjectBase");
+
+    WrapperRubyClass<QtObjectPointer> klass("QML", "QtObjectPointer");
+    klass.defineMethod("owned?", RUBYQML_MEMBER_FUNCTION_INFO(&QtObjectPointer::ext_isOwned));
+    klass.defineMethod("owned=", RUBYQML_MEMBER_FUNCTION_INFO(&QtObjectPointer::ext_setOwned));
+    klass.defineMethod("null?", RUBYQML_MEMBER_FUNCTION_INFO(&QtObjectPointer::ext_isNull));
+    klass.defineMethod("to_s", RUBYQML_MEMBER_FUNCTION_INFO(&QtObjectPointer::ext_toString));
+    klass.defineMethod("destroy!", RUBYQML_MEMBER_FUNCTION_INFO(&QtObjectPointer::ext_destroy));
+    klass.aliasMethod("to_s", "inspect");
 }
 
 } // namespace Ext

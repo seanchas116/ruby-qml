@@ -1,6 +1,6 @@
 #pragma once
 
-#include "extbase.h"
+#include "rubyvalue.h"
 #include <QtCore/QMetaObject>
 #include <QtCore/QVector>
 #include <QtCore/QHash>
@@ -9,12 +9,10 @@
 namespace RubyQml {
 namespace Ext {
 
-class MetaObject : public ExtBase<MetaObject>
+class MetaObject
 {
-    friend class ExtBase<MetaObject>;
 public:
-
-    MetaObject();
+    MetaObject(RubyValue self);
 
     RubyValue className() const;
 
@@ -44,15 +42,16 @@ public:
 
     RubyValue buildRubyClass();
 
+    void gc_mark() {}
+
     static RubyValue fromMetaObject(const QMetaObject *metaObject);
-    static void initClass();
+    static void defineClass();
 
 private:
-
-    void mark() {}
-
     QList<int> findMethods(RubyValue name) const;
     int findProperty(RubyValue name) const;
+
+    const RubyValue self;
 
     const QMetaObject *mMetaObject = nullptr;
     QMultiHash<ID, int> mMethodHash;

@@ -1,24 +1,24 @@
 #pragma once
 
-#include "extbase.h"
+#include "rubyvalue.h"
+#include <functional>
 
 namespace RubyQml {
 
 namespace Ext {
 
-class GCMarker : public ExtBase<GCMarker>
+class GCMarker
 {
-    friend class ExtBase<GCMarker>;
 public:
-    GCMarker();
-
-    void setMarkFunction(const std::function<void()> &func);
-    static void initClass();
+    GCMarker(RubyValue self);
     static RubyValue fromMarkFunction(const std::function<void ()> &func);
 
-private:
-    void mark();
+    void setMarkFunction(const std::function<void()> &func);
+    void gc_mark();
 
+    static void defineClass();
+
+private:
     std::function<void ()> mMarkFunc;
 };
 

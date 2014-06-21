@@ -1,6 +1,6 @@
 #pragma once
 
-#include "extbase.h"
+#include "rubyvalue.h"
 #include <memory>
 
 class QPluginLoader;
@@ -8,22 +8,22 @@ class QPluginLoader;
 namespace RubyQml {
 namespace Ext {
 
-class PluginLoader : public ExtBase<PluginLoader>
+class PluginLoader
 {
-    friend class ExtBase<PluginLoader>;
-
 public:
-    PluginLoader();
+    PluginLoader(RubyValue self);
     ~PluginLoader();
 
     RubyValue initialize(RubyValue path);
     RubyValue load();
     RubyValue instance();
 
-    static void initClass();
+    void gc_mark() {}
+
+    static void defineClass();
 
 private:
-    void mark() {}
+    const RubyValue self;
     std::unique_ptr<QPluginLoader> mPluginLoader;
 };
 

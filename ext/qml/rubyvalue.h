@@ -1,5 +1,6 @@
 #pragma once
 #include "util.h"
+#include "functioninfo.h"
 #include <ruby.h>
 
 class QVariant;
@@ -38,6 +39,18 @@ public:
         return ret;
     }
 
+    template <typename TFunction, TFunction function>
+    void defineSingletonMethod(const char *name, FunctionInfo<TFunction, function>)
+    {
+        using wrapper = FunctionWrapper<TFunction, function>;
+        auto func = (VALUE (*)(...))wrapper::apply;
+        auto argc = wrapper::argc - 1;
+
+        protect([&] {
+            rb_define_singleton_method(mValue, name, func, argc);
+        });
+    }
+
     bool operator==(const RubyValue &other) const { return mValue == other.mValue; }
     bool operator!=(const RubyValue &other) const { return !operator==(other); }
     explicit operator bool() const { return RTEST(mValue); }
@@ -56,6 +69,24 @@ public:
     static void addEnumeratorMetaType(int metaType);
 
 private:
+    template <typename TFunction, TFunction function>
+    struct FunctionWrapper;
+
+    template <typename ... TArgs, RubyValue (*function)(TArgs...)>
+    struct FunctionWrapper<RubyValue (*)(TArgs...), function>
+    {
+        static constexpr size_t argc = sizeof...(TArgs);
+
+        static VALUE apply(typename std::conditional<true, VALUE, TArgs>::type... args)
+        {
+            RubyValue ret;
+            unprotect([&] {
+                ret = function(RubyValue(args)...);
+            });
+            return ret;
+        }
+    };
+
     volatile VALUE mValue = Qnil;
 };
 

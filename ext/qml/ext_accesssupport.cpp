@@ -1,5 +1,6 @@
 #include "ext_accesssupport.h"
 #include "ext_qtobjectpointer.h"
+#include "rubyclass.h"
 #include "accessclass.h"
 #include "accessobject.h"
 #include "foreignmetaobject.h"
@@ -8,7 +9,8 @@
 namespace RubyQml {
 namespace Ext {
 
-AccessSupport::AccessSupport()
+AccessSupport::AccessSupport(RubyValue self) :
+    self(self)
 {
 }
 
@@ -21,12 +23,12 @@ RubyValue AccessSupport::initialize(RubyValue rubyClass, RubyValue className, Ru
     mRubyClass = rubyClass;
     mAccessClass = makeSP<AccessClass>(className, methodInfos, signalInfos, propertyInfos);
     mMetaObject = makeSP<ForeignMetaObject>(mAccessClass);
-    return self();
+    return self;
 }
 
 RubyValue AccessSupport::emitSignal(RubyValue obj, RubyValue name, RubyValue args)
 {
-    auto accessObj = QtObjectPointer::getPointer(obj.send("access_object"))->fetchQObject();
+    auto accessObj = wrapperRubyClass<QtObjectPointer>()->unwrap(obj.send("access_object"))->fetchQObject();
     auto nameId = name.toID();
     auto argVariants = args.to<QVariantList>();
     withoutGvl([&] {
@@ -52,16 +54,16 @@ RubyValue AccessSupport::registerToQml(RubyValue path, RubyValue majorVersion, R
         });
         mTypeRegisterer->registerType(path.to<QByteArray>(), majorVersion.to<int>(), minorVersion.to<int>(), name.to<QByteArray>());
     }
-    return self();
+    return self;
 }
 
-void AccessSupport::initClass()
+void AccessSupport::defineClass()
 {
-    ClassBuilder builder("QML", "AccessSupport");
-    builder.defineMethod<METHOD_TYPE_NAME(&AccessSupport::initialize)>("initialize", MethodAccess::Protected);
-    builder.defineMethod<METHOD_TYPE_NAME(&AccessSupport::emitSignal)>("emit_signal");
-    builder.defineMethod<METHOD_TYPE_NAME(&AccessSupport::createAccessObject)>("create_access_object");
-    builder.defineMethod<METHOD_TYPE_NAME(&AccessSupport::registerToQml)>("register_to_qml");
+    WrapperRubyClass<AccessSupport> klass("QML", "AccessSupport");
+    klass.defineMethod(MethodAccess::Protected, "initialize", RUBYQML_MEMBER_FUNCTION_INFO(&AccessSupport::initialize));
+    klass.defineMethod("emit_signal", RUBYQML_MEMBER_FUNCTION_INFO(&AccessSupport::emitSignal));
+    klass.defineMethod("create_access_object", RUBYQML_MEMBER_FUNCTION_INFO(&AccessSupport::createAccessObject));
+    klass.defineMethod("register_to_qml", RUBYQML_MEMBER_FUNCTION_INFO(&AccessSupport::registerToQml));
 }
 
 } // namespace Ext

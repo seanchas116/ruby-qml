@@ -1,17 +1,15 @@
 #pragma once
-#include "extbase.h"
+#include "rubyclass.h"
 #include <QPointer>
 #include <QJSValue>
 
 namespace RubyQml {
 namespace Ext {
 
-class QtObjectPointer : public ExtBase<QtObjectPointer>
+class QtObjectPointer
 {
-    friend class ExtBase<QtObjectPointer>;
-
 public:
-    QtObjectPointer();
+    QtObjectPointer(RubyValue self);
     ~QtObjectPointer();
 
     static RubyValue fromQObject(QObject *obj, bool owned);
@@ -29,18 +27,19 @@ public:
     RubyValue ext_toString() const;
     RubyValue ext_destroy();
 
-    static RubyValue objectBaseClass() { return mObjectBaseClass; }
-    static void initClass();
+    void gc_mark();
+
+    static RubyClass objectBaseClass() { return mObjectBaseClass; }
+    static void defineClass();
 
 private:
-
-    void mark();
+    const RubyValue self;
 
     bool mIsOwned = false;
     QPointer<QObject> mObject;
     QJSValue mJSValue;
 
-    static RubyValue mObjectBaseClass;
+    static RubyClass mObjectBaseClass;
 };
 
 } // namespace Ext

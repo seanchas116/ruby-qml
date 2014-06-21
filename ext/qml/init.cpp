@@ -12,40 +12,31 @@ using namespace RubyQml;
 
 namespace {
 
+RubyValue echoConversion(RubyValue mod, RubyValue value)
+{
+    Q_UNUSED(mod);
+    auto variant = RubyValue(value).to<QVariant>();
+    return RubyValue::from(variant);
+}
+
 void defineTestUtil()
 {
-    rb_define_module_under(rb_path2class("QML"), "TestUtil");
-
-    auto echo_conversion = [](VALUE klass, VALUE value) {
-        Q_UNUSED(klass);
-        VALUE ret;
-        unprotect([&] {
-            auto variant = RubyValue(value).to<QVariant>();
-            ret = RubyValue::from(variant);
-        });
-        return ret;
-    };
-
-    rb_define_module_function(rb_path2class("QML::TestUtil"), "echo_conversion",
-                              (VALUE(*)(...))(VALUE (*)(VALUE, VALUE))echo_conversion, 1);
+    RubyModule testUtil("QML", "TestUtil");
+    testUtil.toValue().defineSingletonMethod("echo_conversion", RUBYQML_FUNCTION_INFO(&echoConversion));
 }
 
 void defineMetaTypes()
 {
-    unprotect([&] {
-        qRegisterMetaType<const QMetaObject *>();
-    });
+    qRegisterMetaType<const QMetaObject *>();
 }
 
 void defineClasses()
 {
-    unprotect([&] {
-        Ext::MetaObject::initClass();
-        Ext::QtObjectPointer::initClass();
-        Ext::PluginLoader::initClass();
-        Ext::GCMarker::initClass();
-        Ext::AccessSupport::initClass();
-    });
+    Ext::MetaObject::defineClass();
+    Ext::QtObjectPointer::defineClass();
+    Ext::PluginLoader::defineClass();
+    Ext::GCMarker::defineClass();
+    Ext::AccessSupport::defineClass();
 }
 
 void setupGlobalGCMarking()
@@ -73,13 +64,14 @@ void setupEndProc()
 extern "C"
 void Init_qml()
 {
-    defineMetaTypes();
-
     rb_require("qml/errors");
     rb_require("qml/error_converter");
 
-    defineTestUtil();
-    defineClasses();
-    setupGlobalGCMarking();
-    setupEndProc();
+    protect([&] {
+        defineMetaTypes();
+        defineTestUtil();
+        defineClasses();
+        setupGlobalGCMarking();
+        setupEndProc();
+    });
 }

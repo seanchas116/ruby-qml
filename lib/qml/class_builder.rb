@@ -110,7 +110,14 @@ module QML
       @klass.__send__ :alias_property, underscore, name if underscore != name
     end
 
-    def define_enum(name, value)
+    def define_enum(name, hash)
+      define_const(name, hash.values.sort)
+      hash.each do |k, v|
+        define_const(k, v)
+      end
+    end
+
+    def define_const(name, value)
       name = (name[0].capitalize + name[1..-1]).to_sym
       @klass.__send__ :const_set, name, value
       underscore = NameHelper.to_upper_underscore(name)

@@ -277,18 +277,22 @@ int MetaObject::findProperty(RubyValue name) const
 
 RubyValue MetaObject::enumerators() const
 {
-    RubyValue hash;
-    protect([&] {
-        hash = rb_hash_new();
-        int count = mMetaObject->enumeratorCount();
-        for (int enumIndex = 0; enumIndex < count; ++enumIndex) {
-            auto enumerator = mMetaObject->enumerator(enumIndex);
-            for (int i = 0; i < enumerator.keyCount(); ++i) {
-                rb_hash_aset(hash, RubyValue::from(enumerator.key(i)), RubyValue::from(enumerator.value(i)));
-            }
+    QHash<QByteArray, QHash<QByteArray, int>> enums;
+
+    for (int i = mMetaObject->enumeratorOffset(); i < mMetaObject->enumeratorCount(); ++i) {
+        auto metaEnum = mMetaObject->enumerator(i);
+        if (metaEnum.isFlag()) {
+            continue;
         }
-    });
-    return hash;
+
+        QHash<QByteArray, int> enumHash;
+        for (int j = 0; j < metaEnum.keyCount(); ++j) {
+            enumHash[metaEnum.key(j)] = metaEnum.value(j);
+        }
+        enums[metaEnum.name()] = enumHash;
+    }
+
+    return RubyValue::from(enums);
 }
 
 RubyValue MetaObject::superClass() const

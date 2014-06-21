@@ -125,6 +125,7 @@ describe "test object" do
       expect(k::Bar).to eq(1)
       expect(k::FooBar).to eq(2)
       expect(k::FOO_BAR).to eq(2)
+      expect(k::Enums).to match_array [0,1,2]
     end
 
     it 'can be set and get' do

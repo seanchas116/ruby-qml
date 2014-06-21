@@ -3,6 +3,7 @@
 #include "ext_pluginloader.h"
 #include "ext_gcmarker.h"
 #include "ext_accesssupport.h"
+#include "ext_testutil.h"
 #include "signalforwarder.h"
 #include "valuereference.h"
 #include "objectgc.h"
@@ -11,19 +12,6 @@
 using namespace RubyQml;
 
 namespace {
-
-RubyValue echoConversion(RubyValue mod, RubyValue value)
-{
-    Q_UNUSED(mod);
-    auto variant = RubyValue(value).to<QVariant>();
-    return RubyValue::from(variant);
-}
-
-void defineTestUtil()
-{
-    RubyModule testUtil("QML", "TestUtil");
-    testUtil.toValue().defineSingletonMethod("echo_conversion", RUBYQML_FUNCTION_INFO(&echoConversion));
-}
 
 void defineMetaTypes()
 {
@@ -37,6 +25,7 @@ void defineClasses()
     Ext::PluginLoader::defineClass();
     Ext::GCMarker::defineClass();
     Ext::AccessSupport::defineClass();
+    Ext::TestUtil::defineModule();
 }
 
 void setupGlobalGCMarking()
@@ -69,7 +58,6 @@ void Init_qml()
 
     protect([&] {
         defineMetaTypes();
-        defineTestUtil();
         defineClasses();
         setupGlobalGCMarking();
         setupEndProc();

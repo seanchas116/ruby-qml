@@ -126,6 +126,11 @@ describe "test object" do
       expect(k::FooBar).to eq(2)
       expect(k::FOO_BAR).to eq(2)
     end
+
+    it 'can be set and get' do
+      obj.enum_value = obj.class::FOO_BAR
+      expect(obj.enum_value).to eq(obj.class::FOO_BAR)
+    end
   end
 
   describe 'QtObjectBase#inspect' do

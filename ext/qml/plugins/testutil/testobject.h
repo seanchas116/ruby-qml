@@ -13,6 +13,7 @@ class TestObject : public QObject
     Q_OBJECT
     Q_PROPERTY(QString name MEMBER mName NOTIFY nameChanged)
     Q_PROPERTY(double someValue MEMBER mSomeValue NOTIFY someValueChanged)
+    Q_PROPERTY(RubyQml::TestObject::Enums enumValue MEMBER mEnumValue NOTIFY enumValueChanged)
 
 public:
     explicit TestObject(QObject *parent = 0) : QObject(parent)
@@ -92,12 +93,16 @@ signals:
     void someSignal(const QString &arg);
     void nameChanged(const QString &name);
     void someValueChanged(double value);
+    void enumValueChanged(RubyQml::TestObject::Enums value);
 
 private:
 
     Q_ENUMS(Enums)
     QString mName;
     double mSomeValue = 0;
+    Enums mEnumValue = Foo;
 };
 
 } // RubyQml
+
+Q_DECLARE_METATYPE(RubyQml::TestObject::Enums)

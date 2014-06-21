@@ -13,6 +13,7 @@ TestUtilPlugin::TestUtilPlugin(QObject *parent) :
     QObject(parent)
 {
     qRegisterMetaType<TestObject *>();
+    qRegisterMetaType<TestObject::Enums>();
     qRegisterMetaType<TestObjectSubclass *>();
     qRegisterMetaType<OwnershipTest *>();
     qRegisterMetaType<ObjectLifeChecker *>();

@@ -337,6 +337,17 @@ void MetaObject::setMetaObject(const QMetaObject *metaObject)
         propertyHash[rb_intern(property.name())] = index;
     }
 
+    int enumCount = metaObject->enumeratorCount() - metaObject->enumeratorOffset();
+    for (int i = 0; i < enumCount; ++i) {
+        auto index = i + metaObject->enumeratorOffset();
+        auto metaEnum = metaObject->enumerator(index);
+        auto typeName = QByteArray(metaObject->className()) + "::" + QByteArray(metaEnum.name());
+        auto metaType = QMetaType::type(typeName);
+        if (metaType != QMetaType::UnknownType) {
+            RubyValue::addEnumeratorMetaType(metaType);
+        }
+    }
+
     mMetaObject = metaObject;
     mMethodHash = methodHash;
     mPropertyHash = propertyHash;

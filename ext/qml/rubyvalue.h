@@ -53,6 +53,8 @@ public:
     ID toID() const;
     static RubyValue fromID(ID id) { return ID2SYM(id); }
 
+    static void addEnumeratorMetaType(int metaType);
+
 private:
     volatile VALUE mValue = Qnil;
 };

@@ -9,6 +9,7 @@
 #include <ruby/encoding.h>
 #include <QVariant>
 #include <QDateTime>
+#include <QSet>
 
 namespace RubyQml {
 
@@ -240,6 +241,8 @@ RubyValue Conversion<const QMetaObject *>::to(const QMetaObject *metaobj)
 
 } // namespace detail
 
+Q_GLOBAL_STATIC(QSet<int>, enumeratorMetaTypes)
+
 bool RubyValue::isKindOf(RubyValue klass) const
 {
     RubyValue result;
@@ -281,6 +284,9 @@ bool RubyValue::isConvertibleTo(int metaType) const
         case QMetaType::Double:
             return true;
         default:
+            if (enumeratorMetaTypes->contains(metaType)) {
+                return true;
+            }
             return false;
         }
     case T_FLOAT:
@@ -396,6 +402,10 @@ RubyValue RubyValue::from(const QVariant &variant)
     if (QMetaType::metaObjectForType(type)) {
         type = QMetaType::QObjectStar;
     }
+    if (enumeratorMetaTypes->contains(type)) {
+        auto intValue = *static_cast<const int *>(variant.data());
+        return from(intValue);
+    }
     if (!hash.contains(type)) {
         fail("QML::ConversionError",
              QString("failed to convert QVariant value (%1)")
@@ -425,6 +435,12 @@ QVariant RubyValue::toVariant(int type) const
                  .arg(qobj->metaObject()->className())
                  .arg(metaobj->className()));
         }
+        if (enumeratorMetaTypes->contains(type)) {
+            auto intValue = to<int>();
+            auto data = QMetaType::create(type);
+            *static_cast<int *>(data) = intValue;
+            return QVariant(type, data);
+        }
         fail("QML::ConversionError",
              QString("failed to convert Ruby value (%1 to %2)")
              .arg(rb_obj_classname(x))
@@ -441,6 +457,11 @@ ID RubyValue::toID() const
         id = SYM2ID(rb_convert_type(*this, T_SYMBOL, "Symbol", "to_sym"));
     });
     return id;
+}
+
+void RubyValue::addEnumeratorMetaType(int metaType)
+{
+    *enumeratorMetaTypes << metaType;
 }
 
 } // namespace RubyQml

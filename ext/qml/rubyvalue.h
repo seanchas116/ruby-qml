@@ -8,7 +8,12 @@ class QVariant;
 namespace RubyQml {
 
 namespace detail {
-template <typename T, typename Enable = void> struct Conversion;
+template <typename T, typename Enable = void> struct Conversion
+{
+    static T from(RubyValue x);
+    static RubyValue to(typename std::conditional<std::is_scalar<T>::value, T, const T &>::type str);
+};
+
 }
 
 class RubyValue
@@ -96,8 +101,17 @@ template <>
 struct Conversion<RubyValue>
 {
     static RubyValue from(RubyValue x) { return x; }
-    static RubyValue to(RubyValue x) { return x;}
+    static RubyValue to(RubyValue x) { return x; }
 };
+
+template <>
+struct Conversion<bool>
+{
+    static bool from(RubyValue value) { return value; }
+    static RubyValue to(bool x) { return x ? Qtrue : Qfalse; }
+};
+
+// signed integers
 
 template <typename T>
 struct Conversion<T, typename std::enable_if<std::is_signed<T>::value && std::is_integral<T>::value>::type>
@@ -116,6 +130,8 @@ struct Conversion<T, typename std::enable_if<std::is_signed<T>::value && std::is
     }
 };
 
+// unsigned integers
+
 template <typename T>
 struct Conversion<T, typename std::enable_if<std::is_unsigned<T>::value && std::is_integral<T>::value>::type>
 {
@@ -132,6 +148,8 @@ struct Conversion<T, typename std::enable_if<std::is_unsigned<T>::value && std::
         return ULL2NUM(x);
     }
 };
+
+// floating point values
 
 template <typename T>
 struct Conversion<T, typename std::enable_if<std::is_floating_point<T>::value>::type>
@@ -154,6 +172,8 @@ struct Conversion<T, typename std::enable_if<std::is_floating_point<T>::value>::
         return rb_float_new(x);
     }
 };
+
+// QList and QVector
 
 template <class T> struct IsQListLike : std::false_type {};
 template <class V> struct IsQListLike<QList<V>> : std::true_type {};
@@ -190,6 +210,8 @@ struct Conversion<T<V>, typename std::enable_if<IsQListLike<T<V>>::value>::type>
         return ary;
     }
 };
+
+// QHash and QMap
 
 template <class T> struct IsQHashLike : std::false_type {};
 template <class K, class V> struct IsQHashLike<QHash<K, V>> : std::true_type {};
@@ -235,58 +257,9 @@ struct Conversion<T<K, V>, typename std::enable_if<IsQHashLike<T<K, V>>::value>:
 };
 
 template <>
-struct Conversion<bool>
-{
-    static bool from(RubyValue value) { return value; }
-    static RubyValue to(bool x) { return x ? Qtrue : Qfalse; }
-};
-
-template <>
 struct Conversion<const char *>
 {
     static RubyValue to(const char *str);
-};
-
-template <>
-struct Conversion<QByteArray>
-{
-    static QByteArray from(RubyValue x);
-    static RubyValue to(const QByteArray &str);
-};
-
-template <>
-struct Conversion<QString>
-{
-    static QString from(RubyValue x);
-    static RubyValue to(const QString &str);
-};
-
-template <>
-struct Conversion<QDateTime>
-{
-    static QDateTime from(RubyValue x);
-    static RubyValue to(const QDateTime &dateTime);
-};
-
-template <>
-struct Conversion<QObject *>
-{
-    static QObject *from(RubyValue x);
-    static RubyValue to(QObject *obj);
-};
-
-template <>
-struct Conversion<QVariant>
-{
-    static QVariant from(RubyValue x);
-    static RubyValue to(const QVariant &variant);
-};
-
-template <>
-struct Conversion<const QMetaObject *>
-{
-    static const QMetaObject *from(RubyValue x);
-    static RubyValue to(const QMetaObject *metaobj);
 };
 
 } // namespace detail

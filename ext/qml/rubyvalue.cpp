@@ -115,29 +115,29 @@ RubyValue Conversion<const char *>::to(const char *str)
     return ret;
 }
 
-QByteArray Conversion<QByteArray>::from(RubyValue x)
+template <> QByteArray Conversion<QByteArray>::from(RubyValue x)
 {
     x = convertToString(x);
     return QByteArray(RSTRING_PTR(VALUE(x)), RSTRING_LEN(VALUE(x)));
 }
 
-RubyValue Conversion<QByteArray>::to(const QByteArray &str)
+template <> RubyValue Conversion<QByteArray>::to(const QByteArray &str)
 {
     return RubyValue::from(str.constData());
 }
 
-QString Conversion<QString>::from(RubyValue x)
+template <> QString Conversion<QString>::from(RubyValue x)
 {
     x = convertToString(x);
     return QString::fromUtf8(RSTRING_PTR(VALUE(x)), RSTRING_LEN(VALUE(x)));
 }
 
-RubyValue Conversion<QString>::to(const QString &str)
+template <> RubyValue Conversion<QString>::to(const QString &str)
 {
     return RubyValue::from(str.toUtf8().constData());
 }
 
-QDateTime Conversion<QDateTime>::from(RubyValue x)
+template <> QDateTime Conversion<QDateTime>::from(RubyValue x)
 {
     long long num;
     long long den;
@@ -149,8 +149,7 @@ QDateTime Conversion<QDateTime>::from(RubyValue x)
     return QDateTime::fromMSecsSinceEpoch(num * 1000 / den);
 }
 
-RubyValue Conversion<QDateTime>::to(const QDateTime &dateTime)
-{
+template <> RubyValue Conversion<QDateTime>::to(const QDateTime &dateTime) {
     RubyValue ret;
     protect([&] {
         auto at = rb_rational_new(LL2NUM(dateTime.toMSecsSinceEpoch()), INT2FIX(1000));
@@ -159,47 +158,39 @@ RubyValue Conversion<QDateTime>::to(const QDateTime &dateTime)
     return ret;
 }
 
-QVariant Conversion<QVariant>::from(RubyValue x)
+template <> QVariant Conversion<QVariant>::from(RubyValue x)
 {
     return x.toVariant();
 }
 
-RubyValue Conversion<QVariant>::to(const QVariant &variant)
+template <> RubyValue Conversion<QVariant>::to(const QVariant &variant)
 {
     return RubyValue::from(variant);
 }
 
-QObject *Conversion<QObject *>::from(RubyValue x)
+template <> QObject *Conversion<QObject *>::from(RubyValue x)
 {
     if (x == RubyValue()) {
         return nullptr;
     }
 
-    bool isAccess;
-    protect([&] {
-        isAccess = rb_obj_is_kind_of(x, rubyClasses().access);
-    });
-    if (isAccess) {
-        RubyValue accessptr;
-        protect([&] {
-            accessptr = rb_funcall(x, rb_intern("access_object"), 0);
-        });
+    if (x.isKindOf(rubyClasses().access)) {
+        auto accessptr = x.send("access_object");
         return wrapperRubyClass<Ext::QtObjectPointer>().unwrap(accessptr)->fetchQObject();
     }
 
-    RubyValue objptr;
-    protect([&] {
-        if (!rb_obj_is_kind_of(x, rubyClasses().qtObjectBase)) {
-            rb_raise(rb_path2class("QML::ConversionError"), "expected QML::ObjectBase, got %s", rb_obj_classname(x));
-        }
-        objptr = rb_funcall(x, rb_intern("object_pointer"), 0);
-    });
+    if (!x.isKindOf(rubyClasses().qtObjectBase)) {
+        fail("QML::ConversionError",
+             QString("expected QML::ObjectBase, got %1")
+                .arg(x.send("class").send("name").to<QString>()));
+    }
+    auto objptr = x.send("object_pointer");
     auto obj = wrapperRubyClass<Ext::QtObjectPointer>().unwrap(objptr)->fetchQObject();
     wrapperRubyClass<Ext::MetaObject>().unwrap(Ext::MetaObject::fromMetaObject(obj->metaObject()))->buildRubyClass();
     return obj;
 }
 
-RubyValue Conversion<QObject *>::to(QObject *obj)
+template <> RubyValue Conversion<QObject *>::to(QObject *obj)
 {
     if (!obj) {
         return Qnil;
@@ -224,7 +215,7 @@ RubyValue Conversion<QObject *>::to(QObject *obj)
     return rubyobj;
 }
 
-const QMetaObject *Conversion<const QMetaObject *>::from(RubyValue x)
+template <> const QMetaObject *Conversion<const QMetaObject *>::from(RubyValue x)
 {
     if (x == RubyValue()) {
         return nullptr;
@@ -232,7 +223,7 @@ const QMetaObject *Conversion<const QMetaObject *>::from(RubyValue x)
     return wrapperRubyClass<Ext::MetaObject>().unwrap(x)->metaObject();
 }
 
-RubyValue Conversion<const QMetaObject *>::to(const QMetaObject *metaobj)
+template <> RubyValue Conversion<const QMetaObject *>::to(const QMetaObject *metaobj)
 {
     if (!metaobj) {
         return Qnil;
@@ -381,19 +372,26 @@ int RubyValue::defaultMetaType() const
     default:
         break;
     }
-    if (rb_obj_is_kind_of(x, rb_cTime)) {
-        return QMetaType::QDateTime;
-    }
-    if (rb_obj_is_kind_of(x, rubyClasses().qtObjectBase)) {
-        return QMetaType::QObjectStar;
-    }
-    if (rb_obj_is_kind_of(x, wrapperRubyClass<Ext::MetaObject>().toValue())) {
-        return QMetaType::type("const QMetaObject*");
-    }
-    if (rb_obj_is_kind_of(x, rubyClasses().access)) {
-        return QMetaType::QObjectStar;
-    }
-    return QMetaType::UnknownType;
+    auto get = [&]() -> int {
+        if (rb_obj_is_kind_of(x, rb_cTime)) {
+            return QMetaType::QDateTime;
+        }
+        if (rb_obj_is_kind_of(x, rubyClasses().qtObjectBase)) {
+            return QMetaType::QObjectStar;
+        }
+        if (rb_obj_is_kind_of(x, wrapperRubyClass<Ext::MetaObject>().toValue())) {
+            return QMetaType::type("const QMetaObject*");
+        }
+        if (rb_obj_is_kind_of(x, rubyClasses().access)) {
+            return QMetaType::QObjectStar;
+        }
+        return QMetaType::UnknownType;
+    };
+    int result;
+    protect([&] {
+        result = get();
+    });
+    return result;
 }
 
 RubyValue RubyValue::from(const QVariant &variant)

@@ -27,8 +27,8 @@ QtObjectPointer::~QtObjectPointer()
 RubyValue QtObjectPointer::fromQObject(QObject *obj, bool owned)
 {
     auto klass = wrapperRubyClass<QtObjectPointer>();
-    auto ptr = klass->newInstance();
-    klass->unwrap(ptr)->setQObject(obj, owned);
+    auto ptr = klass.newInstance();
+    klass.unwrap(ptr)->setQObject(obj, owned);
     return ptr;
 }
 

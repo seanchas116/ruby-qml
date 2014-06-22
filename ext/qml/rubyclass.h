@@ -130,12 +130,12 @@ public:
         defineMethod(MethodAccess::Public, name, info);
     }
 
-    static WrapperRubyClass *instance()
+    static WrapperRubyClass instance()
     {
         if (!mInstance) {
             throw std::logic_error("class not yet defined");
         }
-        return mInstance.get();
+        return *mInstance;
     }
 
 private:
@@ -148,7 +148,7 @@ private:
     {
         static RubyValue apply(RubyValue self, TArgs ... args)
         {
-            return (instance()->unwrap(self)->*memfn)(args ...);
+            return (instance().unwrap(self)->*memfn)(args ...);
         }
     };
 
@@ -157,7 +157,7 @@ private:
     {
         static RubyValue apply(RubyValue self, TArgs... args)
         {
-            return (instance()->unwrap(self)->*memfn)(args ...);
+            return (instance().unwrap(self)->*memfn)(args ...);
         }
     };
 
@@ -189,7 +189,7 @@ template <typename T>
 std::unique_ptr<WrapperRubyClass<T>> WrapperRubyClass<T>::mInstance = nullptr;
 
 template <typename T>
-inline WrapperRubyClass<T> *wrapperRubyClass()
+inline WrapperRubyClass<T> wrapperRubyClass()
 {
     return WrapperRubyClass<T>::instance();
 }

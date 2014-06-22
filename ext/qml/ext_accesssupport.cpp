@@ -28,7 +28,7 @@ RubyValue AccessSupport::initialize(RubyValue rubyClass, RubyValue className, Ru
 
 RubyValue AccessSupport::emitSignal(RubyValue obj, RubyValue name, RubyValue args)
 {
-    auto accessObj = wrapperRubyClass<QtObjectPointer>()->unwrap(obj.send("access_object"))->fetchQObject();
+    auto accessObj = wrapperRubyClass<QtObjectPointer>().unwrap(obj.send("access_object"))->fetchQObject();
     auto nameId = name.toID();
     auto argVariants = args.to<QVariantList>();
     withoutGvl([&] {

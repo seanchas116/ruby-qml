@@ -13,8 +13,8 @@ GCMarker::GCMarker(RubyValue self)
 RubyValue GCMarker::fromMarkFunction(const std::function<void ()> &func)
 {
     auto klass = wrapperRubyClass<GCMarker>();
-    auto marker = klass->newInstance();
-    klass->unwrap(marker)->setMarkFunction(func);
+    auto marker = klass.newInstance();
+    klass.unwrap(marker)->setMarkFunction(func);
     return marker;
 }
 

@@ -184,7 +184,7 @@ QObject *Conversion<QObject *>::from(RubyValue x)
         protect([&] {
             accessptr = rb_funcall(x, rb_intern("access_object"), 0);
         });
-        return wrapperRubyClass<Ext::QtObjectPointer>()->unwrap(accessptr)->fetchQObject();
+        return wrapperRubyClass<Ext::QtObjectPointer>().unwrap(accessptr)->fetchQObject();
     }
 
     RubyValue objptr;
@@ -194,8 +194,8 @@ QObject *Conversion<QObject *>::from(RubyValue x)
         }
         objptr = rb_funcall(x, rb_intern("object_pointer"), 0);
     });
-    auto obj = wrapperRubyClass<Ext::QtObjectPointer>()->unwrap(objptr)->fetchQObject();
-    wrapperRubyClass<Ext::MetaObject>()->unwrap(Ext::MetaObject::fromMetaObject(obj->metaObject()))->buildRubyClass();
+    auto obj = wrapperRubyClass<Ext::QtObjectPointer>().unwrap(objptr)->fetchQObject();
+    wrapperRubyClass<Ext::MetaObject>().unwrap(Ext::MetaObject::fromMetaObject(obj->metaObject()))->buildRubyClass();
     return obj;
 }
 
@@ -216,7 +216,7 @@ RubyValue Conversion<QObject *>::to(QObject *obj)
 
     auto metaobj = Ext::MetaObject::fromMetaObject(obj->metaObject());
     auto objptr = Ext::QtObjectPointer::fromQObject(obj, false);
-    auto rubyobj = wrapperRubyClass<Ext::MetaObject>()->unwrap(metaobj)->buildRubyClass().send("allocate");
+    auto rubyobj = wrapperRubyClass<Ext::MetaObject>().unwrap(metaobj)->buildRubyClass().send("allocate");
     rubyobj.send("object_pointer=", objptr);
     rubyobj.send("initialize");
 
@@ -229,7 +229,7 @@ const QMetaObject *Conversion<const QMetaObject *>::from(RubyValue x)
     if (x == RubyValue()) {
         return nullptr;
     }
-    return wrapperRubyClass<Ext::MetaObject>()->unwrap(x)->metaObject();
+    return wrapperRubyClass<Ext::MetaObject>().unwrap(x)->metaObject();
 }
 
 RubyValue Conversion<const QMetaObject *>::to(const QMetaObject *metaobj)
@@ -342,7 +342,7 @@ bool RubyValue::isConvertibleTo(int metaType) const
             }
             return false;
         }
-        if (rb_obj_is_kind_of(x, wrapperRubyClass<Ext::MetaObject>()->toValue())) {
+        if (rb_obj_is_kind_of(x, wrapperRubyClass<Ext::MetaObject>().toValue())) {
             return metaType == QMetaType::type("const QMetaObject*");
         }
         if (rb_obj_is_kind_of(x, rubyClasses().access)) {
@@ -387,7 +387,7 @@ int RubyValue::defaultMetaType() const
     if (rb_obj_is_kind_of(x, Ext::QtObjectPointer::objectBaseClass().toValue())) {
         return QMetaType::QObjectStar;
     }
-    if (rb_obj_is_kind_of(x, wrapperRubyClass<Ext::MetaObject>()->toValue())) {
+    if (rb_obj_is_kind_of(x, wrapperRubyClass<Ext::MetaObject>().toValue())) {
         return QMetaType::type("const QMetaObject*");
     }
     if (rb_obj_is_kind_of(x, rubyClasses().access)) {

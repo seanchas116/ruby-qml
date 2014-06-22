@@ -7,6 +7,7 @@
 #include "signalforwarder.h"
 #include "valuereference.h"
 #include "objectgc.h"
+#include "rubyclasses.h"
 #include <QtCore/QSet>
 
 using namespace RubyQml;
@@ -26,6 +27,7 @@ void defineClasses()
     Ext::GCMarker::defineClass();
     Ext::AccessSupport::defineClass();
     Ext::TestUtil::defineModule();
+    RubyClasses::initialize();
 }
 
 void setupGlobalGCMarking()

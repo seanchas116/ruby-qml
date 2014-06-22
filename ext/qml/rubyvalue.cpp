@@ -4,6 +4,7 @@
 #include "ext_metaobject.h"
 #include "objectdata.h"
 #include "accessobject.h"
+#include "rubyclasses.h"
 #include <ruby/intern.h>
 #define ONIG_ESCAPE_UCHAR_COLLISION
 #include <ruby/encoding.h>
@@ -176,7 +177,7 @@ QObject *Conversion<QObject *>::from(RubyValue x)
 
     bool isAccess;
     protect([&] {
-        isAccess = rb_obj_is_kind_of(x, rb_path2class("QML::Access"));
+        isAccess = rb_obj_is_kind_of(x, rubyClasses().access);
     });
     if (isAccess) {
         RubyValue accessptr;
@@ -344,7 +345,7 @@ bool RubyValue::isConvertibleTo(int metaType) const
         if (rb_obj_is_kind_of(x, wrapperRubyClass<Ext::MetaObject>()->toValue())) {
             return metaType == QMetaType::type("const QMetaObject*");
         }
-        if (rb_obj_is_kind_of(x, rb_path2class("QML::Access"))) {
+        if (rb_obj_is_kind_of(x, rubyClasses().access)) {
             return metaType == QMetaType::QObjectStar;
         }
         return false;
@@ -389,7 +390,7 @@ int RubyValue::defaultMetaType() const
     if (rb_obj_is_kind_of(x, wrapperRubyClass<Ext::MetaObject>()->toValue())) {
         return QMetaType::type("const QMetaObject*");
     }
-    if (rb_obj_is_kind_of(x, rb_path2class("QML::Access"))) {
+    if (rb_obj_is_kind_of(x, rubyClasses().access)) {
         return QMetaType::QObjectStar;
     }
     return QMetaType::UnknownType;

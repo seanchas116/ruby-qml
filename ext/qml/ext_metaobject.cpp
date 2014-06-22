@@ -3,6 +3,7 @@
 #include "ext_qtobjectpointer.h"
 #include "rubyclass.h"
 #include "signalforwarder.h"
+#include "rubyclasses.h"
 #include <QtCore/QMetaObject>
 #include <QtCore/QMetaMethod>
 #include <QtCore/QMetaProperty>
@@ -129,7 +130,7 @@ public:
         } else {
             auto ret = RubyValue::from(returnValue);
             // add ownership to QtObjectPointer unless it has parent or is owned by QML engine
-            if (ret.isKindOf(QtObjectPointer::objectBaseClass())) {
+            if (ret.isKindOf(rubyClasses().qtObjectBase)) {
                 auto objectPointer = wrapperRubyClass<QtObjectPointer>().unwrap(ret.send("object_pointer"));
                 auto obj = objectPointer->fetchQObject();
                 if (QQmlEngine::objectOwnership(obj) == QQmlEngine::CppOwnership && !obj->parent()) {

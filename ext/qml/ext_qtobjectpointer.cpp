@@ -115,12 +115,8 @@ void QtObjectPointer::gc_mark()
     }
 }
 
-RubyClass QtObjectPointer::mObjectBaseClass;
-
 void QtObjectPointer::defineClass()
 {
-    mObjectBaseClass = RubyClass("QML", "QtObjectBase");
-
     WrapperRubyClass<QtObjectPointer> klass("QML", "QtObjectPointer");
     klass.defineMethod("owned?", RUBYQML_MEMBER_FUNCTION_INFO(&QtObjectPointer::ext_isOwned));
     klass.defineMethod("owned=", RUBYQML_MEMBER_FUNCTION_INFO(&QtObjectPointer::ext_setOwned));

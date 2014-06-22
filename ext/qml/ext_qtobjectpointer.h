@@ -29,7 +29,6 @@ public:
 
     void gc_mark();
 
-    static RubyClass objectBaseClass() { return mObjectBaseClass; }
     static void defineClass();
 
 private:
@@ -38,8 +37,6 @@ private:
     bool mIsOwned = false;
     QPointer<QObject> mObject;
     QJSValue mJSValue;
-
-    static RubyClass mObjectBaseClass;
 };
 
 } // namespace Ext

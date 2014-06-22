@@ -22,6 +22,8 @@ public:
     RubyValue() = default;
     RubyValue(VALUE value) : mValue(value) {}
 
+    static RubyValue fromPath(const char *path);
+
     template <typename T> static RubyValue from(const T &value)
     {
         return detail::Conversion<T>::to(value);

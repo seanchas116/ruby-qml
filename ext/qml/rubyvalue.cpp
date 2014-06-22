@@ -10,6 +10,7 @@
 #include <ruby/encoding.h>
 #include <QVariant>
 #include <QDateTime>
+#include <QRect>
 #include <QSet>
 
 namespace RubyQml {
@@ -63,6 +64,13 @@ struct ConverterHash
         add<QVariantMap>();
 
         add<QDateTime>();
+
+        add<QPoint>();
+        add<QPointF>();
+        add<QSize>();
+        add<QSizeF>();
+        add<QRect>();
+        add<QRectF>();
 
         add<QObject *>();
         add<const QMetaObject *>();
@@ -158,6 +166,84 @@ template <> RubyValue Conversion<QDateTime>::to(const QDateTime &dateTime) {
     return ret;
 }
 
+template <> QPoint Conversion<QPoint>::from(RubyValue value)
+{
+    return QPoint(value.send("x").to<int>(), value.send("y").to<int>());
+}
+
+template <> RubyValue Conversion<QPoint>::to(const QPoint &point)
+{
+    return RubyValue::fromPath("QML::Support::Point")
+        .send("new", RubyValue::from(point.x()), RubyValue::from(point.y()));
+}
+
+template <> QPointF Conversion<QPointF>::from(RubyValue value)
+{
+    return QPoint(value.send("x").to<double>(), value.send("y").to<double>());
+}
+
+template <> RubyValue Conversion<QPointF>::to(const QPointF &point)
+{
+    return RubyValue::fromPath("QML::Support::Point")
+        .send("new", RubyValue::from(point.x()), RubyValue::from(point.y()));
+}
+
+template <> QSize Conversion<QSize>::from(RubyValue value)
+{
+    return QSize(value.send("width").to<int>(), value.send("height").to<int>());
+}
+
+template <> RubyValue Conversion<QSize>::to(const QSize &size)
+{
+    return RubyValue::fromPath("QML::Support::Size")
+        .send("new", RubyValue::from(size.width()), RubyValue::from(size.height()));
+}
+
+template <> QSizeF Conversion<QSizeF>::from(RubyValue value)
+{
+    return QSize(value.send("width").to<double>(), value.send("height").to<double>());
+}
+
+template <> RubyValue Conversion<QSizeF>::to(const QSizeF &size)
+{
+    return RubyValue::fromPath("QML::Support::Size")
+        .send("new", RubyValue::from(size.width()), RubyValue::from(size.height()));
+}
+
+template <> QRect Conversion<QRect>::from(RubyValue value)
+{
+    auto x = value.send("x").to<int>();
+    auto y = value.send("y").to<int>();
+    auto w = value.send("width").to<int>();
+    auto h = value.send("height").to<int>();
+    return QRect(QPoint(x, y), QSize(w, h));
+}
+
+template <> RubyValue Conversion<QRect>::to(const QRect &rect)
+{
+    return RubyValue::fromPath("QML::Support::Rectangle")
+        .send("new",
+              RubyValue::from(rect.x()), RubyValue::from(rect.y()),
+              RubyValue::from(rect.width()), RubyValue::from(rect.height()));
+}
+
+template <> QRectF Conversion<QRectF>::from(RubyValue value)
+{
+    auto x = value.send("x").to<double>();
+    auto y = value.send("y").to<double>();
+    auto w = value.send("width").to<double>();
+    auto h = value.send("height").to<double>();
+    return QRect(QPoint(x, y), QSize(w, h));
+}
+
+template <> RubyValue Conversion<QRectF>::to(const QRectF &rect)
+{
+    return RubyValue::fromPath("QML::Support::Rectangle")
+        .send("new",
+              RubyValue::from(rect.x()), RubyValue::from(rect.y()),
+              RubyValue::from(rect.width()), RubyValue::from(rect.height()));
+}
+
 template <> QVariant Conversion<QVariant>::from(RubyValue x)
 {
     return x.toVariant();
@@ -234,6 +320,15 @@ template <> RubyValue Conversion<const QMetaObject *>::to(const QMetaObject *met
 } // namespace detail
 
 Q_GLOBAL_STATIC(QSet<int>, enumeratorMetaTypes)
+
+RubyValue RubyValue::fromPath(const char *path)
+{
+    RubyValue ret;
+    protect([&] {
+        ret = rb_path2class(path);
+    });
+    return ret;
+}
 
 bool RubyValue::isKindOf(RubyValue klass) const
 {
@@ -339,6 +434,15 @@ bool RubyValue::isConvertibleTo(int metaType) const
         if (rb_obj_is_kind_of(x, rubyClasses().access)) {
             return metaType == QMetaType::QObjectStar;
         }
+        if (rb_obj_is_kind_of(x, rb_path2class("QML::Support::Point"))) {
+            return metaType == QMetaType::QPoint || metaType == QMetaType::QPointF;
+        }
+        if (rb_obj_is_kind_of(x, rb_path2class("QML::Support::Size"))) {
+            return metaType == QMetaType::QSize || metaType == QMetaType::QSizeF;
+        }
+        if (rb_obj_is_kind_of(x, rb_path2class("QML::Support::Rectangle"))) {
+            return metaType == QMetaType::QRect || metaType == QMetaType::QRectF;
+        }
         return false;
     };
     bool result;
@@ -384,6 +488,15 @@ int RubyValue::defaultMetaType() const
         }
         if (rb_obj_is_kind_of(x, rubyClasses().access)) {
             return QMetaType::QObjectStar;
+        }
+        if (rb_obj_is_kind_of(x, rb_path2class("QML::Support::Point"))) {
+            return QMetaType::QPointF;
+        }
+        if (rb_obj_is_kind_of(x, rb_path2class("QML::Support::Size"))) {
+            return QMetaType::QSizeF;
+        }
+        if (rb_obj_is_kind_of(x, rb_path2class("QML::Support::Rectangle"))) {
+            return QMetaType::QRectF;
         }
         return QMetaType::UnknownType;
     };

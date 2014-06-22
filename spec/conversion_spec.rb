@@ -20,7 +20,10 @@ describe 'Conversion between C++ and Ruby' do
     'non-ascii String' => 'ほげ',
     'Array' => [1, "foobar", true],
     'Hash' => {'one' => 1, 'two' => 2, '三' => 3},
-    'Access derived' => Foo.new
+    'Access derived' => Foo.new,
+    'QML Point' => QML::Point.new(1,2),
+    'QML Size' => QML::Size.new(1,2),
+    'QML Rectangle' => QML::Rectangle.new(1,2,3,4)
   }
 
   samples.each do |k, v|

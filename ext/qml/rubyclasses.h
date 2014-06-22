@@ -6,8 +6,10 @@ namespace RubyQml {
 struct RubyClasses
 {
     RubyClasses();
+
     RubyValue access;
     RubyValue qtObjectBase;
+
     static void initialize();
 };
 

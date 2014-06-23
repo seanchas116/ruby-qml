@@ -7,26 +7,33 @@ ApplicationWindow {
   visible: true
   width: 200
   height: 200
+
   GridLayout {
     anchors.fill: parent
     anchors.margins: 10
     columns: 1
+
     Image {
       id: image
       source: 'image://example/image'
-      //source: 'https://pbs.twimg.com/profile_images/432861545521872897/BsrVF3et_bigger.png'
+      asynchronous: true
+      cache: false
       fillMode: Image.Pad
       Layout.fillHeight: true
+
       function reload() {
         source = ''
         source = 'image://example/image'
       }
     }
+
     GridLayout {
       columns: 2
+
       Label {
         text: 'Image URL'
       }
+
       TextField {
         id: textField
         Layout.fillWidth: true

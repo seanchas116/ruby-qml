@@ -13,10 +13,12 @@ module Examples
       include Celluloid
       include Singleton
 
-      attr_accessor :url
+      def set_url(url)
+        @url = url
+      end
 
       def fetch
-        open(url, 'rb') { |f| f.read } rescue nil
+        open(@url, 'rb') { |f| f.read } rescue nil
       end
     end
 
@@ -26,7 +28,7 @@ module Examples
       property :url, ''
 
       on_changed :url do
-        ImageFetcher.instance.url = url
+        ImageFetcher.instance.async.set_url url
       end
 
       register_to_qml

@@ -15,11 +15,15 @@ SOURCES += coreplugin.cpp \
     applicationextension.cpp \
     componentextension.cpp \
     contextextension.cpp \
-    engineextension.cpp
+    engineextension.cpp \
+    imageprovider.cpp \
+    rubycallbackloop.cpp
 
 HEADERS += coreplugin.h \
     qmlexception.h \
     applicationextension.h \
     componentextension.h \
     contextextension.h \
-    engineextension.h
+    engineextension.h \
+    imageprovider.h \
+    rubycallbackloop.h

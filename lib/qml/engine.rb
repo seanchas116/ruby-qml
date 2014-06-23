@@ -17,5 +17,11 @@ module QML
     def context
       @extension.rootContext
     end
+
+    # @param id [String]
+    # @param provider [QML::ImageProvider]
+    def add_image_provider(id, provider)
+      @extension.add_image_provider(id, provider.qt_image_provider)
+    end
   end
 end

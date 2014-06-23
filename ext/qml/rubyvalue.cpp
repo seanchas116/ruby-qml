@@ -467,8 +467,13 @@ int RubyValue::defaultMetaType() const
     case T_FLOAT:
         return QMetaType::Double;
     case T_SYMBOL:
-    case T_STRING:
         return QMetaType::QString;
+    case T_STRING:
+        if (rb_enc_get_index(x)  == rb_ascii8bit_encindex()) {
+            return QMetaType::QByteArray;
+        } else {
+            return QMetaType::QString;
+        }
     case T_ARRAY:
         return QMetaType::QVariantList;
     case T_HASH:

@@ -3,6 +3,8 @@
 #include "engineextension.h"
 #include "componentextension.h"
 #include "contextextension.h"
+#include "rubycallbackloop.h"
+#include "imageprovider.h"
 #include <QApplication>
 #include <QQmlEngine>
 #include <QQmlComponent>
@@ -20,6 +22,8 @@ CorePlugin::CorePlugin(QObject *parent) :
     qRegisterMetaType<EngineExtension *>();
     qRegisterMetaType<ComponentExtension *>();
     qRegisterMetaType<ContextExtension *>();
+    qRegisterMetaType<RubyCallbackLoop *>();
+    qRegisterMetaType<ImageProvider *>();
     qRegisterMetaType<QApplication *>();
     qRegisterMetaType<QCoreApplication *>();
     qRegisterMetaType<QQmlEngine *>();
@@ -35,6 +39,8 @@ CorePlugin::CorePlugin(QObject *parent) :
     for (auto metaobj : metaObjects) {
         mMetaObjects[metaobj->className()] = QVariant::fromValue(metaobj);
     }
+
+    mCallbackLoop = new RubyCallbackLoop(this);
 }
 
 QApplication *CorePlugin::applicationInstance()
@@ -105,6 +111,11 @@ ContextExtension *CorePlugin::createContextExtension(QQmlContext *context)
 QQmlContext *CorePlugin::contextForObject(QObject *object)
 {
     return QQmlEngine::contextForObject(object);
+}
+
+ImageProvider *CorePlugin::createImageProvider(QObject *rubyCallback)
+{
+    return new ImageProvider(mCallbackLoop, rubyCallback);
 }
 
 } // namespace RubyQml

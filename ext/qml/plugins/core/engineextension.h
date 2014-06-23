@@ -7,6 +7,8 @@ class QQmlContext;
 
 namespace RubyQml {
 
+class ImageProvider;
+
 class EngineExtension : public QObject
 {
     Q_OBJECT
@@ -16,6 +18,7 @@ public:
     QQmlContext *rootContext();
 
 public slots:
+    void addImageProvider(const QString &id, RubyQml::ImageProvider *provider);
 
 private:
     QQmlEngine *mEngine;

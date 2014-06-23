@@ -22,6 +22,7 @@ module QML
     def initialize
       @callback = Callback.new(self)
       @qt_image_provider = Plugins.core.createImageProvider(@callback)
+      @qt_image_provider.owned_by_ruby = false
     end
 
     def request(id)

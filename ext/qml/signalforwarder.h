@@ -14,7 +14,6 @@ public:
     ~SignalForwarder();
 
     int qt_metacall(QMetaObject::Call call, int id, void **args) override;
-    static void deleteAll();
 
     void gc_mark() override;
 
@@ -24,7 +23,6 @@ private:
 
     QMetaMethod mSignal;
     WeakValueReference mProcRef;
-    static QSet<SignalForwarder *> mInstances;
 };
 
 } // namespace RubyQml

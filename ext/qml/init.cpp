@@ -41,7 +41,6 @@ void setupGlobalGCMarking()
 
 void cleanup()
 {
-    SignalForwarder::deleteAll();
     ObjectGC::cleanUp();
 }
 

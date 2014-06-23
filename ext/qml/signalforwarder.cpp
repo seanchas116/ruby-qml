@@ -10,12 +10,10 @@ SignalForwarder::SignalForwarder(QObject *obj, const QMetaMethod &signal, RubyVa
     mProcRef(proc)
 {
     QMetaObject::connect(obj, signal.methodIndex(), this, QObject::staticMetaObject.methodCount());
-    mInstances << this;
 }
 
 SignalForwarder::~SignalForwarder()
 {
-    mInstances.remove(this);
 }
 
 int SignalForwarder::qt_metacall(QMetaObject::Call call, int id, void **args)
@@ -64,15 +62,5 @@ void SignalForwarder::callProc(const QVariantList &list)
         });
     }
 }
-
-void SignalForwarder::deleteAll()
-{
-    auto instances = mInstances;
-    for (auto instance : instances) {
-        delete instance;
-    }
-}
-
-QSet<SignalForwarder *> SignalForwarder::mInstances;
 
 } // namespace RubyQml

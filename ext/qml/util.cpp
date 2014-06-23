@@ -7,28 +7,28 @@
 
 namespace RubyQml {
 
-void protect(const std::function<void ()> &callback)
+void protect(const std::function<void ()> &doAction)
 {
-    auto f = [](VALUE data) {
-        auto &callback = *reinterpret_cast<const std::function<void ()> *>(data);
-        callback();
+    auto callback = [](VALUE data) {
+        auto &doAction= *reinterpret_cast<const std::function<void ()> *>(data);
+        doAction();
         return Qnil;
     };
     int state;
-    rb_protect(f, reinterpret_cast<VALUE>(&callback), &state);
+    rb_protect(callback, reinterpret_cast<VALUE>(&doAction), &state);
     if (state) {
         throw RubyException(state);
     }
 }
 
-void unprotect(const std::function<void ()> &callback) noexcept
+void unprotect(const std::function<void ()> &doAction) noexcept
 {
     int state = 0;
     bool cppErrorOccured= false;
     VALUE cppErrorClassName = Qnil;
     VALUE cppErrorMessage = Qnil;
     try {
-        callback();
+        doAction();
     }
     catch (const RubyException &ex) {
         state = ex.state();
@@ -72,23 +72,23 @@ void rescue(const std::function<void ()> &doAction, const std::function<void (Ru
 
 namespace {
 
-void withOrWithoutGvl(const std::function<void ()> &callback, bool with)
+void changeGvl(const std::function<void ()> &doAction, bool gvl)
 {
-    auto callbackp = const_cast<void *>(static_cast<const void *>(&callback));
+    auto actionPtr = const_cast<void *>(static_cast<const void *>(&doAction));
     auto f = [](void *data) -> void * {
-        auto &callback = *static_cast<const std::function<void ()> *>(data);
+        auto &doAction= *static_cast<const std::function<void ()> *>(data);
         try {
-            callback();
+            doAction();
         } catch (...) {
             return new std::exception_ptr(std::current_exception());
         }
         return nullptr;
     };
     void *result;
-    if (with) {
-        result = rb_thread_call_with_gvl(f, callbackp);
+    if (gvl) {
+        result = rb_thread_call_with_gvl(f, actionPtr );
     } else {
-        result = rb_thread_call_without_gvl(f, callbackp, RUBY_UBF_IO, nullptr);
+        result = rb_thread_call_without_gvl(f, actionPtr , RUBY_UBF_IO, nullptr);
     }
     std::unique_ptr<std::exception_ptr> exc(static_cast<std::exception_ptr *>(result));
     if (exc && *exc) {
@@ -98,14 +98,14 @@ void withOrWithoutGvl(const std::function<void ()> &callback, bool with)
 
 }
 
-void withoutGvl(const std::function<void ()> &callback)
+void withoutGvl(const std::function<void ()> &doAction)
 {
-    withOrWithoutGvl(callback, false);
+    changeGvl(doAction, false);
 }
 
-void withGvl(const std::function<void ()> &callback)
+void withGvl(const std::function<void ()> &doAction)
 {
-    withOrWithoutGvl(callback, true);
+    changeGvl(doAction, true);
 }
 
 void fail(const char *errorClassName, const QString &message)

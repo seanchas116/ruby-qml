@@ -85,22 +85,15 @@ module QML
         access_support = self.class.access_support
         signal_names.each do |name|
           __send__(name).connect do |*args|
-            access_support.emit_signal(self, name, args)
+            @access_objects.each do |obj|
+              obj.class.meta_object.invoke_method(obj.pointer, name, args)
+            end
           end
         end
-        @_access_object = Pointer.new
+        @access_objects = []
       end
 
-      def access_object
-        if @_access_object.null?
-          @_access_object = self.class.access_support.create_access_object(self)
-        end
-        @_access_object
-      end
-
-      def access_object=(obj)
-        @_access_object = obj
-      end
+      attr_reader :access_objects
     end
   end
 end

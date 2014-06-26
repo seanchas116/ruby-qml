@@ -40,7 +40,7 @@ AccessClass::AccessClass(RubyValue className, RubyValue methodInfos, RubyValue s
 
 QVariant AccessClass::callMethod(ForeignObject *obj, size_t id, const QVariantList &args)
 {
-    auto self = static_cast<AccessObject *>(obj)->value();
+    auto self = static_cast<AccessObject *>(obj)->wrappedValue();
     QVariant ret;
     withGvl([&] {
         std::vector<VALUE> values(args.size());

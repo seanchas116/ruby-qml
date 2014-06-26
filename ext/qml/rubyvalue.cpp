@@ -4,6 +4,7 @@
 #include "ext_metaobject.h"
 #include "objectdata.h"
 #include "accessobject.h"
+#include "ext_accesssupport.h"
 #include "rubyclasses.h"
 #include <ruby/intern.h>
 #define ONIG_ESCAPE_UCHAR_COLLISION
@@ -251,54 +252,7 @@ template <> QVariant Conversion<QVariant>::from(RubyValue x)
 
 template <> RubyValue Conversion<QVariant>::to(const QVariant &variant)
 {
-    return RubyValue::from(variant);
-}
-
-template <> QObject *Conversion<QObject *>::from(RubyValue x)
-{
-    if (x == RubyValue()) {
-        return nullptr;
-    }
-
-    if (x.isKindOf(rubyClasses().access)) {
-        auto accessptr = x.send("access_object");
-        return wrapperRubyClass<Ext::Pointer>().unwrap(accessptr)->fetchQObject();
-    }
-
-    if (!x.isKindOf(rubyClasses().wrapper)) {
-        fail("QML::ConversionError",
-             QString("expected QML::Wrapper , got %1")
-                .arg(x.send("class").send("name").to<QString>()));
-    }
-    auto objptr = x.send("pointer");
-    auto obj = wrapperRubyClass<Ext::Pointer>().unwrap(objptr)->fetchQObject();
-    Ext::MetaObject::fromMetaObject(obj->metaObject()).send("build_class");
-    return obj;
-}
-
-template <> RubyValue Conversion<QObject *>::to(QObject *obj)
-{
-    if (!obj) {
-        return Qnil;
-    }
-    auto accessObj = dynamic_cast<AccessObject *>(obj);
-    if (accessObj) {
-        return accessObj->value();
-    }
-
-    auto data = ObjectData::getOrCreate(obj);
-    if (data->wrapper) {
-        return data->wrapper;
-    }
-
-    auto metaobj = Ext::MetaObject::fromMetaObject(obj->metaObject());
-    auto pointer = Ext::Pointer::fromQObject(obj, false);
-    auto wrapper = metaobj.send("build_class").send("allocate");
-    wrapper.send("pointer=", pointer);
-    wrapper.send("initialize");
-
-    data->wrapper = wrapper;
-    return wrapper;
+    return RubyValue::fromVariant(variant);
 }
 
 template <> const QMetaObject *Conversion<const QMetaObject *>::from(RubyValue x)
@@ -512,7 +466,7 @@ int RubyValue::defaultMetaType() const
     return result;
 }
 
-RubyValue RubyValue::from(const QVariant &variant)
+RubyValue RubyValue::fromVariant(const QVariant &variant)
 {
     auto &hash = detail::converterHash->toRubyHash;
     auto type = variant.userType();
@@ -565,6 +519,58 @@ QVariant RubyValue::toVariant(int type) const
         return QVariant();
     }
     return hash[type](x);
+}
+
+RubyValue RubyValue::fromQObject(QObject *obj, bool implicit)
+{
+    if (!obj) {
+        return Qnil;
+    }
+
+    if (implicit) {
+        auto accessObj = dynamic_cast<AccessObject *>(obj);
+        if (accessObj) {
+            return accessObj->wrappedValue();
+        }
+    }
+
+    auto data = ObjectData::getOrCreate(obj);
+    if (data->wrapper) {
+        return data->wrapper;
+    }
+
+    auto metaobj = Ext::MetaObject::fromMetaObject(obj->metaObject());
+    auto pointer = Ext::Pointer::fromQObject(obj, false);
+    auto wrapper = metaobj.send("build_class").send("allocate");
+    wrapper.send("pointer=", pointer);
+    wrapper.send("initialize");
+
+    data->wrapper = wrapper;
+    return wrapper;
+}
+
+QObject *RubyValue::toQObject() const
+{
+    auto x = *this;
+
+    if (x == RubyValue()) {
+        return nullptr;
+    }
+
+    if (x.isKindOf(rubyClasses().access)) {
+        auto support = x.send("class").send("access_support");
+        return wrapperRubyClass<Ext::AccessSupport>().unwrap(support)->wrap(x);
+    }
+
+    if (!x.isKindOf(rubyClasses().wrapper)) {
+        fail("QML::ConversionError",
+             QString("expected QML::Wrapper , got %1")
+                .arg(x.send("class").send("name").to<QString>()));
+    }
+    auto objptr = x.send("pointer");
+    auto obj = wrapperRubyClass<Ext::Pointer>().unwrap(objptr)->fetchQObject();
+    Ext::MetaObject::fromMetaObject(obj->metaObject()).send("build_class");
+    return obj;
 }
 
 ID RubyValue::toID() const

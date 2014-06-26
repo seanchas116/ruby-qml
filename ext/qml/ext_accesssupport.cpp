@@ -37,9 +37,9 @@ RubyValue AccessSupport::emitSignal(RubyValue obj, RubyValue name, RubyValue arg
     return Qnil;
 }
 
-RubyValue AccessSupport::createAccessObject(RubyValue access)
+AccessObject *AccessSupport::wrap(RubyValue access)
 {
-    return Pointer::fromQObject(new AccessObject(mMetaObject, access), false);
+    return new AccessObject(mMetaObject, access);
 }
 
 RubyValue AccessSupport::registerToQml(RubyValue path, RubyValue majorVersion, RubyValue minorVersion, RubyValue name)
@@ -47,9 +47,7 @@ RubyValue AccessSupport::registerToQml(RubyValue path, RubyValue majorVersion, R
     if (!mTypeRegisterer) {
         mTypeRegisterer = makeSP<QmlTypeRegisterer>(mMetaObject, [this](void *where) {
             withGvl([&] {
-                auto value = mRubyClass.send("new");
-                auto obj = Pointer::fromQObject(new(where) AccessObject(mMetaObject, value), false);
-                value.send("access_object=", obj);
+                new(where) AccessObject(mMetaObject, mRubyClass.send("new"));
             });
         });
         mTypeRegisterer->registerType(path.to<QByteArray>(), majorVersion.to<int>(), minorVersion.to<int>(), name.to<QByteArray>());
@@ -62,7 +60,6 @@ void AccessSupport::defineClass()
     WrapperRubyClass<AccessSupport> klass("QML", "AccessSupport");
     klass.defineMethod(MethodAccess::Protected, "initialize", RUBYQML_MEMBER_FUNCTION_INFO(&AccessSupport::initialize));
     klass.defineMethod("emit_signal", RUBYQML_MEMBER_FUNCTION_INFO(&AccessSupport::emitSignal));
-    klass.defineMethod("create_access_object", RUBYQML_MEMBER_FUNCTION_INFO(&AccessSupport::createAccessObject));
     klass.defineMethod("register_to_qml", RUBYQML_MEMBER_FUNCTION_INFO(&AccessSupport::registerToQml));
 }
 

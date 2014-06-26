@@ -66,9 +66,11 @@ public:
     bool isConvertibleTo(int metaType) const;
     int defaultMetaType() const;
 
-    static RubyValue from(const QVariant &value);
+    static RubyValue fromVariant(const QVariant &value);
     QVariant toVariant() const;
     QVariant toVariant(int type) const;
+    static RubyValue fromQObject(QObject *obj, bool implicit = true);
+    QObject *toQObject() const;
 
     ID toID() const;
     static RubyValue fromID(ID id) { return ID2SYM(id); }
@@ -256,6 +258,20 @@ struct Conversion<T<K, V>, typename std::enable_if<IsQHashLike<T<K, V>>::value>:
         }
         return rubyHash;
     }
+};
+
+// QObject-derived
+
+template <typename T>
+struct Conversion<
+    T *,
+    typename std::enable_if<
+        std::is_base_of<QObject, T>::value
+    >::type
+>
+{
+    static T *from(RubyValue value) { return dynamic_cast<T *>(value.toQObject()); }
+    static RubyValue to(T *value) { return RubyValue::fromQObject(value); }
 };
 
 template <>

@@ -7,6 +7,7 @@ namespace RubyQml {
 class AccessClass;
 class ForeignMetaObject;
 class QmlTypeRegisterer;
+class AccessObject;
 
 namespace Ext {
 
@@ -19,7 +20,8 @@ public:
     RubyValue initialize(RubyValue rubyClass, RubyValue className, RubyValue methodInfos, RubyValue signalInfos, RubyValue propertyInfos);
     RubyValue emitSignal(RubyValue obj, RubyValue name, RubyValue args);
     RubyValue registerToQml(RubyValue path, RubyValue majorVersion, RubyValue minorVersion, RubyValue name);
-    RubyValue createAccessObject(RubyValue access);
+
+    AccessObject *wrap(RubyValue access);
 
     void gc_mark() {}
     static void defineClass();

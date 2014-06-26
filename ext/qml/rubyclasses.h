@@ -8,7 +8,7 @@ struct RubyClasses
     RubyClasses();
 
     RubyValue access;
-    RubyValue qtObjectBase;
+    RubyValue wrapper;
 
     static void initialize();
 };

@@ -1,5 +1,5 @@
 #include "ext_metaobject.h"
-#include "ext_qtobjectpointer.h"
+#include "ext_pointer.h"
 #include "ext_pluginloader.h"
 #include "ext_gcmarker.h"
 #include "ext_accesssupport.h"
@@ -22,7 +22,7 @@ void defineMetaTypes()
 void defineClasses()
 {
     Ext::MetaObject::defineClass();
-    Ext::QtObjectPointer::defineClass();
+    Ext::Pointer::defineClass();
     Ext::PluginLoader::defineClass();
     Ext::GCMarker::defineClass();
     Ext::AccessSupport::defineClass();

@@ -21,7 +21,7 @@ ObjectData *ObjectData::getOrCreate(QObject *target)
 void ObjectData::gc_mark()
 {
     if (owned) {
-        rb_gc_mark(rubyObject);
+        rb_gc_mark(wrapper);
     }
 }
 

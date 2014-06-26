@@ -33,7 +33,7 @@ module QML
 
     def self.for_object(obj)
       Plugins.core.contextForObject(obj).tap do |context|
-        context.object_pointer.owned = false if context
+        context.pointer.owned = false if context
       end
     end
   end

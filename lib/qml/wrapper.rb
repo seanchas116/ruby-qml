@@ -1,7 +1,7 @@
 require 'ropework'
 
 module QML
-  class QtObjectBase
+  class Wrapper
     include Ropework::Object
 
     class << self
@@ -9,8 +9,8 @@ module QML
       private :meta_object=
     end
 
-    attr_accessor :object_pointer
-    private :object_pointer=
+    attr_accessor :pointer
+    private :pointer=
 
     def custom_data
       @custom_data ||= {}
@@ -42,11 +42,11 @@ module QML
     alias_method :to_s, :inspect
 
     def owned_by_ruby?
-      object_pointer.owned?
+      pointer.owned?
     end
 
     def owned_by_ruby=(owned)
-      object_pointer.owned = owned
+      pointer.owned = owned
     end
   end
 end

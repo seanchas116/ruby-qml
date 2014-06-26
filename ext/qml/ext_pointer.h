@@ -6,11 +6,11 @@
 namespace RubyQml {
 namespace Ext {
 
-class QtObjectPointer
+class Pointer
 {
 public:
-    QtObjectPointer(RubyValue self);
-    ~QtObjectPointer();
+    Pointer(RubyValue self);
+    ~Pointer();
 
     static RubyValue fromQObject(QObject *obj, bool owned);
 

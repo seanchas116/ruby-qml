@@ -1,6 +1,6 @@
 require 'logger'
 require 'ropework'
-require 'qml/qt_object_base'
+require 'qml/wrapper'
 require 'qml/qml'
 require 'qml/name_helper'
 
@@ -79,14 +79,14 @@ module QML
 
     def create
       super_metaobj = @metaobj.super_class
-      @klass = Class.new(super_metaobj ? super_metaobj.build_class : QtObjectBase)
+      @klass = Class.new(super_metaobj ? super_metaobj.build_class : Wrapper)
     end
 
     def define_method(name)
       metaobj = @metaobj
       return if metaobj.private?(name)
       @klass.__send__ :define_method, name do |*args|
-        metaobj.invoke_method(@object_pointer, name, args)
+        metaobj.invoke_method(@pointer, name, args)
       end
       @klass.__send__ :private, name if @metaobj.protected?(name)
       underscore = NameHelper.to_underscore(name)
@@ -95,7 +95,7 @@ module QML
 
     def define_signal(name)
       @klass.__send__ :variadic_signal, name, factory: proc { |obj|
-        QtSignal.new(@metaobj, obj.object_pointer, name)
+        QtSignal.new(@metaobj, obj.pointer, name)
       }
       underscore = NameHelper.to_underscore(name)
       @klass.__send__ :alias_signal, underscore, name if underscore != name
@@ -104,7 +104,7 @@ module QML
     def define_property(name)
       metaobj = @metaobj
       @klass.__send__ :property, name, factory: proc { |obj|
-        QtProperty.new(@metaobj, obj.object_pointer, name)
+        QtProperty.new(@metaobj, obj.pointer, name)
       }
       underscore = NameHelper.to_underscore(name)
       @klass.__send__ :alias_property, underscore, name if underscore != name

@@ -1,5 +1,5 @@
 #include "ext_pluginloader.h"
-#include "ext_qtobjectpointer.h"
+#include "ext_pointer.h"
 #include "rubyclass.h"
 #include <QtCore/QPluginLoader>
 #include <QtCore/QSet>

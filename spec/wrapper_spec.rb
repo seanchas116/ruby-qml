@@ -1,6 +1,6 @@
 require 'spec_helper'
 
-describe QML::QtObjectBase do
+describe QML::Wrapper do
 
   describe '#qml_eval' do
 

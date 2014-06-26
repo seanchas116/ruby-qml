@@ -40,8 +40,6 @@ public:
     void setMetaObject(const QMetaObject *metaObject);
     const QMetaObject *metaObject() const { return mMetaObject; }
 
-    RubyValue buildRubyClass();
-
     void gc_mark() {}
 
     static RubyValue fromMetaObject(const QMetaObject *metaObject);

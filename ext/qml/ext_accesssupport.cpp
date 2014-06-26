@@ -1,5 +1,5 @@
 #include "ext_accesssupport.h"
-#include "ext_qtobjectpointer.h"
+#include "ext_pointer.h"
 #include "rubyclass.h"
 #include "accessclass.h"
 #include "accessobject.h"
@@ -28,7 +28,7 @@ RubyValue AccessSupport::initialize(RubyValue rubyClass, RubyValue className, Ru
 
 RubyValue AccessSupport::emitSignal(RubyValue obj, RubyValue name, RubyValue args)
 {
-    auto accessObj = wrapperRubyClass<QtObjectPointer>().unwrap(obj.send("access_object"))->fetchQObject();
+    auto accessObj = wrapperRubyClass<Pointer>().unwrap(obj.send("access_object"))->fetchQObject();
     auto nameId = name.toID();
     auto argVariants = args.to<QVariantList>();
     withoutGvl([&] {
@@ -39,7 +39,7 @@ RubyValue AccessSupport::emitSignal(RubyValue obj, RubyValue name, RubyValue arg
 
 RubyValue AccessSupport::createAccessObject(RubyValue access)
 {
-    return QtObjectPointer::fromQObject(new AccessObject(mMetaObject, access), false);
+    return Pointer::fromQObject(new AccessObject(mMetaObject, access), false);
 }
 
 RubyValue AccessSupport::registerToQml(RubyValue path, RubyValue majorVersion, RubyValue minorVersion, RubyValue name)
@@ -48,7 +48,7 @@ RubyValue AccessSupport::registerToQml(RubyValue path, RubyValue majorVersion, R
         mTypeRegisterer = makeSP<QmlTypeRegisterer>(mMetaObject, [this](void *where) {
             withGvl([&] {
                 auto value = mRubyClass.send("new");
-                auto obj = QtObjectPointer::fromQObject(new(where) AccessObject(mMetaObject, value), false);
+                auto obj = Pointer::fromQObject(new(where) AccessObject(mMetaObject, value), false);
                 value.send("access_object=", obj);
             });
         });

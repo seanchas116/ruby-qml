@@ -88,7 +88,7 @@ module QML
             access_support.emit_signal(self, name, args)
           end
         end
-        @_access_object = QtObjectPointer.new
+        @_access_object = Pointer.new
       end
 
       def access_object

@@ -1,4 +1,4 @@
-#include "ext_qtobjectpointer.h"
+#include "ext_pointer.h"
 #include "markable.h"
 #include "objectdata.h"
 #include "objectgc.h"
@@ -12,27 +12,27 @@
 namespace RubyQml {
 namespace Ext {
 
-QtObjectPointer::QtObjectPointer(RubyValue self) :
+Pointer::Pointer(RubyValue self) :
     self(self)
 {
 }
 
-QtObjectPointer::~QtObjectPointer()
+Pointer::~Pointer()
 {
     if (mIsOwned) {
         destroy();
     }
 }
 
-RubyValue QtObjectPointer::fromQObject(QObject *obj, bool owned)
+RubyValue Pointer::fromQObject(QObject *obj, bool owned)
 {
-    auto klass = wrapperRubyClass<QtObjectPointer>();
+    auto klass = wrapperRubyClass<Pointer>();
     auto ptr = klass.newInstance();
     klass.unwrap(ptr)->setQObject(obj, owned);
     return ptr;
 }
 
-QObject *QtObjectPointer::fetchQObject()
+QObject *Pointer::fetchQObject()
 {
     if (!mObject) {
         fail("QML::QtObjectError", "referencing already deleted Qt Object");
@@ -40,7 +40,7 @@ QObject *QtObjectPointer::fetchQObject()
     return mObject;
 }
 
-void QtObjectPointer::setQObject(QObject *obj, bool owned)
+void Pointer::setQObject(QObject *obj, bool owned)
 {
     if (!obj) {
         throw std::logic_error("null object");
@@ -59,7 +59,7 @@ void QtObjectPointer::setQObject(QObject *obj, bool owned)
     setOwned(owned);
 }
 
-void QtObjectPointer::setOwned(bool owned)
+void Pointer::setOwned(bool owned)
 {
     if (mObject) {
         ObjectData::getOrCreate(mObject)->owned = owned;
@@ -67,7 +67,7 @@ void QtObjectPointer::setOwned(bool owned)
     }
 }
 
-void QtObjectPointer::destroy()
+void Pointer::destroy()
 {
     if (!mIsOwned) {
         fail("QML::QtObjectError", "destroying non-owned Qt object");
@@ -79,50 +79,50 @@ void QtObjectPointer::destroy()
     }
 }
 
-RubyValue QtObjectPointer::ext_isOwned() const
+RubyValue Pointer::ext_isOwned() const
 {
     return RubyValue::from(mIsOwned);
 }
 
-RubyValue QtObjectPointer::ext_setOwned(RubyValue owned)
+RubyValue Pointer::ext_setOwned(RubyValue owned)
 {
     setOwned(owned.to<bool>());
     return ext_isOwned();
 }
 
-RubyValue QtObjectPointer::ext_isNull() const
+RubyValue Pointer::ext_isNull() const
 {
     return RubyValue::from(!mObject);
 }
 
-RubyValue QtObjectPointer::ext_toString() const
+RubyValue Pointer::ext_toString() const
 {
     QString name;
     QDebug(&name) << mObject.data();
     return RubyValue::from(name);
 }
 
-RubyValue QtObjectPointer::ext_destroy()
+RubyValue Pointer::ext_destroy()
 {
     destroy();
     return self;
 }
 
-void QtObjectPointer::gc_mark()
+void Pointer::gc_mark()
 {
     if (mIsOwned) {
         ObjectGC::instance()->markOwnedObject(mObject);
     }
 }
 
-void QtObjectPointer::defineClass()
+void Pointer::defineClass()
 {
-    WrapperRubyClass<QtObjectPointer> klass("QML", "QtObjectPointer");
-    klass.defineMethod("owned?", RUBYQML_MEMBER_FUNCTION_INFO(&QtObjectPointer::ext_isOwned));
-    klass.defineMethod("owned=", RUBYQML_MEMBER_FUNCTION_INFO(&QtObjectPointer::ext_setOwned));
-    klass.defineMethod("null?", RUBYQML_MEMBER_FUNCTION_INFO(&QtObjectPointer::ext_isNull));
-    klass.defineMethod("to_s", RUBYQML_MEMBER_FUNCTION_INFO(&QtObjectPointer::ext_toString));
-    klass.defineMethod("destroy!", RUBYQML_MEMBER_FUNCTION_INFO(&QtObjectPointer::ext_destroy));
+    WrapperRubyClass<Pointer> klass("QML", "Pointer");
+    klass.defineMethod("owned?", RUBYQML_MEMBER_FUNCTION_INFO(&Pointer::ext_isOwned));
+    klass.defineMethod("owned=", RUBYQML_MEMBER_FUNCTION_INFO(&Pointer::ext_setOwned));
+    klass.defineMethod("null?", RUBYQML_MEMBER_FUNCTION_INFO(&Pointer::ext_isNull));
+    klass.defineMethod("to_s", RUBYQML_MEMBER_FUNCTION_INFO(&Pointer::ext_toString));
+    klass.defineMethod("destroy!", RUBYQML_MEMBER_FUNCTION_INFO(&Pointer::ext_destroy));
     klass.aliasMethod("to_s", "inspect");
 }
 

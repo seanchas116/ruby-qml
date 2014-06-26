@@ -1,6 +1,6 @@
 #include "ext_metaobject.h"
 #include "util.h"
-#include "ext_qtobjectpointer.h"
+#include "ext_pointer.h"
 #include "rubyclass.h"
 #include "signalforwarder.h"
 #include "rubyclasses.h"
@@ -130,12 +130,12 @@ public:
             return Qnil;
         } else {
             auto ret = RubyValue::from(returnValue);
-            // add ownership to QtObjectPointer unless it has parent or is owned by QML engine
-            if (ret.isKindOf(rubyClasses().qtObjectBase)) {
-                auto objectPointer = wrapperRubyClass<QtObjectPointer>().unwrap(ret.send("object_pointer"));
-                auto obj = objectPointer->fetchQObject();
+            // add ownership to Pointer unless it has parent or is owned by QML engine
+            if (ret.isKindOf(rubyClasses().wrapper)) {
+                auto pointer = wrapperRubyClass<Pointer>().unwrap(ret.send("pointer"));
+                auto obj = pointer->fetchQObject();
                 if (QQmlEngine::objectOwnership(obj) == QQmlEngine::CppOwnership && !obj->parent()) {
-                    objectPointer->setOwned(true);
+                    pointer->setOwned(true);
                 }
             }
             return ret;
@@ -153,7 +153,7 @@ RubyValue MetaObject::invokeMethod(RubyValue object, RubyValue methodName, RubyV
     protect([&] {
         args = rb_check_array_type(args);
     });
-    auto obj = wrapperRubyClass<QtObjectPointer>().unwrap(object)->fetchQObject();
+    auto obj = wrapperRubyClass<Pointer>().unwrap(object)->fetchQObject();
     for (int i : methodIndexes) {
         MethodInvoker invoker(args, mMetaObject->method(i));
         if (invoker.isArgsCompatible()) {
@@ -177,7 +177,7 @@ RubyValue MetaObject::invokeMethod(RubyValue object, RubyValue methodName, RubyV
 RubyValue MetaObject::connectSignal(RubyValue object, RubyValue signalName, RubyValue proc) const
 {
     auto id = signalName.toID();
-    auto obj = wrapperRubyClass<QtObjectPointer>().unwrap(object)->fetchQObject();
+    auto obj = wrapperRubyClass<Pointer>().unwrap(object)->fetchQObject();
 
     proc = proc.send("to_proc");
 
@@ -209,7 +209,7 @@ RubyValue MetaObject::getProperty(RubyValue object, RubyValue name) const
 {
     auto metaProperty = mMetaObject->property(findProperty(name));
 
-    auto qobj = wrapperRubyClass<QtObjectPointer>().unwrap(object)->fetchQObject();
+    auto qobj = wrapperRubyClass<Pointer>().unwrap(object)->fetchQObject();
     QVariant result;
     withoutGvl([&] {
         result = metaProperty.read(qobj);
@@ -228,7 +228,7 @@ RubyValue MetaObject::setProperty(RubyValue object, RubyValue name, RubyValue ne
         });
     }
 
-    auto qobj = wrapperRubyClass<QtObjectPointer>().unwrap(object)->fetchQObject();
+    auto qobj = wrapperRubyClass<Pointer>().unwrap(object)->fetchQObject();
     auto variant = newValue.to<QVariant>();
     QVariant result;
     withoutGvl([&] {
@@ -358,11 +358,6 @@ void MetaObject::setMetaObject(const QMetaObject *metaObject)
     mMetaObject = metaObject;
     mMethodHash = methodHash;
     mPropertyHash = propertyHash;
-}
-
-RubyValue MetaObject::buildRubyClass()
-{
-    return self.send("build_class");
 }
 
 RubyValue MetaObject::fromMetaObject(const QMetaObject *metaObject)

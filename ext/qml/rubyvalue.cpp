@@ -1,6 +1,6 @@
 #include "rubyvalue.h"
 #include "util.h"
-#include "ext_qtobjectpointer.h"
+#include "ext_pointer.h"
 #include "ext_metaobject.h"
 #include "objectdata.h"
 #include "accessobject.h"
@@ -262,17 +262,17 @@ template <> QObject *Conversion<QObject *>::from(RubyValue x)
 
     if (x.isKindOf(rubyClasses().access)) {
         auto accessptr = x.send("access_object");
-        return wrapperRubyClass<Ext::QtObjectPointer>().unwrap(accessptr)->fetchQObject();
+        return wrapperRubyClass<Ext::Pointer>().unwrap(accessptr)->fetchQObject();
     }
 
-    if (!x.isKindOf(rubyClasses().qtObjectBase)) {
+    if (!x.isKindOf(rubyClasses().wrapper)) {
         fail("QML::ConversionError",
-             QString("expected QML::ObjectBase, got %1")
+             QString("expected QML::Wrapper , got %1")
                 .arg(x.send("class").send("name").to<QString>()));
     }
-    auto objptr = x.send("object_pointer");
-    auto obj = wrapperRubyClass<Ext::QtObjectPointer>().unwrap(objptr)->fetchQObject();
-    wrapperRubyClass<Ext::MetaObject>().unwrap(Ext::MetaObject::fromMetaObject(obj->metaObject()))->buildRubyClass();
+    auto objptr = x.send("pointer");
+    auto obj = wrapperRubyClass<Ext::Pointer>().unwrap(objptr)->fetchQObject();
+    Ext::MetaObject::fromMetaObject(obj->metaObject()).send("build_class");
     return obj;
 }
 
@@ -287,18 +287,18 @@ template <> RubyValue Conversion<QObject *>::to(QObject *obj)
     }
 
     auto data = ObjectData::getOrCreate(obj);
-    if (data->rubyObject) {
-        return data->rubyObject;
+    if (data->wrapper) {
+        return data->wrapper;
     }
 
     auto metaobj = Ext::MetaObject::fromMetaObject(obj->metaObject());
-    auto objptr = Ext::QtObjectPointer::fromQObject(obj, false);
-    auto rubyobj = wrapperRubyClass<Ext::MetaObject>().unwrap(metaobj)->buildRubyClass().send("allocate");
-    rubyobj.send("object_pointer=", objptr);
-    rubyobj.send("initialize");
+    auto pointer = Ext::Pointer::fromQObject(obj, false);
+    auto wrapper = metaobj.send("build_class").send("allocate");
+    wrapper.send("pointer=", pointer);
+    wrapper.send("initialize");
 
-    data->rubyObject = rubyobj;
-    return rubyobj;
+    data->wrapper = wrapper;
+    return wrapper;
 }
 
 template <> const QMetaObject *Conversion<const QMetaObject *>::from(RubyValue x)
@@ -416,7 +416,7 @@ bool RubyValue::isConvertibleTo(int metaType) const
         if (rb_obj_is_kind_of(x, rb_cTime)) {
             return metaType == QMetaType::QDateTime;
         }
-        if (rb_obj_is_kind_of(x, rubyClasses().qtObjectBase)) {
+        if (rb_obj_is_kind_of(x, rubyClasses().wrapper)) {
             if (metaType == QMetaType::QObjectStar) {
                 return true;
             }
@@ -485,7 +485,7 @@ int RubyValue::defaultMetaType() const
         if (rb_obj_is_kind_of(x, rb_cTime)) {
             return QMetaType::QDateTime;
         }
-        if (rb_obj_is_kind_of(x, rubyClasses().qtObjectBase)) {
+        if (rb_obj_is_kind_of(x, rubyClasses().wrapper)) {
             return QMetaType::QObjectStar;
         }
         if (rb_obj_is_kind_of(x, wrapperRubyClass<Ext::MetaObject>().toValue())) {

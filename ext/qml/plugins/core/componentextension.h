@@ -17,7 +17,7 @@ public slots:
 
     void loadString(const QString &data, const QString &path);
     void loadFile(const QString &filePath);
-    QObject *create();
+    QObject *create(QQmlContext *context);
 
 private:
     void throwIfError();

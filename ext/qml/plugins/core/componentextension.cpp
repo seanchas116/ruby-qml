@@ -22,9 +22,9 @@ void ComponentExtension::loadFile(const QString &filePath)
     throwIfError();
 }
 
-QObject *ComponentExtension::create()
+QObject *ComponentExtension::create(QQmlContext *context)
 {
-    auto created = mComponent->create();
+    auto created = mComponent->create(context);
     throwIfError();
     return created;
 }

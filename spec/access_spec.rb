@@ -25,8 +25,8 @@ describe QML::Access do
     end
   end
 
-  let(:context) { QML.engine.context }
-  let(:component) { QML::Component.new data: data }
+  let(:context) { QML::Context.new }
+  let(:component) { QML::Component.new context: context, data: data }
   let(:root) { component.create }
 
   describe '.register_to_qml' do

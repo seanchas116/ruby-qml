@@ -5,11 +5,10 @@ module QML
   Component = Plugins.core.metaObjects['QQmlComponent'].build_class
 
   class Component
-    attr_reader :engine, :data, :path
+    attr_reader :data, :path
 
-    def self.new(engine, data: nil, path: nil)
-      Plugins.core.createComponent(engine).instance_eval do
-        @engine = engine
+    def self.new(data: nil, path: nil)
+      Plugins.core.createComponent(Engine.instance).instance_eval do
         @data = data
         @path = path
 

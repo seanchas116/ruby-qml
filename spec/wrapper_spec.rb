@@ -4,9 +4,8 @@ describe QML::Wrapper do
 
   describe '#qml_eval' do
 
-    let(:engine) { QML::Engine.new }
     let(:component) do
-      QML::Component.new engine, data: <<-EOS
+      QML::Component.new data: <<-EOS
         import QtQuick 2.0
         QtObject {
           property string foo: 'foo'

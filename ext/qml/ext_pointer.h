@@ -19,13 +19,11 @@ public:
     void setQObject(QObject *obj, bool owned);
     bool isOwned() const { return mIsOwned; }
     void setOwned(bool owned);
-    void destroy();
 
     RubyValue ext_isOwned() const;
     RubyValue ext_setOwned(RubyValue owned);
     RubyValue ext_isNull() const;
     RubyValue ext_toString() const;
-    RubyValue ext_destroy();
 
     void gc_mark();
 

@@ -25,8 +25,8 @@ describe QML::Access do
     end
   end
 
-  let(:engine) { QML::Engine.new }
-  let(:component) { QML::Component.new engine, data: data }
+  let(:context) { QML.engine.context }
+  let(:component) { QML::Component.new data: data }
   let(:root) { component.create }
 
   describe '.register_to_qml' do
@@ -118,8 +118,8 @@ describe QML::Access do
     let(:bar) { Bar.new }
 
     before do
-      engine.context[:foo] = foo
-      engine.context[:bar] = bar
+      context[:foo] = foo
+      context[:bar] = bar
       root
     end
 

@@ -20,9 +20,7 @@ ObjectData *ObjectData::getOrCreate(QObject *target)
 
 void ObjectData::gc_mark()
 {
-    if (owned) {
-        rb_gc_mark(wrapper);
-    }
+    rb_gc_mark(wrapper);
 }
 
 } // namespace RubyQml

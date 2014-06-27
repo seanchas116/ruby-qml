@@ -38,7 +38,7 @@ def add_ldflags(flags)
   $LDFLAGS += " #{flags}"
 end
 
-%w{Qt5Core Qt5Gui Qt5Qml Qt5Quick libffi}.each do |mod|
+%w{Qt5Core Qt5Gui Qt5Widgets Qt5Qml Qt5Quick libffi}.each do |mod|
   add_cppflags `#{pkgconfig} --cflags #{mod}`.chomp
   add_ldflags `#{pkgconfig} --libs #{mod}`.chomp
 end
@@ -53,7 +53,7 @@ end
 headers = %w{
   QtCore/QObject
   QtCore/QVariant
-  QtGui/QGuiApplication
+  QtWidgets/QApplication
   QtQml/QQmlEngine
   QtQml/QQmlComponent
   QtQml/QQmlContext

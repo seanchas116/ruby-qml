@@ -4,6 +4,8 @@
 #include "ext_gcmarker.h"
 #include "ext_accesssupport.h"
 #include "ext_testutil.h"
+#include "ext_kernel.h"
+#include "application.h"
 #include "signalforwarder.h"
 #include "valuereference.h"
 #include "objectgc.h"
@@ -27,6 +29,7 @@ void defineClasses()
     Ext::GCMarker::defineClass();
     Ext::AccessSupport::defineClass();
     Ext::TestUtil::defineModule();
+    Ext::Kernel::defineModule();
     RubyClasses::initialize();
 }
 
@@ -56,8 +59,10 @@ void Init_qml()
 {
     rb_require("qml/errors");
     rb_require("qml/error_converter");
+    auto args = RubyValue(rb_argv).to<QList<QByteArray>>();
 
     protect([&] {
+        Application::init(args);
         defineMetaTypes();
         defineClasses();
         setupGlobalGCMarking();

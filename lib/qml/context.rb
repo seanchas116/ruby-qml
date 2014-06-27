@@ -5,17 +5,13 @@ module QML
 
   class Context
 
-    def self.new(engine)
-      Plugins.core.createContext(engine)
+    def self.new
+      Plugins.core.createContext(Engine.instance)
     end
 
     def initialize
       super()
       @extension = Plugins.core.createContextExtension(self)
-    end
-
-    def engine
-      @extension.engine
     end
 
     def eval(obj, str)

@@ -1,12 +1,16 @@
 require 'qml/plugins'
 
 module QML
-  Engine = Plugins.core.metaObjects['QQmlEngine'].build_class
+  Engine = Kernel.engine_meta_object.build_class
 
   class Engine
 
+    def self.instance
+      Kernel.engine
+    end
+
     def self.new
-      Plugins.core.createEngine
+      fail ApplicationError, "cannot create Application instance manually"
     end
 
     def initialize
@@ -24,4 +28,9 @@ module QML
       @extension.add_image_provider(id, provider.qt_image_provider)
     end
   end
+
+  def engine
+    Kernel.engine
+  end
+  module_function :engine
 end

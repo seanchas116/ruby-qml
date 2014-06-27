@@ -48,36 +48,6 @@ QApplication *CorePlugin::applicationInstance()
     return qApp;
 }
 
-QApplication *CorePlugin::createApplication(const QVariantList &args)
-{
-    static bool created = false;
-    static QList<QByteArray> staticArgs;
-    static int argc;
-    static char **argv;
-
-    if (created) {
-        throw std::logic_error("Application already created");
-    }
-
-    argc = args.size();
-    argv = new char*[argc];
-
-    std::transform(args.begin(), args.end(), std::back_inserter(staticArgs), [](const QVariant &arg) {
-        return arg.toString().toUtf8();
-    });
-    std::transform(staticArgs.begin(), staticArgs.end(), argv, [](QByteArray &ba) {
-        return ba.data();
-    });
-    auto app = new QApplication(argc, argv);
-    created = true;
-    return app;
-}
-
-QQmlEngine *CorePlugin::createEngine()
-{
-    return new QQmlEngine();
-}
-
 QQmlComponent *CorePlugin::createComponent(QQmlEngine *e)
 {
     return new QQmlComponent(e);

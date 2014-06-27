@@ -32,8 +32,6 @@ public slots:
 
     QApplication *applicationInstance();
 
-    QApplication *createApplication(const QVariantList &args);
-    QQmlEngine *createEngine();
     QQmlComponent *createComponent(QQmlEngine *engine);
     QQmlContext *createContext(QQmlEngine *engine);
 

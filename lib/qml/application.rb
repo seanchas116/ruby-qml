@@ -1,12 +1,12 @@
 require 'qml/plugins'
 
 module QML
-  Application = Plugins.core.metaObjects['QApplication'].build_class
+  Application = Kernel.application_meta_object.build_class
 
   class Application
 
     def self.instance
-      Plugins.core.applicationInstance
+      Kernel.application
     end
 
     def self.notify_error(error)
@@ -14,13 +14,7 @@ module QML
     end
 
     def self.new
-      fail ApplicationError, "cannot create multiple Application instance" if instance
-      Plugins.core.createApplication(ARGV).tap do |app|
-        if block_given?
-          yield app
-          app.exec
-        end
-      end
+      fail ApplicationError, "cannot create Application instance manually"
     end
 
     def initialize
@@ -29,7 +23,7 @@ module QML
     end
 
     def engine
-      @engine ||= Engine.new
+      Kernel.engine
     end
 
     def context
@@ -41,7 +35,7 @@ module QML
     end
 
     def load(data: nil, path: nil)
-      @root_component = Component.new(engine, data: data, path: path)
+      @root_component = Component.new(data: data, path: path)
       @root = @root_component.create
     end
 
@@ -77,7 +71,13 @@ module QML
   end
 
   def application
-    Application.instance
+    Application.instance.tap do |app|
+      if block_given?
+        yield app
+        app.exec
+      end
+    end
   end
+
   module_function :application
 end

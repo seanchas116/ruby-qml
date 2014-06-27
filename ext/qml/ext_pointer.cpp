@@ -2,6 +2,7 @@
 #include "markable.h"
 #include "objectdata.h"
 #include "objectgc.h"
+#include "application.h"
 #include <QObject>
 #include <QHash>
 #include <QQmlEngine>
@@ -19,9 +20,7 @@ Pointer::Pointer(RubyValue self) :
 
 Pointer::~Pointer()
 {
-    if (mIsOwned) {
-        destroy();
-    }
+    qDebug() << "release object" << mObject << "owned:" << mIsOwned;
 }
 
 RubyValue Pointer::fromQObject(QObject *obj, bool owned)
@@ -45,37 +44,27 @@ void Pointer::setQObject(QObject *obj, bool owned)
     if (!obj) {
         throw std::logic_error("null object");
     }
-    if (mIsOwned) {
-        destroy();
-    }
-    auto context = QQmlEngine::contextForObject(obj);
-    if (context) {
-        QQmlEngine::setObjectOwnership(obj, QQmlEngine::JavaScriptOwnership);
-        mJSValue = context->engine()->newQObject(obj);
-        mIsOwned = false;
-    }
     mObject = obj;
     ObjectGC::instance()->addObject(obj);
+
+    if (QQmlEngine::objectOwnership(obj) == QQmlEngine::JavaScriptOwnership) {
+        owned = true;
+    }
     setOwned(owned);
+    qDebug() << "set object" << obj << "owned:" << owned;
 }
 
 void Pointer::setOwned(bool owned)
 {
     if (mObject) {
+        if (owned) {
+            mJSValue = Application::engine()->newQObject(mObject);
+        } else {
+            mJSValue = QJSValue();
+        }
+
         ObjectData::getOrCreate(mObject)->owned = owned;
         mIsOwned = owned;
-    }
-}
-
-void Pointer::destroy()
-{
-    if (!mIsOwned) {
-        fail("QML::QtObjectError", "destroying non-owned Qt object");
-    }
-    setOwned(false);
-
-    if (mObject && !mObject->parent() && !qobject_cast<QCoreApplication *>(mObject)) {
-        delete mObject;
     }
 }
 
@@ -102,12 +91,6 @@ RubyValue Pointer::ext_toString() const
     return RubyValue::from(name);
 }
 
-RubyValue Pointer::ext_destroy()
-{
-    destroy();
-    return self;
-}
-
 void Pointer::gc_mark()
 {
     if (mIsOwned) {
@@ -122,7 +105,6 @@ void Pointer::defineClass()
     klass.defineMethod("owned=", RUBYQML_MEMBER_FUNCTION_INFO(&Pointer::ext_setOwned));
     klass.defineMethod("null?", RUBYQML_MEMBER_FUNCTION_INFO(&Pointer::ext_isNull));
     klass.defineMethod("to_s", RUBYQML_MEMBER_FUNCTION_INFO(&Pointer::ext_toString));
-    klass.defineMethod("destroy!", RUBYQML_MEMBER_FUNCTION_INFO(&Pointer::ext_destroy));
     klass.aliasMethod("to_s", "inspect");
 }
 

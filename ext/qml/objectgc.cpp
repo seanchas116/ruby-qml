@@ -2,6 +2,7 @@
 #include "markable.h"
 #include "objectdata.h"
 #include <QObject>
+#include <QDebug>
 
 namespace RubyQml {
 
@@ -15,17 +16,16 @@ void ObjectGC::addObject(QObject *obj)
 
 void ObjectGC::mark(QObject *obj, bool markOwned)
 {
-    if (dynamic_cast<ObjectData *>(obj)) {
-        return;
-    }
+    auto objData = dynamic_cast<ObjectData *>(obj);
     if (!markOwned) {
-        auto data = ObjectData::getOrCreate(obj);
-        if (data->owned) {
+        if (objData && objData->owned) {
             return;
         }
     }
+
     auto markable = dynamic_cast<Markable *>(obj);
     if (markable) {
+        qDebug() << "marking:" << obj << "parent:" << obj->parent();
         markable->gc_mark();
     }
     for (auto child : obj->children()) {

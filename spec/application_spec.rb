@@ -1,7 +1,7 @@
 require 'spec_helper'
 
 describe QML::Application do
-  let(:application) { QML::Application.instance }
+  let(:application) { QML.application }
   describe '.instance' do
     it 'returns the QML::Application instance' do
       expect(application).to be_a(QML::Application)

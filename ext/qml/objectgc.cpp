@@ -66,11 +66,4 @@ ObjectGC *ObjectGC::instance()
     return gc;
 }
 
-void ObjectGC::cleanUp()
-{
-    if (instance()) {
-        delete instance();
-    }
-}
-
 } // namespace RubyQml

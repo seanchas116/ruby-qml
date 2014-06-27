@@ -16,7 +16,6 @@ public:
     QDebug debug();
 
     static ObjectGC *instance();
-    static void cleanUp();
 
 private:
     ObjectGC() {}

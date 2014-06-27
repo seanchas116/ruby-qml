@@ -44,7 +44,6 @@ void setupGlobalGCMarking()
 
 void cleanup()
 {
-    ObjectGC::cleanUp();
 }
 
 void setupEndProc()

@@ -3,6 +3,7 @@
 #include "objectdata.h"
 #include <QObject>
 #include <QDebug>
+#include <QBuffer>
 
 namespace RubyQml {
 
@@ -25,7 +26,7 @@ void ObjectGC::mark(QObject *obj, bool markOwned)
 
     auto markable = dynamic_cast<Markable *>(obj);
     if (markable) {
-        qDebug() << "marking:" << obj << "parent:" << obj->parent();
+        debug() << "\u270F marking object:" << obj << "parent:" << obj->parent();
         markable->gc_mark();
     }
     for (auto child : obj->children()) {
@@ -45,20 +46,30 @@ void ObjectGC::markNonOwnedObjects()
     }
 }
 
-static ObjectGC *instance_ = nullptr;
+QDebug ObjectGC::debug()
+{
+    static auto emptyBuffer = [] {
+        auto buf = new QBuffer();
+        buf->open(QIODevice::WriteOnly);
+        return buf;
+    }();
+    if (mDebugMessageEnabled) {
+        return qDebug();
+    } else {
+        return QDebug(emptyBuffer);
+    }
+}
 
 ObjectGC *ObjectGC::instance()
 {
-    if (!instance_) {
-        instance_ = new ObjectGC();
-    }
-    return instance_;
+    static auto gc = new ObjectGC();
+    return gc;
 }
 
 void ObjectGC::cleanUp()
 {
-    if (instance_) {
-        delete instance_;
+    if (instance()) {
+        delete instance();
     }
 }
 

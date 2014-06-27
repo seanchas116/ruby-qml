@@ -20,7 +20,7 @@ Pointer::Pointer(RubyValue self) :
 
 Pointer::~Pointer()
 {
-    qDebug() << "release object" << mObject << "owned:" << mIsOwned;
+    ObjectGC::instance()->debug() << "\u267b releasing object:" << mObject << "owned:" << mIsOwned;
 }
 
 RubyValue Pointer::fromQObject(QObject *obj, bool owned)
@@ -50,8 +50,8 @@ void Pointer::setQObject(QObject *obj, bool owned)
     if (QQmlEngine::objectOwnership(obj) == QQmlEngine::JavaScriptOwnership) {
         owned = true;
     }
+    ObjectGC::instance()->debug() << "\u2728 acquiring object:" << obj << "owned:" << owned;
     setOwned(owned);
-    qDebug() << "set object" << obj << "owned:" << owned;
 }
 
 void Pointer::setOwned(bool owned)

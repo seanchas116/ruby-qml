@@ -61,6 +61,7 @@ void Pointer::setOwned(bool owned)
             mJSValue = Application::engine()->newQObject(mObject);
         } else {
             mJSValue = QJSValue();
+            QQmlEngine::setObjectOwnership(mObject, QQmlEngine::CppOwnership);
         }
 
         ObjectData::getOrCreate(mObject)->owned = owned;

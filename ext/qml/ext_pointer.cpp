@@ -59,6 +59,7 @@ void Pointer::setOwned(bool owned)
     if (mObject) {
         if (owned) {
             mJSValue = Application::engine()->newQObject(mObject);
+            QQmlEngine::setObjectOwnership(mObject, QQmlEngine::JavaScriptOwnership);
         } else {
             mJSValue = QJSValue();
             QQmlEngine::setObjectOwnership(mObject, QQmlEngine::CppOwnership);

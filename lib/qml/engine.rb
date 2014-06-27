@@ -22,6 +22,10 @@ module QML
       @extension.rootContext
     end
 
+    def collect_garbage
+      @extension.collect_garbage
+    end
+
     # @param id [String]
     # @param provider [QML::ImageProvider]
     def add_image_provider(id, provider)

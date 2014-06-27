@@ -10,13 +10,7 @@ describe QML::Context do
     EOS
   end
   let(:object) { component.create }
-  let(:context) { engine.context }
-
-  describe '#engine' do
-    it 'returns its engine' do
-      expect(context.engine).to eq engine
-    end
-  end
+  let(:context) { QML.engine.context }
 
   describe '#[]=' do
     it 'makes a value available to QML context' do

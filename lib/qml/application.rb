@@ -61,6 +61,12 @@ module QML
       @extension.force_deferred_deletes
     end
 
+    def collect_garbage
+      ::GC.start
+      engine.collect_garbage
+      force_deferred_deletes
+    end
+
     # Called when an Ruby error is occured in executing Qt code.
     # @param error The error (or the exception)
     def notify_error(error)

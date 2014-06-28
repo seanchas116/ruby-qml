@@ -36,6 +36,6 @@ module Examples
   end
 end
 
-QML::Application.new do |app|
+QML.application do |app|
   app.load_path Pathname(__FILE__) + '../main.qml'
 end

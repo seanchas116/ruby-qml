@@ -20,6 +20,7 @@ describe 'Conversion between C++ and Ruby' do
     'non-ascii String' => 'ほげ',
     'Array' => [1, "foobar", true],
     'Hash' => {'one' => 1, 'two' => 2, '三' => 3},
+    'Date' => Date.today,
     'Access derived' => Foo.new,
     'QML Point' => QML::Geometry::Point.new(1,2),
     'QML Size' => QML::Geometry::Size.new(1,2),
@@ -39,12 +40,12 @@ describe 'Conversion between C++ and Ruby' do
     expect(actual).to eq expected.to_s
   end
 
-  it 'can convert Time' do
-    time = Time.now
+  it 'can convert DateTime' do
+    time = DateTime.now
     result = convert(time)
     # QDateTime has msec precision
-    expect((result.to_r * 1000).to_i).to eq (time.to_r * 1000).to_i
-    expect(result.gmt_offset).to eq(result.gmt_offset)
+    expect((result.to_time.to_r * 1000).to_i).to eq (time.to_time.to_r * 1000).to_i
+    expect(result.to_time.gmt_offset).to eq(result.to_time.gmt_offset)
   end
 
   it 'can convert meta object' do

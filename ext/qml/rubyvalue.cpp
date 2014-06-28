@@ -66,6 +66,7 @@ struct ConverterHash
         add<QVariantMap>();
 
         add<QDateTime>();
+        add<QDate>();
 
         add<QPoint>();
         add<QPointF>();
@@ -152,6 +153,7 @@ template <> QDateTime Conversion<QDateTime>::from(RubyValue x)
     long long num;
     long long den;
     protect([&] {
+        x = rb_funcall(x, rb_intern("to_time"), 0);
         auto at = rb_funcall(x, rb_intern("to_r"), 0);
         num = NUM2LL(RRATIONAL(at)->num);
         den = NUM2LL(RRATIONAL(at)->den);
@@ -164,8 +166,25 @@ template <> RubyValue Conversion<QDateTime>::to(const QDateTime &dateTime) {
     protect([&] {
         auto at = rb_rational_new(LL2NUM(dateTime.toMSecsSinceEpoch()), INT2FIX(1000));
         ret = rb_funcall(rb_cTime, rb_intern("at"), 1, at);
+        ret = rb_funcall(ret, rb_intern("to_datetime"), 0);
     });
     return ret;
+}
+
+template <> QDate Conversion<QDate>::from(RubyValue x)
+{
+    auto y = x.send("year").to<int>();
+    auto m = x.send("month").to<int>();
+    auto d = x.send("day").to<int>();
+    return QDate(y, m, d);
+}
+
+template <> RubyValue Conversion<QDate>::to(const QDate &date)
+{
+    return RubyValue::fromPath("Date").send("new",
+                                            RubyValue::from(date.year()),
+                                            RubyValue::from(date.month()),
+                                            RubyValue::from(date.day()));
 }
 
 template <> QPoint Conversion<QPoint>::from(RubyValue value)
@@ -371,6 +390,15 @@ bool RubyValue::isConvertibleTo(int metaType) const
         if (rb_obj_is_kind_of(x, rb_cTime)) {
             return metaType == QMetaType::QDateTime;
         }
+        static auto dateTimeClass = RubyValue::fromPath("DateTime");
+        if (rb_obj_is_kind_of(x, dateTimeClass)) {
+            return metaType == QMetaType::QDateTime;
+        }
+        static auto dateClass = RubyValue::fromPath("Date");
+        if (rb_obj_is_kind_of(x, dateClass)) {
+            return metaType == QMetaType::QDate || metaType == QMetaType::QDateTime;
+        }
+
         if (rb_obj_is_kind_of(x, rubyClasses().wrapper)) {
             if (metaType == QMetaType::QObjectStar) {
                 return true;
@@ -449,6 +477,15 @@ int RubyValue::defaultMetaType() const
         if (rb_obj_is_kind_of(x, rb_cTime)) {
             return QMetaType::QDateTime;
         }
+        static auto dateTimeClass = RubyValue::fromPath("DateTime");
+        if (rb_obj_is_kind_of(x, dateTimeClass)) {
+            return QMetaType::QDateTime;
+        }
+        static auto dateClass = RubyValue::fromPath("Date");
+        if (rb_obj_is_kind_of(x, dateClass)) {
+            return QMetaType::QDate;
+        }
+
         if (rb_obj_is_kind_of(x, rubyClasses().wrapper)) {
             return QMetaType::QObjectStar;
         }

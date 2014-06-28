@@ -4,7 +4,7 @@ require 'qml/reactive/unbound_property'
 module QML
   module Reactive
 
-    # Object is used to define Ropework signals and properties within class definition.
+    # Object is used to define signals and properties within class definition.
     # Signals and properties will be inherited by and can be overridden in subclasses.
     module Object
 
@@ -86,7 +86,7 @@ module QML
         # @return [Symbol] The signal name
         # @example
         #   class Button
-        #     include Ropework::Object
+        #     include QML::Reactive::Object
         #     signal :pressed, [:pos]
         #     def press(pos)
         #       pressed.emit(pos)
@@ -140,7 +140,7 @@ module QML
         # @return [Symbol] The name
         # @example
         #   class Foo
-        #     include Ropework::Object
+        #     include QML::Reactive::Object
         #     property(:name) { 'hogehoge' }
         #     ...
         #   end

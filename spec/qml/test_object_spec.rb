@@ -54,7 +54,7 @@ describe "test object" do
   describe '#someSignal signal' do
 
     it 'should emit the signal' do
-      spy = Ropework::SignalSpy.new(obj.someSignal)
+      spy = QML::Reactive::SignalSpy.new(obj.someSignal)
       obj.emitSomeSignal('poyopoyo')
       expect(spy.args.first).to eq(['poyopoyo'])
     end
@@ -63,7 +63,7 @@ describe "test object" do
   describe '#some_signal signal' do
 
     it 'is same as #someSignal' do
-      spy = Ropework::SignalSpy.new(obj.some_signal)
+      spy = QML::Reactive::SignalSpy.new(obj.some_signal)
       obj.emit_some_signal('poyopoyo')
       expect(spy.args.first).to eq(['poyopoyo'])
     end
@@ -95,7 +95,7 @@ describe "test object" do
     end
 
     it 'should notify when changed' do
-      spy = Ropework::SignalSpy.new(obj.name_changed)
+      spy = QML::Reactive::SignalSpy.new(obj.name_changed)
       obj.name = 'hogepoyo'
       expect(spy.args.first).to eq(['hogepoyo'])
     end

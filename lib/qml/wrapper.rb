@@ -1,8 +1,6 @@
-require 'ropework'
-
 module QML
   class Wrapper
-    include Ropework::Object
+    include Reactive::Object
 
     class << self
       attr_accessor :meta_object

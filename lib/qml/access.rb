@@ -1,12 +1,11 @@
 require 'ostruct'
-require 'ropework'
 require 'qml/qml'
 
 module QML
   module Access
     def self.included(derived)
       derived.class_eval do
-        include Ropework::Object
+        include Reactive::Object
         include InstanceMethods
         extend ClassMethods
       end

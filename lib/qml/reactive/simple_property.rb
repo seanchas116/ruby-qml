@@ -6,7 +6,7 @@ module QML
       attr_accessor :value
 
       # @!attribute [r] changed
-      #   @return [Ropework::Signal] The notification signal that is emitted when the value is changed
+      #   @return [QML::Reactive::Signal] The notification signal that is emitted when the value is changed
       attr_reader :changed
 
       def initialize

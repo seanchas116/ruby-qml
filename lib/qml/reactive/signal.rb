@@ -66,7 +66,7 @@ module QML
 
       # Connects a procedure.
       # @yield Called when #emit runs
-      # @return [Ropework::Signal::Connection]
+      # @return [QML::Reactive::Signal::Connection]
       def connect(&listener)
         @listeners << listener
         connected(listener)
@@ -85,7 +85,7 @@ module QML
       end
 
       # Creates a transformed version of the signal.
-      # @return [Ropework::Signal]
+      # @return [QML::Reactive::Signal]
       def map(&block)
         Signals::MapSignal.new(self, block)
       end
@@ -93,13 +93,13 @@ module QML
       alias_method :collect, :map
 
       # Creates a filtered version of the signal.
-      # @return [Ropework::Signal]
+      # @return [QML::Reactive::Signal]
       def select(&block)
         Signals::SelectSignal.new(self, block)
       end
 
       # Creates a merged signal.
-      # @return [Ropework::Signal]
+      # @return [QML::Reactive::Signal]
       def merge(*others)
         Signals::MergeSignal.new([self] + others)
       end

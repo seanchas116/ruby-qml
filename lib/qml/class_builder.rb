@@ -1,5 +1,4 @@
 require 'logger'
-require 'ropework'
 require 'qml/wrapper'
 require 'qml/qml'
 require 'qml/name_helper'
@@ -7,7 +6,7 @@ require 'qml/name_helper'
 module QML
 
   class QtProperty
-    prepend Ropework::Bindable
+    prepend Reactive::Bindable
 
     attr_reader :changed
 
@@ -28,7 +27,7 @@ module QML
     end
   end
 
-  class QtSignal < Ropework::Signal
+  class QtSignal < Reactive::Signal
     def initialize(metaobj, objptr, name)
       super(variadic: true)
       @objptr = objptr

@@ -47,11 +47,8 @@ void Pointer::setQObject(QObject *obj, bool owned)
     mObject = obj;
     ObjectGC::instance()->addObject(obj);
 
-    if (QQmlEngine::objectOwnership(obj) == QQmlEngine::JavaScriptOwnership) {
-        owned = true;
-    }
     ObjectGC::instance()->debug() << "\u2728 acquiring object:" << obj << "owned:" << owned;
-    setOwned(owned);
+    preferOwned(owned);
 }
 
 void Pointer::setOwned(bool owned)
@@ -70,6 +67,21 @@ void Pointer::setOwned(bool owned)
     }
 }
 
+void Pointer::preferOwned(bool owned)
+{
+    // already belongs to QML
+    if (QQmlEngine::contextForObject(mObject)) {
+        owned = true;
+    }
+    if (QQmlEngine::objectOwnership(mObject) == QQmlEngine::JavaScriptOwnership) {
+        owned = true;
+    }
+    if (mObject->parent()) {
+        owned = false;
+    }
+    setOwned(owned);
+}
+
 RubyValue Pointer::ext_isOwned() const
 {
     return RubyValue::from(mIsOwned);
@@ -78,6 +90,12 @@ RubyValue Pointer::ext_isOwned() const
 RubyValue Pointer::ext_setOwned(RubyValue owned)
 {
     setOwned(owned.to<bool>());
+    return ext_isOwned();
+}
+
+RubyValue Pointer::ext_preferOwned(RubyValue owned)
+{
+    preferOwned(owned.to<bool>());
     return ext_isOwned();
 }
 
@@ -105,6 +123,7 @@ void Pointer::defineClass()
     WrapperRubyClass<Pointer> klass("QML", "Pointer");
     klass.defineMethod("owned?", RUBYQML_MEMBER_FUNCTION_INFO(&Pointer::ext_isOwned));
     klass.defineMethod("owned=", RUBYQML_MEMBER_FUNCTION_INFO(&Pointer::ext_setOwned));
+    klass.defineMethod("prefer_owned", RUBYQML_MEMBER_FUNCTION_INFO(&Pointer::ext_preferOwned));
     klass.defineMethod("null?", RUBYQML_MEMBER_FUNCTION_INFO(&Pointer::ext_isNull));
     klass.defineMethod("to_s", RUBYQML_MEMBER_FUNCTION_INFO(&Pointer::ext_toString));
     klass.aliasMethod("to_s", "inspect");

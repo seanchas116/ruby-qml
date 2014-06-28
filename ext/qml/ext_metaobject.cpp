@@ -130,13 +130,9 @@ public:
             return Qnil;
         } else {
             auto ret = RubyValue::from(returnValue);
-            // add ownership to Pointer unless it has parent or is owned by QML engine
             if (ret.isKindOf(rubyClasses().wrapper)) {
                 auto pointer = wrapperRubyClass<Pointer>().unwrap(ret.send("pointer"));
-                auto obj = pointer->fetchQObject();
-                if (QQmlEngine::objectOwnership(obj) == QQmlEngine::CppOwnership && !obj->parent()) {
-                    pointer->setOwned(true);
-                }
+                pointer->preferOwned(true);
             }
             return ret;
         }

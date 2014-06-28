@@ -69,12 +69,18 @@ void Pointer::setOwned(bool owned)
 
 void Pointer::preferOwned(bool owned)
 {
+    auto context = QQmlEngine::contextForObject(mObject);
+    auto ownership = QQmlEngine::objectOwnership(mObject);
     // already belongs to QML
-    if (QQmlEngine::contextForObject(mObject)) {
+    if (context) {
         owned = true;
     }
-    if (QQmlEngine::objectOwnership(mObject) == QQmlEngine::JavaScriptOwnership) {
+    if (ownership == QQmlEngine::JavaScriptOwnership) {
         owned = true;
+    }
+    // owned by QML-related C++ object?
+    if (context && ownership == QQmlEngine::CppOwnership) {
+        owned = false;
     }
     if (mObject->parent()) {
         owned = false;

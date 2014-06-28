@@ -389,16 +389,21 @@ bool RubyValue::isConvertibleTo(int metaType) const
         if (rb_obj_is_kind_of(x, rubyClasses().access)) {
             return metaType == QMetaType::QObjectStar;
         }
-        if (rb_obj_is_kind_of(x, rb_path2class("QML::Geometry::Point"))) {
+
+        static auto pointClass = RubyValue::fromPath("QML::Geometry::Point");
+        if (rb_obj_is_kind_of(x, pointClass)) {
             return metaType == QMetaType::QPoint || metaType == QMetaType::QPointF;
         }
-        if (rb_obj_is_kind_of(x, rb_path2class("QML::Geometry::Size"))) {
+        static auto sizeClass = RubyValue::fromPath("QML::Geometry::Size");
+        if (rb_obj_is_kind_of(x, sizeClass)) {
             return metaType == QMetaType::QSize || metaType == QMetaType::QSizeF;
         }
-        if (rb_obj_is_kind_of(x, rb_path2class("QML::Geometry::Rectangle"))) {
+        static auto rectClass = RubyValue::fromPath("QML::Geometry::Rectangle");
+        if (rb_obj_is_kind_of(x, rectClass)) {
             return metaType == QMetaType::QRect || metaType == QMetaType::QRectF;
         }
         static auto listModelClass = RubyValue::fromPath("QML::Data::ListModel");
+
         if (rb_obj_is_kind_of(x, listModelClass)) {
             return metaType == QMetaType::QObjectStar;
         }
@@ -453,15 +458,20 @@ int RubyValue::defaultMetaType() const
         if (rb_obj_is_kind_of(x, rubyClasses().access)) {
             return QMetaType::QObjectStar;
         }
-        if (rb_obj_is_kind_of(x, rb_path2class("QML::Geometry::Point"))) {
+
+        static auto pointClass = RubyValue::fromPath("QML::Geometry::Point");
+        if (rb_obj_is_kind_of(x, pointClass)) {
             return QMetaType::QPointF;
         }
-        if (rb_obj_is_kind_of(x, rb_path2class("QML::Geometry::Size"))) {
+        static auto sizeClass = RubyValue::fromPath("QML::Geometry::Size");
+        if (rb_obj_is_kind_of(x, sizeClass)) {
             return QMetaType::QSizeF;
         }
-        if (rb_obj_is_kind_of(x, rb_path2class("QML::Geometry::Rectangle"))) {
+        static auto rectClass = RubyValue::fromPath("QML::Geometry::Rectangle");
+        if (rb_obj_is_kind_of(x, rectClass)) {
             return QMetaType::QRectF;
         }
+
         static auto listModelClass = RubyValue::fromPath("QML::Data::ListModel");
         if (rb_obj_is_kind_of(x, listModelClass)) {
             return  QMetaType::QObjectStar;

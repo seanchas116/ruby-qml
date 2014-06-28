@@ -1,5 +1,8 @@
 require 'qml/version'
+
 require 'qml/support'
+require 'qml/reactive'
+
 require 'qml/plugin_loader'
 require 'qml/meta_object'
 require 'qml/component'

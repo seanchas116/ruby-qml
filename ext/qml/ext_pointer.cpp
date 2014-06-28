@@ -126,7 +126,7 @@ void Pointer::defineClass()
     klass.defineMethod("prefer_owned", RUBYQML_MEMBER_FUNCTION_INFO(&Pointer::ext_preferOwned));
     klass.defineMethod("null?", RUBYQML_MEMBER_FUNCTION_INFO(&Pointer::ext_isNull));
     klass.defineMethod("to_s", RUBYQML_MEMBER_FUNCTION_INFO(&Pointer::ext_toString));
-    klass.aliasMethod("to_s", "inspect");
+    klass.aliasMethod("inspect", "to_s");
 }
 
 } // namespace Ext

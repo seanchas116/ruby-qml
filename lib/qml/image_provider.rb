@@ -1,6 +1,7 @@
 require 'qml/access'
 require 'qml/callback_loop'
 
+=begin
 module QML
   class ImageProvider
 
@@ -28,7 +29,6 @@ module QML
     def request(id)
       fail ::NotImplementedError
     end
-
-    #CallbackLoop.instance.start
   end
 end
+=end

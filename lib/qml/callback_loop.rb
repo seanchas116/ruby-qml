@@ -1,7 +1,7 @@
 require 'singleton'
 require 'qml/plugins'
-require 'pry'
 
+=begin
 module QML
   class CallbackLoop
     include Singleton
@@ -23,3 +23,4 @@ module QML
     end
   end
 end
+=end

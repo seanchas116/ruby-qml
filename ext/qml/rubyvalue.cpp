@@ -4,6 +4,7 @@
 #include "ext_metaobject.h"
 #include "objectdata.h"
 #include "accessobject.h"
+#include "listmodel.h"
 #include "ext_accesssupport.h"
 #include "rubyclasses.h"
 #include <ruby/intern.h>
@@ -397,6 +398,10 @@ bool RubyValue::isConvertibleTo(int metaType) const
         if (rb_obj_is_kind_of(x, rb_path2class("QML::Geometry::Rectangle"))) {
             return metaType == QMetaType::QRect || metaType == QMetaType::QRectF;
         }
+        static auto listModelClass = RubyValue::fromPath("QML::Data::ListModel");
+        if (rb_obj_is_kind_of(x, listModelClass)) {
+            return metaType == QMetaType::QObjectStar;
+        }
         return false;
     };
     bool result;
@@ -456,6 +461,10 @@ int RubyValue::defaultMetaType() const
         }
         if (rb_obj_is_kind_of(x, rb_path2class("QML::Geometry::Rectangle"))) {
             return QMetaType::QRectF;
+        }
+        static auto listModelClass = RubyValue::fromPath("QML::Data::ListModel");
+        if (rb_obj_is_kind_of(x, listModelClass)) {
+            return  QMetaType::QObjectStar;
         }
         return QMetaType::UnknownType;
     };
@@ -532,6 +541,10 @@ RubyValue RubyValue::fromQObject(QObject *obj, bool implicit)
         if (accessObj) {
             return accessObj->wrappedValue();
         }
+        auto listModel = dynamic_cast<ListModel *>(obj);
+        if (listModel) {
+            return listModel->rubyModel();
+        }
     }
 
     auto data = ObjectData::getOrCreate(obj);
@@ -560,6 +573,10 @@ QObject *RubyValue::toQObject() const
     if (x.isKindOf(rubyClasses().access)) {
         auto support = x.send("class").send("access_support");
         return wrapperRubyClass<Ext::AccessSupport>().unwrap(support)->wrap(x);
+    }
+    auto listModelClass = RubyValue::fromPath("QML::Data::ListModel");
+    if (x.isKindOf(listModelClass)) {
+        return new ListModel(x);
     }
 
     if (!x.isKindOf(rubyClasses().wrapper)) {

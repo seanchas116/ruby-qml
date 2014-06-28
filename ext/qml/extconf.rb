@@ -15,7 +15,9 @@ ffi_path &&= Pathname(ffi_path).realpath
 end
 
 qmake = qt_path ? qt_path + 'bin/qmake' : find_executable('qmake')
+moc = qt_path ? qt_path + 'bin/moc' : find_executable('moc')
 abort 'qmake executable not found' unless qmake
+abort 'moc executable not found' unless moc
 
 # build plugins
 
@@ -64,5 +66,9 @@ headers.each do |h|
 end
 
 add_cppflags '-std=c++11 -Wall -Wextra -g -pipe'
+
+%w{listmodel}.each do |header|
+  Pathname("moc_#{header}.cpp").write(`#{moc} #{header}.h`)
+end
 
 create_makefile "qml/qml"

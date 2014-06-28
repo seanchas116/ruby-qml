@@ -29,6 +29,6 @@ module QML
       fail ::NotImplementedError
     end
 
-    CallbackLoop.instance.start
+    #CallbackLoop.instance.start
   end
 end

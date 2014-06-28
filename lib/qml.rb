@@ -16,4 +16,5 @@ require 'qml/access'
 require 'qml/root_path'
 require 'qml/callback_loop'
 
+require 'qml/data'
 require 'qml/test_util'

@@ -174,7 +174,7 @@ template <> QPoint Conversion<QPoint>::from(RubyValue value)
 
 template <> RubyValue Conversion<QPoint>::to(const QPoint &point)
 {
-    return RubyValue::fromPath("QML::Support::Point")
+    return RubyValue::fromPath("QML::Geometry::Point")
         .send("new", RubyValue::from(point.x()), RubyValue::from(point.y()));
 }
 
@@ -185,7 +185,7 @@ template <> QPointF Conversion<QPointF>::from(RubyValue value)
 
 template <> RubyValue Conversion<QPointF>::to(const QPointF &point)
 {
-    return RubyValue::fromPath("QML::Support::Point")
+    return RubyValue::fromPath("QML::Geometry::Point")
         .send("new", RubyValue::from(point.x()), RubyValue::from(point.y()));
 }
 
@@ -196,7 +196,7 @@ template <> QSize Conversion<QSize>::from(RubyValue value)
 
 template <> RubyValue Conversion<QSize>::to(const QSize &size)
 {
-    return RubyValue::fromPath("QML::Support::Size")
+    return RubyValue::fromPath("QML::Geometry::Size")
         .send("new", RubyValue::from(size.width()), RubyValue::from(size.height()));
 }
 
@@ -207,7 +207,7 @@ template <> QSizeF Conversion<QSizeF>::from(RubyValue value)
 
 template <> RubyValue Conversion<QSizeF>::to(const QSizeF &size)
 {
-    return RubyValue::fromPath("QML::Support::Size")
+    return RubyValue::fromPath("QML::Geometry::Size")
         .send("new", RubyValue::from(size.width()), RubyValue::from(size.height()));
 }
 
@@ -222,7 +222,7 @@ template <> QRect Conversion<QRect>::from(RubyValue value)
 
 template <> RubyValue Conversion<QRect>::to(const QRect &rect)
 {
-    return RubyValue::fromPath("QML::Support::Rectangle")
+    return RubyValue::fromPath("QML::Geometry::Rectangle")
         .send("new",
               RubyValue::from(rect.x()), RubyValue::from(rect.y()),
               RubyValue::from(rect.width()), RubyValue::from(rect.height()));
@@ -239,7 +239,7 @@ template <> QRectF Conversion<QRectF>::from(RubyValue value)
 
 template <> RubyValue Conversion<QRectF>::to(const QRectF &rect)
 {
-    return RubyValue::fromPath("QML::Support::Rectangle")
+    return RubyValue::fromPath("QML::Geometry::Rectangle")
         .send("new",
               RubyValue::from(rect.x()), RubyValue::from(rect.y()),
               RubyValue::from(rect.width()), RubyValue::from(rect.height()));
@@ -388,13 +388,13 @@ bool RubyValue::isConvertibleTo(int metaType) const
         if (rb_obj_is_kind_of(x, rubyClasses().access)) {
             return metaType == QMetaType::QObjectStar;
         }
-        if (rb_obj_is_kind_of(x, rb_path2class("QML::Support::Point"))) {
+        if (rb_obj_is_kind_of(x, rb_path2class("QML::Geometry::Point"))) {
             return metaType == QMetaType::QPoint || metaType == QMetaType::QPointF;
         }
-        if (rb_obj_is_kind_of(x, rb_path2class("QML::Support::Size"))) {
+        if (rb_obj_is_kind_of(x, rb_path2class("QML::Geometry::Size"))) {
             return metaType == QMetaType::QSize || metaType == QMetaType::QSizeF;
         }
-        if (rb_obj_is_kind_of(x, rb_path2class("QML::Support::Rectangle"))) {
+        if (rb_obj_is_kind_of(x, rb_path2class("QML::Geometry::Rectangle"))) {
             return metaType == QMetaType::QRect || metaType == QMetaType::QRectF;
         }
         return false;
@@ -448,13 +448,13 @@ int RubyValue::defaultMetaType() const
         if (rb_obj_is_kind_of(x, rubyClasses().access)) {
             return QMetaType::QObjectStar;
         }
-        if (rb_obj_is_kind_of(x, rb_path2class("QML::Support::Point"))) {
+        if (rb_obj_is_kind_of(x, rb_path2class("QML::Geometry::Point"))) {
             return QMetaType::QPointF;
         }
-        if (rb_obj_is_kind_of(x, rb_path2class("QML::Support::Size"))) {
+        if (rb_obj_is_kind_of(x, rb_path2class("QML::Geometry::Size"))) {
             return QMetaType::QSizeF;
         }
-        if (rb_obj_is_kind_of(x, rb_path2class("QML::Support::Rectangle"))) {
+        if (rb_obj_is_kind_of(x, rb_path2class("QML::Geometry::Rectangle"))) {
             return QMetaType::QRectF;
         }
         return QMetaType::UnknownType;

@@ -21,9 +21,9 @@ describe 'Conversion between C++ and Ruby' do
     'Array' => [1, "foobar", true],
     'Hash' => {'one' => 1, 'two' => 2, '三' => 3},
     'Access derived' => Foo.new,
-    'QML Point' => QML::Point.new(1,2),
-    'QML Size' => QML::Size.new(1,2),
-    'QML Rectangle' => QML::Rectangle.new(1,2,3,4)
+    'QML Point' => QML::Geometry::Point.new(1,2),
+    'QML Size' => QML::Geometry::Size.new(1,2),
+    'QML Rectangle' => QML::Geometry::Rectangle.new(1,2,3,4)
   }
 
   samples.each do |k, v|

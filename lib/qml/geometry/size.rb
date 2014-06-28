@@ -1,5 +1,5 @@
 module QML
-  module Support
+  module Geometry
     class Size < Struct.new(:width, :height); end
   end
 end

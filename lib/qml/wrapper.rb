@@ -39,12 +39,16 @@ module QML
 
     alias_method :to_s, :inspect
 
-    def owned_by_ruby?
-      pointer.owned?
+    def managed?
+      pointer.managed?
     end
 
-    def owned_by_ruby=(owned)
-      pointer.owned = owned
+    def managed=(managed)
+      pointer.managed = managed
+    end
+
+    def prefer_managed(managed)
+      pointer.prefer_managed managed
     end
   end
 end

@@ -1,6 +1,7 @@
 #include "componentextension.h"
 #include "qmlexception.h"
 #include <QQmlComponent>
+#include <QQmlEngine>
 #include <QDebug>
 
 namespace RubyQml {
@@ -26,6 +27,7 @@ QObject *ComponentExtension::create(QQmlContext *context)
 {
     auto created = mComponent->create(context);
     throwIfError();
+    QQmlEngine::setObjectOwnership(created, QQmlEngine::JavaScriptOwnership);
     return created;
 }
 

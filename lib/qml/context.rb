@@ -20,6 +20,7 @@ module QML
 
     def []=(key, value)
       @extension.setContextProperty(key, value)
+      value.prefer_managed true if value.is_a? Wrapper
       value
     end
 
@@ -29,7 +30,7 @@ module QML
 
     def self.for_object(obj)
       Plugins.core.contextForObject(obj).tap do |context|
-        context.pointer.owned = false if context
+        context.managed = false if context
       end
     end
   end

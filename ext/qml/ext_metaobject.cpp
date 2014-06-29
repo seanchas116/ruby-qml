@@ -132,7 +132,7 @@ public:
             auto ret = RubyValue::from(returnValue);
             if (ret.isKindOf(rubyClasses().wrapper)) {
                 auto pointer = wrapperRubyClass<Pointer>().unwrap(ret.send("pointer"));
-                pointer->preferOwned(true);
+                pointer->preferManaged(true);
             }
             return ret;
         }

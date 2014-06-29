@@ -63,13 +63,27 @@ describe QML::Wrapper do
       end
     end
 
-    describe '#owned_by_ruby?' do
+    context 'when it is created by component' do
+      let(:component) do
+        QML::Component.new data: <<-EOS
+          import QtQuick 2.0
+          Item {}
+        EOS
+      end
+      it 'gets ownership' do
+        checker = -> { QML::TestUtil::ObjectLifeChecker.new(component.create) }.call
+        QML.application.collect_garbage
+        expect(checker.alive?).to eq false
+      end
+    end
+
+    describe '#managed?' do
       [true, false].each do |cond|
-        context "when owned_by_ruby = #{cond}" do
+        context "when managed = #{cond}" do
           it "returns #{cond}" do
             obj = ownership_test.create_object
-            obj.owned_by_ruby = cond
-            expect(obj.owned_by_ruby?).to eq cond
+            obj.managed = cond
+            expect(obj.managed?).to eq cond
           end
         end
       end
@@ -77,11 +91,11 @@ describe QML::Wrapper do
 
     context 'on garbage collection' do
 
-      context 'when owned' do
+      context 'when managed' do
         it 'gets destroyed' do
           checker = -> {
             obj = ownership_test.create_object
-            obj.owned_by_ruby = true
+            obj.managed = true
             QML::TestUtil::ObjectLifeChecker.new(obj)
           }.call
           QML.application.collect_garbage
@@ -89,11 +103,11 @@ describe QML::Wrapper do
         end
       end
 
-      context 'when not owned' do
+      context 'when not managed' do
         it 'does not get destroyed' do
           checker = -> {
             obj = ownership_test.create_object
-            obj.owned_by_ruby = false
+            obj.managed = false
             QML::TestUtil::ObjectLifeChecker.new(obj)
           }.call
           QML.application.collect_garbage

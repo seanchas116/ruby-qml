@@ -16,14 +16,14 @@ public:
 
     QObject *qObject() { return mObject; }
     QObject *fetchQObject();
-    void setQObject(QObject *obj, bool owned);
-    bool isOwned() const { return mIsOwned; }
-    void setOwned(bool owned);
-    void preferOwned(bool owned);
+    void setQObject(QObject *obj, bool managed);
+    bool isManaged() const { return mIsManaged; }
+    void setManaged(bool managed);
+    void preferManaged(bool managed);
 
-    RubyValue ext_isOwned() const;
-    RubyValue ext_setOwned(RubyValue owned);
-    RubyValue ext_preferOwned(RubyValue owned);
+    RubyValue ext_isManaged() const;
+    RubyValue ext_setManaged(RubyValue managed);
+    RubyValue ext_preferManaged(RubyValue managed);
     RubyValue ext_isNull() const;
     RubyValue ext_toString() const;
 
@@ -34,7 +34,7 @@ public:
 private:
     const RubyValue self;
 
-    bool mIsOwned = false;
+    bool mIsManaged = false;
     QPointer<QObject> mObject;
     QJSValue mJSValue;
 };

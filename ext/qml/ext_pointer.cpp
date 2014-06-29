@@ -20,7 +20,7 @@ Pointer::Pointer(RubyValue self) :
 
 Pointer::~Pointer()
 {
-    ObjectGC::instance()->debug() << "\u267b releasing object:" << mObject << "owned:" << mIsOwned;
+    ObjectGC::instance()->debug() << "\u267b releasing object:" << mObject << "managed:" << mIsManaged;
 }
 
 RubyValue Pointer::fromQObject(QObject *obj, bool owned)
@@ -39,7 +39,7 @@ QObject *Pointer::fetchQObject()
     return mObject;
 }
 
-void Pointer::setQObject(QObject *obj, bool owned)
+void Pointer::setQObject(QObject *obj, bool managed)
 {
     if (!obj) {
         throw std::logic_error("null object");
@@ -47,62 +47,57 @@ void Pointer::setQObject(QObject *obj, bool owned)
     mObject = obj;
     ObjectGC::instance()->addObject(obj);
 
-    ObjectGC::instance()->debug() << "\u2728 acquiring object:" << obj << "owned:" << owned;
-    preferOwned(owned);
+    preferManaged(managed);
+    ObjectGC::instance()->debug() << "\u2728 acquiring object:" << mObject;
 }
 
-void Pointer::setOwned(bool owned)
+void Pointer::setManaged(bool managed)
 {
     if (mObject) {
-        if (owned) {
-            mJSValue = Application::engine()->newQObject(mObject);
+        if (managed) {
             QQmlEngine::setObjectOwnership(mObject, QQmlEngine::JavaScriptOwnership);
+            mJSValue = Application::engine()->newQObject(mObject);
         } else {
-            mJSValue = QJSValue();
             QQmlEngine::setObjectOwnership(mObject, QQmlEngine::CppOwnership);
+            mJSValue = QJSValue();
         }
 
-        ObjectData::getOrCreate(mObject)->owned = owned;
-        mIsOwned = owned;
+        ObjectData::getOrCreate(mObject)->owned = managed;
+        mIsManaged = managed;
     }
 }
 
-void Pointer::preferOwned(bool owned)
+void Pointer::preferManaged(bool managed)
 {
-    auto context = QQmlEngine::contextForObject(mObject);
     auto ownership = QQmlEngine::objectOwnership(mObject);
-    // already belongs to QML
-    if (context) {
-        owned = true;
-    }
+
     if (ownership == QQmlEngine::JavaScriptOwnership) {
-        owned = true;
+        managed = true;
+    } else {
+        // owned by parent
+        if (mObject->parent()) {
+            managed = false;
+        }
     }
-    // owned by QML-related C++ object?
-    if (context && ownership == QQmlEngine::CppOwnership) {
-        owned = false;
-    }
-    if (mObject->parent()) {
-        owned = false;
-    }
-    setOwned(owned);
+
+    setManaged(managed);
 }
 
-RubyValue Pointer::ext_isOwned() const
+RubyValue Pointer::ext_isManaged() const
 {
-    return RubyValue::from(mIsOwned);
+    return RubyValue::from(mIsManaged);
 }
 
-RubyValue Pointer::ext_setOwned(RubyValue owned)
+RubyValue Pointer::ext_setManaged(RubyValue managed)
 {
-    setOwned(owned.to<bool>());
-    return ext_isOwned();
+    setManaged(managed.to<bool>());
+    return ext_isManaged();
 }
 
-RubyValue Pointer::ext_preferOwned(RubyValue owned)
+RubyValue Pointer::ext_preferManaged(RubyValue managed)
 {
-    preferOwned(owned.to<bool>());
-    return ext_isOwned();
+    preferManaged(managed.to<bool>());
+    return ext_isManaged();
 }
 
 RubyValue Pointer::ext_isNull() const
@@ -119,7 +114,7 @@ RubyValue Pointer::ext_toString() const
 
 void Pointer::gc_mark()
 {
-    if (mIsOwned) {
+    if (mIsManaged) {
         ObjectGC::instance()->markOwnedObject(mObject);
     }
 }
@@ -127,9 +122,9 @@ void Pointer::gc_mark()
 void Pointer::defineClass()
 {
     WrapperRubyClass<Pointer> klass("QML", "Pointer");
-    klass.defineMethod("owned?", RUBYQML_MEMBER_FUNCTION_INFO(&Pointer::ext_isOwned));
-    klass.defineMethod("owned=", RUBYQML_MEMBER_FUNCTION_INFO(&Pointer::ext_setOwned));
-    klass.defineMethod("prefer_owned", RUBYQML_MEMBER_FUNCTION_INFO(&Pointer::ext_preferOwned));
+    klass.defineMethod("managed?", RUBYQML_MEMBER_FUNCTION_INFO(&Pointer::ext_isManaged));
+    klass.defineMethod("managed=", RUBYQML_MEMBER_FUNCTION_INFO(&Pointer::ext_setManaged));
+    klass.defineMethod("prefer_managed", RUBYQML_MEMBER_FUNCTION_INFO(&Pointer::ext_preferManaged));
     klass.defineMethod("null?", RUBYQML_MEMBER_FUNCTION_INFO(&Pointer::ext_isNull));
     klass.defineMethod("to_s", RUBYQML_MEMBER_FUNCTION_INFO(&Pointer::ext_toString));
     klass.aliasMethod("inspect", "to_s");

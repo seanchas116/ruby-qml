@@ -2,6 +2,9 @@ require 'spec_helper'
 
 describe QML::Data::ArrayModel do
 
+  class NoColumnArrayModel < QML::Data::ArrayModel
+  end
+
   class TestArrayModel < QML::Data::ArrayModel
     column :title, :number
   end
@@ -65,6 +68,14 @@ describe QML::Data::ArrayModel do
         current = list_view.current_item
         expect(current.item_title).to eq(expected_array[i][:title])
         expect(current.item_number).to eq(expected_array[i][:number])
+      end
+    end
+  end
+
+  describe '#initialize' do
+    context 'when columns are not specified' do
+      it 'fails' do
+        expect { NoColumnArrayModel.new }.to raise_error(QML::Data::Error)
       end
     end
   end

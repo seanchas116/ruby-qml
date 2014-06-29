@@ -9,7 +9,6 @@ module QML
   class QMLError < StandardError; end
   class AccessError < StandardError; end
   class ApplicationError < StandardError; end
-  class ModelError < StandardError; end
 
   class CppError < StandardError
     attr_reader :class_name, :raw_message

@@ -1,3 +1,5 @@
+require 'qml/data/error'
+
 module QML
   module Data
     class ListModel
@@ -9,15 +11,13 @@ module QML
           @columns |= columns
         end
 
-        def columns
-          @columns ||= []
-        end
+        attr_reader :columns
       end
 
       attr_reader :qt_models
 
       def initialize
-        columns = self.class.columns or fail ModelError, 'columns not specified'
+        fail Error, 'columns not specified' unless self.class.columns
         @qt_models = []
       end
 

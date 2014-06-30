@@ -39,6 +39,7 @@ module QML
 
     def initialize
       super()
+      Access.register_classes
       @extension = Plugins.core.createComponentExtension(self)
     end
 

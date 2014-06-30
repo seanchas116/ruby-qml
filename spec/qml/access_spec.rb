@@ -35,12 +35,14 @@ describe QML::Access do
 
       class Hoge
         include QML::Access
+
+        register_to_qml under: 'HogeNS', version: '1.2', name: 'Hoge'
+
         property :text
 
         def some_method(a, b)
           a + b
         end
-        register_to_qml under: 'HogeNS', version: '1.2', name: 'Hoge'
       end
 
       let(:data) do

@@ -11,13 +11,21 @@ module QML
       end
     end
 
+    # @api private
+    def self.unregistered_classes
+      @unregistered_classes ||= []
+    end
+
+    # @api private
+    def self.register_classes
+      @unregistered_classes.each(&:register_to_qml_real)
+    end
+
     ALLOWED_PATTERN = /^[a-zA-Z_]\w*$/
 
     module ClassMethods
 
       # Registers the class as a QML type.
-      # You must call this method in the bottom of class definition
-      # because it creates the meta object for the class and it is immutable after creation.
       # @param under [String|nil] The namespece which encapsulates the exported QML type. If not specified, automatically inferred from the module nesting of the class.
       # @param version [String|nil] The version of the type. Defaults to VERSION constant of the encapsulating module / class of the class.
       # @param name [String|nil] The name of the type. Defaults to the name of the class.
@@ -41,9 +49,16 @@ module QML
         fail AccessError, 'insufficient version (major and minor versions required)' unless versions.size >= 2
         name ||= path.last
 
-        access_support.register_to_qml(under, versions[0], versions[1], name)
+        @qml_registeration = [under, versions[0], versions[1], name]
+        Access.unregistered_classes << self
       end
 
+      # @api private
+      def register_to_qml_real
+        access_support.register_to_qml(*@qml_registeration) if @qml_registeration
+      end
+
+      # @api private
       def access_support
         @access_support ||= create_access_support
       end
@@ -92,6 +107,7 @@ module QML
         @access_objects = []
       end
 
+      # @api private
       attr_reader :access_objects
     end
   end

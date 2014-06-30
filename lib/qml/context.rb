@@ -12,6 +12,7 @@ module QML
     def initialize
       super()
       @extension = Plugins.core.createContextExtension(self)
+      @context_properties = {}
     end
 
     def eval(obj, str)
@@ -19,8 +20,10 @@ module QML
     end
 
     def []=(key, value)
-      @extension.setContextProperty(key, value)
       value.prefer_managed true if value.is_a? Wrapper
+      # just hold referenece
+      @context_properties[key] = value
+      @extension.setContextProperty(key, value)
       value
     end
 

@@ -20,7 +20,7 @@ Pointer::Pointer(RubyValue self) :
 
 Pointer::~Pointer()
 {
-    ObjectGC::instance()->debug() << "\u267b releasing object:" << mObject << "managed:" << mIsManaged;
+    ObjectGC::instance()->debug() << "\u267B\uFE0F  releasing object:" << mObject << "managed:" << mIsManaged;
 }
 
 RubyValue Pointer::fromQObject(QObject *obj, bool owned)
@@ -48,7 +48,7 @@ void Pointer::setQObject(QObject *obj, bool managed)
     ObjectGC::instance()->addObject(obj);
 
     preferManaged(managed);
-    ObjectGC::instance()->debug() << "\u2728 acquiring object:" << mObject;
+    ObjectGC::instance()->debug() << "\u2728  acquiring object:" << mObject;
 }
 
 void Pointer::setManaged(bool managed)

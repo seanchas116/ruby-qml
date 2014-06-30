@@ -26,7 +26,7 @@ void ObjectGC::mark(QObject *obj, bool markOwned)
 
     auto markable = dynamic_cast<Markable *>(obj);
     if (markable) {
-        debug() << "\u270F marking object:" << obj << "parent:" << obj->parent();
+        debug() << "\u270F\uFE0F  marking object:" << obj << "parent:" << obj->parent();
         markable->gc_mark();
     }
     for (auto child : obj->children()) {

@@ -1,9 +1,6 @@
-require 'qml/plugins'
 require 'qml/engine'
 
 module QML
-  Component = Plugins.core.metaObjects['QQmlComponent'].build_class
-
   # The Component class is used to instantiate objects like Window / ApplicationWindow objects from QML files.
   # You usually do not need to use this class because Application#load, #load_path, #load_data do same
   # for the application top-level objects such as main windows.

@@ -1,8 +1,6 @@
-require 'qml/plugins'
+require 'qml/qt_classes'
 
 module QML
-  Context = Plugins.core.metaObjects['QQmlContext'].build_class
-
   class Context
 
     def self.new

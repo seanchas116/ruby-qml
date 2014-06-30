@@ -1,7 +1,6 @@
-require 'qml/plugins'
+require 'qml/qt_classes'
 
 module QML
-  Application = Kernel.application_meta_object.build_class
 
   class Application
 

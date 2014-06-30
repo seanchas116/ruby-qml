@@ -1,8 +1,6 @@
-require 'qml/plugins'
+require 'qml/qt_classes'
 
 module QML
-  Engine = Kernel.engine_meta_object.build_class
-
   class Engine
 
     def self.instance

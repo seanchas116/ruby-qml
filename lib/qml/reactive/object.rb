@@ -4,10 +4,12 @@ require 'qml/reactive/unbound_property'
 module QML
   module Reactive
 
-    # Object is used to define signals and properties within class definition.
+    # {Object} is used to define signals and properties within class definition.
     # Signals and properties will be inherited by and can be overridden in subclasses.
+    # @note Currently {Object} can be included only by classes, not modules.
     module Object
 
+      # When {Object} is included by a class, the class extends {ClassMethods} to add the common class methods.
       def self.included(derived)
         fail Error, "SignalDef must be included in a class" unless derived.is_a? ::Class
         derived.extend(ClassMethods)
@@ -34,7 +36,7 @@ module QML
           instance_variable_set(:"@_signal_#{signal.name}", signal.bind(self))
         end
 
-        self.class.initial_connections_hash.each do |name, blocks|
+        self.class.send(:initial_connections_hash).each do |name, blocks|
           blocks.each do |block|
             signal(name).connect do |*args|
               instance_exec(*args, &block)
@@ -42,6 +44,24 @@ module QML
           end
         end
       end
+
+      # @!method signal(name)
+      #   Returns a signal.
+      #   @param name [Symbol] The signal name
+      #   @return [QML::Reactive::Signal]
+
+      # @!method signals
+      #   Returns all signal names.
+      #   @return [Array<Symbol>]
+
+      # @!method property(name)
+      #   Returns a property.
+      #   @param name [Symbol] The property name
+      #   @return [QML::Reactive::Property]
+
+      # @!method properties
+      #   Returns all property names.
+      #   @return [Array<Symbol>]
 
       [%w{signal signals}, %w{property properties}].each do |singular, plural|
         class_eval <<-EOS, __FILE__, __LINE__ + 1
@@ -59,6 +79,25 @@ module QML
 
       module ClassMethods
 
+        # @!method instance_signals(include_super = true)
+        #   Returns all signal names for the class.
+        #   @param include_super [true|false]
+        #   @return [Array<Symbol>]
+
+        # @!method instance_signal(name)
+        #   Returns an unbound signal.
+        #   @param name [Symbol] The signal name
+        #   @return [QML::Reactive::UnboundSignal]
+
+        # @!method instance_properties(include_super = true)
+        #   Returns all property names for the class.
+        #   @param include_super [true|false]
+        #   @return [Array<Symbol>]
+
+        # @!method instance_property(name)
+        #   Returns an unbound property.
+        #   @param name [Symbol] The property name
+        #   @return [QML::Reactive::UnboundProperty]
         [%w{signal signals}, %w{property properties}].each do |singular, plural|
           class_eval <<-EOS, __FILE__, __LINE__ + 1
             def instance_#{singular}_hash(include_super = true)
@@ -111,26 +150,20 @@ module QML
           end
         end
 
+        # Defines a variadic signal.
+        # Variadic signals do not restrict the number of arguments.
+        # @see #signal
         def variadic_signal(name, factory: nil)
           name.to_sym.tap do |name|
             add_signal(UnboundSignal.new(name, nil, true, self, factory))
           end
         end
 
+        # Aliases a signal.
+        # @return [Symbol] The new name
         def alias_signal(name, original_name)
           add_signal(instance_signal(original_name).alias(name))
           name
-        end
-
-        # @api private
-        def add_signal(signal)
-          instance_signal_hash(false)[signal.name] = signal
-
-          class_eval <<-EOS, __FILE__, __LINE__ + 1
-            def #{signal.name}
-              @_signal_#{signal.original}
-            end
-          EOS
         end
 
         # Defines a property for the class.
@@ -160,38 +193,11 @@ module QML
           name
         end
 
+        # Aliases a property.
+        # @return [Symbol] The new name
         def alias_property(name, original_name)
           add_property(instance_property(original_name).alias(name))
           name
-        end
-
-        # @api private
-        def add_property(property)
-          instance_property_hash(false)[property.name] = property
-
-          class_eval <<-EOS, __FILE__, __LINE__ + 1
-            def #{property.name}(&block)
-              @_property_#{property.original}.value(&block)
-            end
-            def #{property.name}=(new_value)
-              @_property_#{property.original}.value = new_value
-            end
-          EOS
-
-          add_signal(property.notifier_signal)
-        end
-
-        def initial_connections_hash(include_super: true)
-          if include_super && superclass.include?(Object)
-            superclass.initial_connections_hash.dup.tap do |hash|
-              initial_connections_hash(include_super: false).each do |key, blocks|
-                hash[key] ||= []
-                hash[key] += blocks
-              end
-            end
-          else
-            @initial_connections_hash ||= {}
-          end
         end
 
         # Adds a signal handler.
@@ -218,11 +224,50 @@ module QML
         #       ...
         #     end
         #   end
+        # @see #on
         def on_changed(property_name, &block)
           on(:"#{property_name}_changed", &block)
         end
 
-        private :signal, :property, :add_signal, :add_property, :on, :on_changed
+        private
+
+        def add_signal(signal)
+          instance_signal_hash(false)[signal.name] = signal
+
+          class_eval <<-EOS, __FILE__, __LINE__ + 1
+            def #{signal.name}
+              @_signal_#{signal.original}
+            end
+          EOS
+        end
+
+        def add_property(property)
+          instance_property_hash(false)[property.name] = property
+
+          class_eval <<-EOS, __FILE__, __LINE__ + 1
+            def #{property.name}(&block)
+              @_property_#{property.original}.value(&block)
+            end
+            def #{property.name}=(new_value)
+              @_property_#{property.original}.value = new_value
+            end
+          EOS
+
+          add_signal(property.notifier_signal)
+        end
+
+        def initial_connections_hash(include_super: true)
+          if include_super && superclass.include?(Object)
+            superclass.send(:initial_connections_hash).dup.tap do |hash|
+              initial_connections_hash(include_super: false).each do |key, blocks|
+                hash[key] ||= []
+                hash[key] += blocks
+              end
+            end
+          else
+            @initial_connections_hash ||= {}
+          end
+        end
       end
     end
   end

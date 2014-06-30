@@ -26,7 +26,6 @@ public:
     RubyValue ext_preferManaged(RubyValue managed);
     RubyValue ext_isNull() const;
     RubyValue ext_toString() const;
-    RubyValue ext_associate(RubyValue wrapper);
 
     void gc_mark();
 

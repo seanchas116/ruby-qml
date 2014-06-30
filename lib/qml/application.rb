@@ -1,10 +1,12 @@
 require 'qml/plugins'
 
 module QML
-  class Application < Kernel.application_meta_object.build_class
+  Application = Kernel.application_meta_object.build_class
+
+  class Application
 
     def self.instance
-      hijack(Kernel.application)
+      Kernel.application
     end
 
     def self.notify_error(error)

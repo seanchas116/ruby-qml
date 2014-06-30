@@ -112,14 +112,6 @@ RubyValue Pointer::ext_toString() const
     return RubyValue::from(name);
 }
 
-RubyValue Pointer::ext_associate(RubyValue wrapper)
-{
-    if (mObject) {
-        ObjectData::getOrCreate(mObject)->wrapper = wrapper;
-    }
-    return self;
-}
-
 void Pointer::gc_mark()
 {
     if (mIsManaged) {
@@ -133,7 +125,6 @@ void Pointer::defineClass()
     klass.defineMethod("managed?", RUBYQML_MEMBER_FUNCTION_INFO(&Pointer::ext_isManaged));
     klass.defineMethod("managed=", RUBYQML_MEMBER_FUNCTION_INFO(&Pointer::ext_setManaged));
     klass.defineMethod("prefer_managed", RUBYQML_MEMBER_FUNCTION_INFO(&Pointer::ext_preferManaged));
-    klass.defineMethod("associate", RUBYQML_MEMBER_FUNCTION_INFO(&Pointer::ext_associate));
     klass.defineMethod("null?", RUBYQML_MEMBER_FUNCTION_INFO(&Pointer::ext_isNull));
     klass.defineMethod("to_s", RUBYQML_MEMBER_FUNCTION_INFO(&Pointer::ext_toString));
     klass.aliasMethod("inspect", "to_s");

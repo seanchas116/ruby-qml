@@ -3,7 +3,6 @@ require 'qml/qml'
 
 module QML
   module Access
-    # When {Access} is included by a class, the class extends {ClassMethods} to add the common class methods.
     def self.included(derived)
       derived.class_eval do
         include Reactive::Object

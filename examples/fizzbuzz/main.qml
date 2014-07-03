@@ -7,37 +7,24 @@ ApplicationWindow {
     visible: true
     width: 200
     height: 100
-    title: qsTr("FizzBuzz")
+    title: "FizzBuzz"
 
-    GridLayout {
+    ColumnLayout {
         anchors.fill: parent
         anchors.margins: 10
-        columns: 2
-        columnSpacing: 20
-        Text {
-            text: "Input"
-            Layout.alignment: Qt.AlignRight
-        }
         TextField {
+            placeholderText: "Input"
+            text: "0"
             id: textField
-        }
-        Text {
-            text: "Result"
-            Layout.alignment: Qt.AlignRight
         }
         Text {
             y: 100
             id: text
             text: fizzbuzz.result
         }
-        Item {
-            Layout.fillHeight: true
-        }
         Button {
             text: 'Quit'
-            onClicked: {
-                fizzbuzz.quit()
-            }
+            onClicked: fizzbuzz.quit()
         }
     }
     FizzBuzz {

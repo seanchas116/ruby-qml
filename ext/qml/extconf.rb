@@ -7,7 +7,7 @@ abort 'pkg-config executable not found' unless pkgconfig
 qt_path = with_config('qt-dir')
 qt_path &&= Pathname(qt_path).realpath
 
-ffi_path = with_config('ffi-dir')
+ffi_path = with_config('libffi-dir')
 ffi_path &&= Pathname(ffi_path).realpath
 
 [qt_path, ffi_path].reject(&:nil?).each do |path|

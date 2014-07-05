@@ -18,7 +18,7 @@ module QML
 
     # @api private
     def self.register_classes
-      @unregistered_classes.each(&:register_to_qml_real)
+      unregistered_classes.each(&:register_to_qml_real)
     end
 
     ALLOWED_PATTERN = /^[a-zA-Z_]\w*$/

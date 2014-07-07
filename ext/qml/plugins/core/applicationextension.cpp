@@ -1,20 +1,29 @@
 #include "applicationextension.h"
 #include <QApplication>
 #include <QTimer>
+#include <QDebug>
 
 namespace RubyQml {
 
 ApplicationExtension::ApplicationExtension(QApplication *app) :
     mApp(app)
 {
-    auto timer = new QTimer();
+    auto timer = new QTimer(this);
     timer->setInterval(0);
-    connect(timer, SIGNAL(timeout()), this, SIGNAL(eventLoopProcessed()));
+    timer->setSingleShot(false);
+    timer->start();
+    connect(timer, &QTimer::timeout, this, &ApplicationExtension::eventsProcessed);
 }
 
 void ApplicationExtension::exec()
 {
     mApp->exec();
+}
+
+void ApplicationExtension::processEvents()
+{
+    QCoreApplication::processEvents();
+    forceDeferredDeletes();
 }
 
 void ApplicationExtension::forceDeferredDeletes()

@@ -1,8 +1,11 @@
 require 'ostruct'
 require 'qml/qml'
+require 'qml/dispatchable'
 
 module QML
   module Access
+    include Dispatchable
+
     def self.included(derived)
       derived.class_eval do
         include Reactive::Object

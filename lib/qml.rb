@@ -15,6 +15,14 @@ require 'qml/qt'
 require 'qml/access'
 require 'qml/root_path'
 require 'qml/callback_loop'
+require 'qml/dispatcher'
+require 'qml/dispatchable'
 
 require 'qml/data'
 require 'qml/test_util'
+
+module QML
+  application.events_processed.each do
+    Dispatcher.instance.run_tasks
+  end
+end

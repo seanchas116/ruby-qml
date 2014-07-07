@@ -14,10 +14,11 @@ public:
     explicit ApplicationExtension(QApplication *app);
 
 signals:
-    void eventLoopProcessed();
+    void eventsProcessed();
 
 public slots:
     void exec();
+    void processEvents();
     void forceDeferredDeletes();
 
 private:

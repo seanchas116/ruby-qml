@@ -24,9 +24,14 @@ module QML
       fail ApplicationError, "cannot create Application instance manually"
     end
 
+    signal :events_processed, []
+
     def initialize
       super()
       @extension = Plugins.core.createApplicationExtension(self)
+      @extension.events_processed.each do
+        events_processed.call
+      end
     end
 
     # @return [Engine] The engine of the application.
@@ -76,6 +81,10 @@ module QML
     # This method never returns until the application quits.
     def exec
       @extension.exec
+    end
+
+    def process_events
+      @extension.process_events
     end
 
     def force_deferred_deletes

@@ -1,5 +1,8 @@
+require 'qml/dispatchable'
+
 module QML
   class Wrapper
+    include Dispatchable
     include Reactive::Object
 
     class << self

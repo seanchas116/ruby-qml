@@ -6,7 +6,6 @@
 #include "accessobject.h"
 #include "listmodel.h"
 #include "ext_accesssupport.h"
-#include "rubyclasses.h"
 #include <ruby/intern.h>
 #define ONIG_ESCAPE_UCHAR_COLLISION
 #include <ruby/encoding.h>
@@ -376,15 +375,16 @@ bool RubyValue::isConvertibleTo(int metaType) const
         if (rb_obj_is_kind_of(x, rb_cTime)) {
             return metaType == QMetaType::QDateTime;
         }
-        static auto dateTimeClass = RubyModule::fromPath("DateTime");
+        static auto dateTimeClass = RubyClass::fromPath("DateTime");
         if (rb_obj_is_kind_of(x, dateTimeClass)) {
             return metaType == QMetaType::QDateTime;
         }
-        static auto dateClass = RubyModule::fromPath("Date");
+        static auto dateClass = RubyClass::fromPath("Date");
         if (rb_obj_is_kind_of(x, dateClass)) {
             return metaType == QMetaType::QDate || metaType == QMetaType::QDateTime;
         }
-        if (rb_obj_is_kind_of(x, rubyClasses().wrapper)) {
+        static auto wrapperClass = RubyClass::fromPath("QML::Wrapper");
+        if (rb_obj_is_kind_of(x, wrapperClass)) {
             if (metaType == QMetaType::QObjectStar) {
                 return true;
             }
@@ -399,7 +399,8 @@ bool RubyValue::isConvertibleTo(int metaType) const
         if (rb_obj_is_kind_of(x, wrapperRubyClass<Ext::MetaObject>().toValue())) {
             return metaType == QMetaType::type("const QMetaObject*");
         }
-        if (rb_obj_is_kind_of(x, rubyClasses().access)) {
+        auto accessModule = RubyModule::fromPath("QML::Access");
+        if (rb_obj_is_kind_of(x, accessModule)) {
             return metaType == QMetaType::QObjectStar;
         }
 
@@ -466,13 +467,15 @@ int RubyValue::defaultMetaType() const
             return QMetaType::QDate;
         }
 
-        if (rb_obj_is_kind_of(x, rubyClasses().wrapper)) {
+        static auto wrapperClass = RubyClass::fromPath("QML::Wrapper");
+        if (rb_obj_is_kind_of(x, wrapperClass)) {
             return QMetaType::QObjectStar;
         }
         if (rb_obj_is_kind_of(x, wrapperRubyClass<Ext::MetaObject>().toValue())) {
             return QMetaType::type("const QMetaObject*");
         }
-        if (rb_obj_is_kind_of(x, rubyClasses().access)) {
+        auto accessModule = RubyModule::fromPath("QML::Access");
+        if (rb_obj_is_kind_of(x, accessModule)) {
             return QMetaType::QObjectStar;
         }
 
@@ -591,8 +594,8 @@ QObject *RubyValue::toQObject() const
     if (x == RubyValue()) {
         return nullptr;
     }
-
-    if (x.isKindOf(rubyClasses().access)) {
+    auto accessModule = RubyModule::fromPath("QML::Access");
+    if (x.isKindOf(accessModule)) {
         auto support = x.send("class").send("access_support");
         return wrapperRubyClass<Ext::AccessSupport>().unwrap(support)->wrap(x);
     }
@@ -601,7 +604,8 @@ QObject *RubyValue::toQObject() const
         return new ListModel(x);
     }
 
-    if (!x.isKindOf(rubyClasses().wrapper)) {
+    auto wrapperClass = RubyClass::fromPath("QML::Wrapper");
+    if (!x.isKindOf(wrapperClass)) {
         fail("QML::ConversionError",
              QString("expected QML::Wrapper , got %1")
                 .arg(x.send("class").send("name").to<QString>()));

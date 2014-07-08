@@ -3,7 +3,6 @@
 #include "ext_pointer.h"
 #include "rubyclass.h"
 #include "signalforwarder.h"
-#include "rubyclasses.h"
 #include <QtCore/QMetaObject>
 #include <QtCore/QMetaMethod>
 #include <QtCore/QMetaProperty>
@@ -129,7 +128,8 @@ public:
             return Qnil;
         } else {
             auto ret = RubyValue::from(returnValue);
-            if (ret.isKindOf(rubyClasses().wrapper)) {
+            static auto wrapperClass = RubyClass::fromPath("QML::Wrapper");
+            if (ret.isKindOf(wrapperClass)) {
                 auto pointer = wrapperRubyClass<Pointer>().unwrap(ret.send("pointer"));
                 pointer->preferManaged(true);
             }

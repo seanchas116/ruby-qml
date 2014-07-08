@@ -2,16 +2,28 @@
 
 namespace RubyQml {
 
+RubyModule::RubyModule(VALUE moduleValue) :
+    RubyModule(RubyValue(moduleValue))
+{
+}
+
 RubyModule::RubyModule(RubyValue moduleValue) :
     mValue(moduleValue)
 {
     checkType();
 }
 
-RubyModule::RubyModule(const QByteArray &under, const QByteArray &name)
+RubyModule::RubyModule(const char *name)
 {
     protect([&] {
-        mValue = rb_define_module_under(rb_path2class(under), name);
+        mValue = rb_define_module(name);
+    });
+}
+
+RubyModule::RubyModule(const RubyModule &under, const char *name)
+{
+    protect([&] {
+        mValue = rb_define_module_under(under.toValue(), name);
     });
 }
 
@@ -20,6 +32,15 @@ RubyModule &RubyModule::operator=(const RubyModule &other)
     mValue = other.mValue;
     checkType();
     return *this;
+}
+
+RubyModule RubyModule::fromPath(const char *path)
+{
+    RubyValue ret;
+    protect([&] {
+        ret = rb_path2class(path);
+    });
+    return ret;
 }
 
 void RubyModule::aliasMethod(const char *newName, const char *originalName)
@@ -31,7 +52,11 @@ void RubyModule::aliasMethod(const char *newName, const char *originalName)
 
 void RubyModule::checkType()
 {
-    if (!mValue.isKindOf(rb_cModule)) {
+    bool check;
+    protect([&] {
+        check = rb_obj_is_kind_of(mValue, rb_cModule);
+    });
+    if (!check) {
         throw std::logic_error("expected Module value");
     }
 }
@@ -42,23 +67,27 @@ RubyClass::RubyClass(RubyValue classValue) :
     checkType();
 }
 
-static RubyValue defineClass(const QByteArray &under, const QByteArray &name)
+namespace {
+
+RubyValue defineClass(const RubyModule &under, const char *name)
 {
     RubyValue klass;
     protect([&] {
-        klass = rb_define_class_under(rb_path2class(under), name, rb_cObject);
+        klass = rb_define_class_under(under.toValue(), name, rb_cObject);
     });
     return klass;
 }
 
-RubyClass::RubyClass(const QByteArray &under, const QByteArray &name) :
+}
+
+RubyClass::RubyClass(const RubyModule &under, const char *name) :
     RubyModule(defineClass(under, name))
 {
 }
 
-RubyValue RubyClass::newInstance()
+RubyClass RubyClass::fromPath(const char *path)
 {
-    return toValue().send("new");
+    return RubyClass(RubyModule::fromPath(path).toValue());
 }
 
 void RubyClass::checkType()

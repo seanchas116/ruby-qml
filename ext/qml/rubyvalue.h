@@ -1,6 +1,5 @@
 #pragma once
 #include "util.h"
-#include "functioninfo.h"
 #include <ruby.h>
 
 class QVariant;
@@ -16,13 +15,13 @@ template <typename T, typename Enable = void> struct Conversion
 
 }
 
+class RubyModule;
+
 class RubyValue
 {
 public:
     RubyValue() = default;
     RubyValue(VALUE value) : mValue(value) {}
-
-    static RubyValue fromPath(const char *path);
 
     template <typename T> static RubyValue from(const T &value)
     {
@@ -37,32 +36,20 @@ public:
     operator VALUE() const { return mValue; }
 
     template <typename ... TArgs>
-    RubyValue send(const char *method, TArgs && ... args) const
+    RubyValue send(const char *method, TArgs ... args) const
     {
         RubyValue ret;
         protect([&] {
-            ret = rb_funcall(mValue, rb_intern(method), sizeof...(args), VALUE(args)...);
+            ret = rb_funcall(mValue, rb_intern(method), sizeof...(args), RubyValue(args)...);
         });
         return ret;
-    }
-
-    template <typename TFunction, TFunction function>
-    void defineSingletonMethod(const char *name, FunctionInfo<TFunction, function>)
-    {
-        using wrapper = FunctionWrapper<TFunction, function>;
-        auto func = (VALUE (*)(...))wrapper::apply;
-        auto argc = wrapper::argc - 1;
-
-        protect([&] {
-            rb_define_singleton_method(mValue, name, func, argc);
-        });
     }
 
     bool operator==(const RubyValue &other) const { return mValue == other.mValue; }
     bool operator!=(const RubyValue &other) const { return !operator==(other); }
     explicit operator bool() const { return RTEST(mValue); }
 
-    bool isKindOf(RubyValue klass) const;
+    bool isKindOf(const RubyModule &module) const;
     bool isConvertibleTo(int metaType) const;
     int defaultMetaType() const;
 
@@ -78,24 +65,6 @@ public:
     static void addEnumeratorMetaType(int metaType);
 
 private:
-    template <typename TFunction, TFunction function>
-    struct FunctionWrapper;
-
-    template <typename ... TArgs, RubyValue (*function)(TArgs...)>
-    struct FunctionWrapper<RubyValue (*)(TArgs...), function>
-    {
-        static constexpr size_t argc = sizeof...(TArgs);
-
-        static VALUE apply(typename std::conditional<true, VALUE, TArgs>::type... args)
-        {
-            RubyValue ret;
-            unprotect([&] {
-                ret = function(RubyValue(args)...);
-            });
-            return ret;
-        }
-    };
-
     volatile VALUE mValue = Qnil;
 };
 

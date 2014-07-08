@@ -1,5 +1,6 @@
 #include "accessobject.h"
 #include "util.h"
+#include "rubyclass.h"
 #include <QSet>
 
 namespace RubyQml {
@@ -8,7 +9,7 @@ AccessObject::AccessObject(const SP<ForeignMetaObject> &metaobj, RubyValue value
     ForeignObject(metaobj),
     mWrapped(value)
 {
-    if (!value.isKindOf(RubyValue::fromPath("QML::Access"))) {
+    if (!value.isKindOf(RubyModule::fromPath("QML::Access"))) {
         std::logic_error("wrapping non QML::Access object");
     }
     value.send("access_objects").send("push", RubyValue::fromQObject(this, false));

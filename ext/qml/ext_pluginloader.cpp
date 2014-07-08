@@ -45,7 +45,7 @@ RubyValue PluginLoader::instance()
 
 void PluginLoader::defineClass()
 {
-    WrapperRubyClass<PluginLoader> klass("QML", "PluginLoader");
+    WrapperRubyClass<PluginLoader> klass(RubyModule::fromPath("QML"), "PluginLoader");
     klass.defineMethod(MethodAccess::Private, "initialize", RUBYQML_MEMBER_FUNCTION_INFO(&PluginLoader::initialize));
     klass.defineMethod(MethodAccess::Public, "load", RUBYQML_MEMBER_FUNCTION_INFO(&PluginLoader::load));
     klass.defineMethod(MethodAccess::Public, "instance", RUBYQML_MEMBER_FUNCTION_INFO(&PluginLoader::instance));

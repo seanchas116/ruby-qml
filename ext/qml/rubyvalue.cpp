@@ -181,10 +181,10 @@ template <> QDate Conversion<QDate>::from(RubyValue x)
 
 template <> RubyValue Conversion<QDate>::to(const QDate &date)
 {
-    return RubyValue::fromPath("Date").send("new",
-                                            RubyValue::from(date.year()),
-                                            RubyValue::from(date.month()),
-                                            RubyValue::from(date.day()));
+    return RubyClass::fromPath("Date").
+            newInstance(RubyValue::from(date.year()),
+                        RubyValue::from(date.month()),
+                        RubyValue::from(date.day()));
 }
 
 template <> QPoint Conversion<QPoint>::from(RubyValue value)
@@ -194,8 +194,8 @@ template <> QPoint Conversion<QPoint>::from(RubyValue value)
 
 template <> RubyValue Conversion<QPoint>::to(const QPoint &point)
 {
-    return RubyValue::fromPath("QML::Geometry::Point")
-        .send("new", RubyValue::from(point.x()), RubyValue::from(point.y()));
+    return RubyClass::fromPath("QML::Geometry::Point")
+        .newInstance(RubyValue::from(point.x()), RubyValue::from(point.y()));
 }
 
 template <> QPointF Conversion<QPointF>::from(RubyValue value)
@@ -205,8 +205,8 @@ template <> QPointF Conversion<QPointF>::from(RubyValue value)
 
 template <> RubyValue Conversion<QPointF>::to(const QPointF &point)
 {
-    return RubyValue::fromPath("QML::Geometry::Point")
-        .send("new", RubyValue::from(point.x()), RubyValue::from(point.y()));
+    return RubyClass::fromPath("QML::Geometry::Point")
+        .newInstance(RubyValue::from(point.x()), RubyValue::from(point.y()));
 }
 
 template <> QSize Conversion<QSize>::from(RubyValue value)
@@ -216,8 +216,8 @@ template <> QSize Conversion<QSize>::from(RubyValue value)
 
 template <> RubyValue Conversion<QSize>::to(const QSize &size)
 {
-    return RubyValue::fromPath("QML::Geometry::Size")
-        .send("new", RubyValue::from(size.width()), RubyValue::from(size.height()));
+    return RubyClass::fromPath("QML::Geometry::Size")
+        .newInstance(RubyValue::from(size.width()), RubyValue::from(size.height()));
 }
 
 template <> QSizeF Conversion<QSizeF>::from(RubyValue value)
@@ -227,8 +227,8 @@ template <> QSizeF Conversion<QSizeF>::from(RubyValue value)
 
 template <> RubyValue Conversion<QSizeF>::to(const QSizeF &size)
 {
-    return RubyValue::fromPath("QML::Geometry::Size")
-        .send("new", RubyValue::from(size.width()), RubyValue::from(size.height()));
+    return RubyClass::fromPath("QML::Geometry::Size")
+        .newInstance(RubyValue::from(size.width()), RubyValue::from(size.height()));
 }
 
 template <> QRect Conversion<QRect>::from(RubyValue value)
@@ -242,10 +242,9 @@ template <> QRect Conversion<QRect>::from(RubyValue value)
 
 template <> RubyValue Conversion<QRect>::to(const QRect &rect)
 {
-    return RubyValue::fromPath("QML::Geometry::Rectangle")
-        .send("new",
-              RubyValue::from(rect.x()), RubyValue::from(rect.y()),
-              RubyValue::from(rect.width()), RubyValue::from(rect.height()));
+    return RubyClass::fromPath("QML::Geometry::Rectangle")
+        .newInstance(RubyValue::from(rect.x()), RubyValue::from(rect.y()),
+                     RubyValue::from(rect.width()), RubyValue::from(rect.height()));
 }
 
 template <> QRectF Conversion<QRectF>::from(RubyValue value)
@@ -259,10 +258,9 @@ template <> QRectF Conversion<QRectF>::from(RubyValue value)
 
 template <> RubyValue Conversion<QRectF>::to(const QRectF &rect)
 {
-    return RubyValue::fromPath("QML::Geometry::Rectangle")
-        .send("new",
-              RubyValue::from(rect.x()), RubyValue::from(rect.y()),
-              RubyValue::from(rect.width()), RubyValue::from(rect.height()));
+    return RubyClass::fromPath("QML::Geometry::Rectangle")
+        .newInstance(RubyValue::from(rect.x()), RubyValue::from(rect.y()),
+                     RubyValue::from(rect.width()), RubyValue::from(rect.height()));
 }
 
 template <> QVariant Conversion<QVariant>::from(RubyValue x)
@@ -295,20 +293,11 @@ template <> RubyValue Conversion<const QMetaObject *>::to(const QMetaObject *met
 
 Q_GLOBAL_STATIC(QSet<int>, enumeratorMetaTypes)
 
-RubyValue RubyValue::fromPath(const char *path)
-{
-    RubyValue ret;
-    protect([&] {
-        ret = rb_path2class(path);
-    });
-    return ret;
-}
-
-bool RubyValue::isKindOf(RubyValue klass) const
+bool RubyValue::isKindOf(const RubyModule &module) const
 {
     RubyValue result;
     protect([&] {
-        result = rb_obj_is_kind_of(mValue, klass);
+        result = rb_obj_is_kind_of(mValue, module.toValue());
     });
     return result;
 }
@@ -390,15 +379,14 @@ bool RubyValue::isConvertibleTo(int metaType) const
         if (rb_obj_is_kind_of(x, rb_cTime)) {
             return metaType == QMetaType::QDateTime;
         }
-        static auto dateTimeClass = RubyValue::fromPath("DateTime");
+        static auto dateTimeClass = RubyModule::fromPath("DateTime");
         if (rb_obj_is_kind_of(x, dateTimeClass)) {
             return metaType == QMetaType::QDateTime;
         }
-        static auto dateClass = RubyValue::fromPath("Date");
+        static auto dateClass = RubyModule::fromPath("Date");
         if (rb_obj_is_kind_of(x, dateClass)) {
             return metaType == QMetaType::QDate || metaType == QMetaType::QDateTime;
         }
-
         if (rb_obj_is_kind_of(x, rubyClasses().wrapper)) {
             if (metaType == QMetaType::QObjectStar) {
                 return true;
@@ -418,19 +406,19 @@ bool RubyValue::isConvertibleTo(int metaType) const
             return metaType == QMetaType::QObjectStar;
         }
 
-        static auto pointClass = RubyValue::fromPath("QML::Geometry::Point");
+        static auto pointClass = RubyModule::fromPath("QML::Geometry::Point");
         if (rb_obj_is_kind_of(x, pointClass)) {
             return metaType == QMetaType::QPoint || metaType == QMetaType::QPointF;
         }
-        static auto sizeClass = RubyValue::fromPath("QML::Geometry::Size");
+        static auto sizeClass = RubyModule::fromPath("QML::Geometry::Size");
         if (rb_obj_is_kind_of(x, sizeClass)) {
             return metaType == QMetaType::QSize || metaType == QMetaType::QSizeF;
         }
-        static auto rectClass = RubyValue::fromPath("QML::Geometry::Rectangle");
+        static auto rectClass = RubyModule::fromPath("QML::Geometry::Rectangle");
         if (rb_obj_is_kind_of(x, rectClass)) {
             return metaType == QMetaType::QRect || metaType == QMetaType::QRectF;
         }
-        static auto listModelClass = RubyValue::fromPath("QML::Data::ListModel");
+        static auto listModelClass = RubyModule::fromPath("QML::Data::ListModel");
 
         if (rb_obj_is_kind_of(x, listModelClass)) {
             return metaType == QMetaType::QObjectStar;
@@ -477,11 +465,11 @@ int RubyValue::defaultMetaType() const
         if (rb_obj_is_kind_of(x, rb_cTime)) {
             return QMetaType::QDateTime;
         }
-        static auto dateTimeClass = RubyValue::fromPath("DateTime");
+        static auto dateTimeClass = RubyModule::fromPath("DateTime");
         if (rb_obj_is_kind_of(x, dateTimeClass)) {
             return QMetaType::QDateTime;
         }
-        static auto dateClass = RubyValue::fromPath("Date");
+        static auto dateClass = RubyModule::fromPath("Date");
         if (rb_obj_is_kind_of(x, dateClass)) {
             return QMetaType::QDate;
         }
@@ -496,20 +484,20 @@ int RubyValue::defaultMetaType() const
             return QMetaType::QObjectStar;
         }
 
-        static auto pointClass = RubyValue::fromPath("QML::Geometry::Point");
+        static auto pointClass = RubyModule::fromPath("QML::Geometry::Point");
         if (rb_obj_is_kind_of(x, pointClass)) {
             return QMetaType::QPointF;
         }
-        static auto sizeClass = RubyValue::fromPath("QML::Geometry::Size");
+        static auto sizeClass = RubyModule::fromPath("QML::Geometry::Size");
         if (rb_obj_is_kind_of(x, sizeClass)) {
             return QMetaType::QSizeF;
         }
-        static auto rectClass = RubyValue::fromPath("QML::Geometry::Rectangle");
+        static auto rectClass = RubyModule::fromPath("QML::Geometry::Rectangle");
         if (rb_obj_is_kind_of(x, rectClass)) {
             return QMetaType::QRectF;
         }
 
-        static auto listModelClass = RubyValue::fromPath("QML::Data::ListModel");
+        static auto listModelClass = RubyModule::fromPath("QML::Data::ListModel");
         if (rb_obj_is_kind_of(x, listModelClass)) {
             return  QMetaType::QObjectStar;
         }
@@ -621,7 +609,7 @@ QObject *RubyValue::toQObject() const
         auto support = x.send("class").send("access_support");
         return wrapperRubyClass<Ext::AccessSupport>().unwrap(support)->wrap(x);
     }
-    auto listModelClass = RubyValue::fromPath("QML::Data::ListModel");
+    static auto listModelClass = RubyModule::fromPath("QML::Data::ListModel");
     if (x.isKindOf(listModelClass)) {
         return new ListModel(x);
     }

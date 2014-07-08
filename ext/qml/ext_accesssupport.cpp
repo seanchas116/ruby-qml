@@ -57,7 +57,7 @@ RubyValue AccessSupport::registerToQml(RubyValue path, RubyValue majorVersion, R
 
 void AccessSupport::defineClass()
 {
-    WrapperRubyClass<AccessSupport> klass("QML", "AccessSupport");
+    WrapperRubyClass<AccessSupport> klass(RubyModule::fromPath("QML"), "AccessSupport");
     klass.defineMethod(MethodAccess::Protected, "initialize", RUBYQML_MEMBER_FUNCTION_INFO(&AccessSupport::initialize));
     klass.defineMethod("emit_signal", RUBYQML_MEMBER_FUNCTION_INFO(&AccessSupport::emitSignal));
     klass.defineMethod("register_to_qml", RUBYQML_MEMBER_FUNCTION_INFO(&AccessSupport::registerToQml));

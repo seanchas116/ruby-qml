@@ -31,7 +31,7 @@ void GCMarker::gc_mark()
 
 void GCMarker::defineClass()
 {
-    WrapperRubyClass<GCMarker> klass("QML", "GCProtection");
+    WrapperRubyClass<GCMarker> klass(RubyModule::fromPath("QML"), "GCProtection");
     Q_UNUSED(klass);
 }
 

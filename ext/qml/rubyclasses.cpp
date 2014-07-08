@@ -5,8 +5,8 @@ namespace RubyQml {
 
 RubyClasses::RubyClasses()
 {
-    access = RubyModule("QML", "Access").toValue();
-    wrapper = RubyClass("QML", "Wrapper").toValue();
+    access = RubyModule(RubyModule("QML"), "Access");
+    wrapper = RubyClass(RubyModule("QML"), "Wrapper");
 }
 
 static std::unique_ptr<RubyClasses> instance;

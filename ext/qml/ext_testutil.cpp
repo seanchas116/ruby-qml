@@ -31,10 +31,10 @@ RubyValue setGCDebugMessageEnabled(RubyValue self, RubyValue enabled)
 
 void defineModule()
 {
-    RubyModule testUtil("QML", "TestUtil");
-    testUtil.toValue().defineSingletonMethod("echo_conversion", RUBYQML_FUNCTION_INFO(&echoConversion));
-    testUtil.toValue().defineSingletonMethod("gc_debug_message_enabled?", RUBYQML_FUNCTION_INFO(&gcDebugMessageEnabled));
-    testUtil.toValue().defineSingletonMethod("gc_debug_message_enabled=", RUBYQML_FUNCTION_INFO(&setGCDebugMessageEnabled));
+    RubyModule testUtil(RubyModule::fromPath("QML"), "TestUtil");
+    testUtil.defineModuleFunction("echo_conversion", RUBYQML_FUNCTION_INFO(&echoConversion));
+    testUtil.defineModuleFunction("gc_debug_message_enabled?", RUBYQML_FUNCTION_INFO(&gcDebugMessageEnabled));
+    testUtil.defineModuleFunction("gc_debug_message_enabled=", RUBYQML_FUNCTION_INFO(&setGCDebugMessageEnabled));
 }
 
 } // namespace TestUtil

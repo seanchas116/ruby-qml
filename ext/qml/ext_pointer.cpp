@@ -121,7 +121,7 @@ void Pointer::gc_mark()
 
 void Pointer::defineClass()
 {
-    WrapperRubyClass<Pointer> klass("QML", "Pointer");
+    WrapperRubyClass<Pointer> klass(RubyModule::fromPath("QML"), "Pointer");
     klass.defineMethod("managed?", RUBYQML_MEMBER_FUNCTION_INFO(&Pointer::ext_isManaged));
     klass.defineMethod("managed=", RUBYQML_MEMBER_FUNCTION_INFO(&Pointer::ext_setManaged));
     klass.defineMethod("prefer_managed", RUBYQML_MEMBER_FUNCTION_INFO(&Pointer::ext_preferManaged));

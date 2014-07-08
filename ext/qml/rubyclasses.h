@@ -1,5 +1,5 @@
 #pragma once
-#include "rubyvalue.h"
+#include "rubyclass.h"
 
 namespace RubyQml {
 
@@ -7,8 +7,8 @@ struct RubyClasses
 {
     RubyClasses();
 
-    RubyValue access;
-    RubyValue wrapper;
+    RubyModule access;
+    RubyModule wrapper;
 
     static void initialize();
 };

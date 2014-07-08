@@ -366,7 +366,7 @@ RubyValue MetaObject::fromMetaObject(const QMetaObject *metaObject)
 
 void MetaObject::defineClass()
 {
-    WrapperRubyClass<MetaObject> klass("QML", "MetaObject");
+    WrapperRubyClass<MetaObject> klass(RubyModule::fromPath("QML"), "MetaObject");
 
     klass.defineMethod("name", RUBYQML_MEMBER_FUNCTION_INFO(&MetaObject::className));
 

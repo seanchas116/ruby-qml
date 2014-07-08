@@ -1,52 +1,78 @@
 #pragma once
+#include "functioninfo.h"
 #include "rubyvalue.h"
 #include <QDebug>
 
 namespace RubyQml {
 
 enum class MethodAccess { Public, Protected, Private };
+enum class MethodType { InstanceMethod, ModuleFunction };
 
 class RubyModule
 {
 public:
     RubyModule() = default;
+    RubyModule(VALUE moduleValue);
     RubyModule(RubyValue moduleValue);
-    RubyModule(const QByteArray &under, const QByteArray &name);
+    RubyModule(const char *name);
+    RubyModule(const RubyModule &under, const char *name);
     RubyModule(const RubyModule &other) = default;
     RubyModule &operator=(const RubyModule &other);
 
+    static RubyModule fromPath(const char *path);
+
     template <typename TFunction, TFunction function>
-    void defineMethod(MethodAccess access, const char *name, FunctionInfo<TFunction, function>)
+    void defineMethod(MethodType type, MethodAccess access, const char *name, FunctionInfo<TFunction, function>)
     {
         using wrapper = FunctionWrapper<TFunction, function>;
         auto func = (VALUE (*)(...))wrapper::apply;
         auto argc = wrapper::argc - 1;
 
         protect([&] {
-            switch (access) {
-            case MethodAccess::Public:
-                rb_define_method(mValue , name, func, argc);
+            switch (type) {
+            case MethodType::InstanceMethod:
+                switch (access) {
+                case MethodAccess::Public:
+                    rb_define_method(mValue , name, func, argc);
+                    break;
+                case MethodAccess::Protected:
+                    rb_define_protected_method(mValue, name, func, argc);
+                    break;
+                case MethodAccess::Private:
+                    rb_define_private_method(mValue, name, func, argc);
+                    break;
+                }
                 break;
-            case MethodAccess::Protected:
-                rb_define_protected_method(mValue, name, func, argc);
-                break;
-            case MethodAccess::Private:
-                rb_define_private_method(mValue, name, func, argc);
+            case MethodType::ModuleFunction:
+                rb_define_module_function(mValue, name, func, argc);
                 break;
             }
         });
     }
 
-    template <typename TFunction, TFunction function>
-    void defineMethod(const char *name, FunctionInfo<TFunction, function> info)
+    template <typename T>
+    void defineMethod(MethodAccess access, const char *name, T info)
+    {
+        defineMethod(MethodType::InstanceMethod, access, name, info);
+    }
+
+    template <typename T>
+    void defineModuleFunction(const char *name, T info)
+    {
+        defineMethod(MethodType::ModuleFunction, MethodAccess::Public, name, info);
+    }
+
+    template <typename T>
+    void defineMethod(const char *name, T info)
     {
         defineMethod(MethodAccess::Public, name, info);
     }
 
     void aliasMethod(const char *newName, const char *originalName);
 
-    RubyValue toValue() { return mValue; }
-    operator RubyValue() { return toValue(); }
+    RubyValue toValue() const { return mValue; }
+    operator RubyValue() const { return toValue(); }
+    operator VALUE() const { return toValue(); }
 
     virtual void checkType();
 
@@ -77,11 +103,17 @@ class RubyClass : public RubyModule
 public:
     RubyClass() = default;
     RubyClass(RubyValue classValue);
-    RubyClass(const QByteArray &under, const QByteArray &name);
+    RubyClass(const RubyModule &under, const char *name);
+
+    static RubyClass fromPath(const char *path);
 
     void checkType() override;
 
-    RubyValue newInstance();
+    template <typename ... Args>
+    RubyValue newInstance(Args ... args)
+    {
+        return toValue().send("new", args...);
+    }
 };
 
 
@@ -89,7 +121,7 @@ template <typename T>
 class WrapperRubyClass : public RubyClass
 {
 public:
-    WrapperRubyClass(const QByteArray &under, const QByteArray &name) :
+    WrapperRubyClass(const RubyModule &under, const char *name) :
         RubyClass(under, name)
     {
         if (mInstance) {

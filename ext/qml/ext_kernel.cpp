@@ -33,11 +33,11 @@ RubyValue engineMetaObject()
 
 void defineModule()
 {
-    RubyModule kernel("QML", "Kernel");
-    kernel.toValue().defineSingletonMethod("application", RUBYQML_FUNCTION_INFO(&application));
-    kernel.toValue().defineSingletonMethod("engine", RUBYQML_FUNCTION_INFO(&engine));
-    kernel.toValue().defineSingletonMethod("application_meta_object", RUBYQML_FUNCTION_INFO(&applicationMetaObject));
-    kernel.toValue().defineSingletonMethod("engine_meta_object", RUBYQML_FUNCTION_INFO(&engineMetaObject));
+    RubyModule kernel(RubyModule::fromPath("QML"), "Kernel");
+    kernel.defineModuleFunction("application", RUBYQML_FUNCTION_INFO(&application));
+    kernel.defineModuleFunction("engine", RUBYQML_FUNCTION_INFO(&engine));
+    kernel.defineModuleFunction("application_meta_object", RUBYQML_FUNCTION_INFO(&applicationMetaObject));
+    kernel.defineModuleFunction("engine_meta_object", RUBYQML_FUNCTION_INFO(&engineMetaObject));
 }
 
 } // namespace Kernel

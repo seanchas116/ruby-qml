@@ -143,25 +143,32 @@ template <> RubyValue Conversion<QString>::to(const QString &str)
     return RubyValue::from(str.toUtf8().constData());
 }
 
-template <> QDateTime Conversion<QDateTime>::from(RubyValue x)
+template <> QDateTime Conversion<QDateTime>::from(RubyValue time)
 {
-    long long num;
-    long long den;
+    timeval at;
+    int offset;
     protect([&] {
-        x = rb_funcall(x, RUBYQML_INTERN("to_time"), 0);
-        auto at = rb_funcall(x, RUBYQML_INTERN("to_r"), 0);
-        num = NUM2LL(RRATIONAL(at)->num);
-        den = NUM2LL(RRATIONAL(at)->den);
+        if (rb_obj_is_kind_of(time, rb_cTime)) {
+            offset = NUM2INT(rb_funcall(time, RUBYQML_INTERN("gmt_offset"), 0));
+        } else { // DateTime
+            auto dayOffset = rb_funcall(time, RUBYQML_INTERN("offset"), 0);
+            offset = NUM2INT(RRATIONAL(dayOffset)->num) * 24 * 60 * 60 / NUM2INT(RRATIONAL(dayOffset)->den);
+            time = rb_funcall(time, RUBYQML_INTERN("to_time"), 0);
+        }
+        at = rb_time_timeval(time);
     });
-    return QDateTime::fromMSecsSinceEpoch(num * 1000 / den);
+    QDateTime dateTime;
+    dateTime.setOffsetFromUtc(offset);
+    dateTime.setMSecsSinceEpoch(at.tv_sec * 1000 + at.tv_usec / 1000);
+    return dateTime;
 }
 
 template <> RubyValue Conversion<QDateTime>::to(const QDateTime &dateTime) {
     RubyValue ret;
     protect([&] {
-        auto at = rb_rational_new(LL2NUM(dateTime.toMSecsSinceEpoch()), INT2FIX(1000));
-        ret = rb_funcall(rb_cTime, RUBYQML_INTERN("at"), 1, at);
-        ret = rb_funcall(ret, RUBYQML_INTERN("to_datetime"), 0);
+        auto sec = rb_rational_new(LL2NUM(dateTime.toMSecsSinceEpoch()), INT2NUM(1000));
+        auto time = rb_time_num_new(sec, INT2NUM(dateTime.offsetFromUtc()));
+        ret = rb_funcall(time, RUBYQML_INTERN("to_datetime"), 0);
     });
     return ret;
 }

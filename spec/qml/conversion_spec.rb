@@ -40,12 +40,14 @@ describe 'Conversion between C++ and Ruby' do
     expect(actual).to eq expected.to_s
   end
 
-  it 'can convert DateTime' do
-    time = DateTime.now
-    result = convert(time)
-    # QDateTime has msec precision
-    expect((result.to_time.to_r * 1000).to_i).to eq (time.to_time.to_r * 1000).to_i
-    expect(result.to_time.gmt_offset).to eq(result.to_time.gmt_offset)
+  [4/24.to_r, 8/24.to_r].each do |offset|
+    it "can convert DateTime with offset #{offset}" do
+      time = DateTime.now.new_offset(offset)
+      result = convert(time)
+      # QDateTime has msec precision
+      expect((result.to_time.to_r * 1000).to_i).to eq (time.to_time.to_r * 1000).to_i
+      expect(result.offset).to eq(time.offset)
+    end
   end
 
   it 'can convert meta object' do

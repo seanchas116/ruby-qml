@@ -15,6 +15,9 @@ template <typename T, typename Enable = void> struct Conversion
 
 }
 
+#define RUBYQML_INTERN(str) \
+    [] { static auto id = rb_intern(str); return id; }()
+
 class RubyModule;
 
 class RubyValue
@@ -36,11 +39,17 @@ public:
     operator VALUE() const { return mValue; }
 
     template <typename ... TArgs>
-    RubyValue send(const char *method, TArgs ... args) const
+    RubyValue send(ID method, TArgs ... args) const
     {
         return protect([&] {
-            return rb_funcall(mValue, rb_intern(method), sizeof...(args), RubyValue(args)...);
+            return rb_funcall(mValue, method, sizeof...(args), RubyValue(args)...);
         });
+    }
+
+    template <typename ... TArgs>
+    RubyValue send(const char *method, TArgs ... args) const
+    {
+        return send(rb_intern(method), args...);
     }
 
     bool operator==(const RubyValue &other) const { return mValue == other.mValue; }

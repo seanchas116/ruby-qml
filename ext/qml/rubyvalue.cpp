@@ -148,8 +148,8 @@ template <> QDateTime Conversion<QDateTime>::from(RubyValue x)
     long long num;
     long long den;
     protect([&] {
-        x = rb_funcall(x, rb_intern("to_time"), 0);
-        auto at = rb_funcall(x, rb_intern("to_r"), 0);
+        x = rb_funcall(x, RUBYQML_INTERN("to_time"), 0);
+        auto at = rb_funcall(x, RUBYQML_INTERN("to_r"), 0);
         num = NUM2LL(RRATIONAL(at)->num);
         den = NUM2LL(RRATIONAL(at)->den);
     });
@@ -160,102 +160,150 @@ template <> RubyValue Conversion<QDateTime>::to(const QDateTime &dateTime) {
     RubyValue ret;
     protect([&] {
         auto at = rb_rational_new(LL2NUM(dateTime.toMSecsSinceEpoch()), INT2FIX(1000));
-        ret = rb_funcall(rb_cTime, rb_intern("at"), 1, at);
-        ret = rb_funcall(ret, rb_intern("to_datetime"), 0);
+        ret = rb_funcall(rb_cTime, RUBYQML_INTERN("at"), 1, at);
+        ret = rb_funcall(ret, RUBYQML_INTERN("to_datetime"), 0);
     });
     return ret;
 }
 
 template <> QDate Conversion<QDate>::from(RubyValue x)
 {
-    auto y = x.send("year").to<int>();
-    auto m = x.send("month").to<int>();
-    auto d = x.send("day").to<int>();
+    int y, m, d;
+    protect([&] {
+        y = NUM2INT(rb_funcall(x, RUBYQML_INTERN("year"), 0));
+        m = NUM2INT(rb_funcall(x, RUBYQML_INTERN("month"), 0));
+        d = NUM2INT(rb_funcall(x, RUBYQML_INTERN("day"), 0));
+    });
     return QDate(y, m, d);
 }
 
 template <> RubyValue Conversion<QDate>::to(const QDate &date)
 {
-    return RubyClass::fromPath("Date").
-            newInstance(RubyValue::from(date.year()),
-                        RubyValue::from(date.month()),
-                        RubyValue::from(date.day()));
+    static auto klass = RubyClass::fromPath("Date");
+    return protect([&] {
+        return rb_funcall(klass, RUBYQML_INTERN("new"), 3,
+                          INT2NUM(date.year()), INT2NUM(date.month()), INT2NUM(date.day()));
+    });
 }
 
 template <> QPoint Conversion<QPoint>::from(RubyValue value)
 {
-    return QPoint(value.send("x").to<int>(), value.send("y").to<int>());
+    int x, y;
+    protect([&] {
+        x = NUM2INT(rb_funcall(value, RUBYQML_INTERN("x"), 0));
+        y = NUM2INT(rb_funcall(value, RUBYQML_INTERN("y"), 0));
+    });
+    return QPoint(x, y);
 }
 
 template <> RubyValue Conversion<QPoint>::to(const QPoint &point)
 {
-    return RubyClass::fromPath("QML::Geometry::Point")
-        .newInstance(RubyValue::from(point.x()), RubyValue::from(point.y()));
+    static auto klass = RubyClass::fromPath("QML::Geometry::Point");
+    return protect([&] {
+        return rb_funcall(klass, RUBYQML_INTERN("new"), 2,
+                          INT2NUM(point.x()), INT2NUM(point.y()));
+    });
 }
 
 template <> QPointF Conversion<QPointF>::from(RubyValue value)
 {
-    return QPoint(value.send("x").to<double>(), value.send("y").to<double>());
+    double x, y;
+    protect([&] {
+        x = rb_num2dbl(rb_funcall(value, RUBYQML_INTERN("x"), 0));
+        y = rb_num2dbl(rb_funcall(value, RUBYQML_INTERN("y"), 0));
+    });
+    return QPointF(x, y);
 }
 
 template <> RubyValue Conversion<QPointF>::to(const QPointF &point)
 {
-    return RubyClass::fromPath("QML::Geometry::Point")
-        .newInstance(RubyValue::from(point.x()), RubyValue::from(point.y()));
+    static auto klass = RubyClass::fromPath("QML::Geometry::Point");
+    return protect([&] {
+        return rb_funcall(klass, RUBYQML_INTERN("new"), 2,
+                          rb_float_new(point.x()), rb_float_new(point.y()));
+    });
 }
 
 template <> QSize Conversion<QSize>::from(RubyValue value)
 {
-    return QSize(value.send("width").to<int>(), value.send("height").to<int>());
+    int w, h;
+    protect([&] {
+        w = NUM2INT(rb_funcall(value, RUBYQML_INTERN("width"), 0));
+        h = NUM2INT(rb_funcall(value, RUBYQML_INTERN("height"), 0));
+    });
+    return QSize(w, h);
 }
 
 template <> RubyValue Conversion<QSize>::to(const QSize &size)
 {
-    return RubyClass::fromPath("QML::Geometry::Size")
-        .newInstance(RubyValue::from(size.width()), RubyValue::from(size.height()));
+    static auto klass = RubyClass::fromPath("QML::Geometry::Size");
+    return protect([&] {
+        return rb_funcall(klass, RUBYQML_INTERN("new"), 2,
+                          INT2NUM(size.width()), INT2NUM(size.height()));
+    });
 }
 
 template <> QSizeF Conversion<QSizeF>::from(RubyValue value)
 {
-    return QSize(value.send("width").to<double>(), value.send("height").to<double>());
+    double w, h;
+    protect([&] {
+        w = rb_num2dbl(rb_funcall(value, RUBYQML_INTERN("width"), 0));
+        h = rb_num2dbl(rb_funcall(value, RUBYQML_INTERN("height"), 0));
+    });
+    return QSizeF(w, h);
 }
 
 template <> RubyValue Conversion<QSizeF>::to(const QSizeF &size)
 {
-    return RubyClass::fromPath("QML::Geometry::Size")
-        .newInstance(RubyValue::from(size.width()), RubyValue::from(size.height()));
+    static auto klass = RubyClass::fromPath("QML::Geometry::Size");
+    return protect([&] {
+        return rb_funcall(klass, RUBYQML_INTERN("new"), 2,
+                          rb_float_new(size.width()), rb_float_new(size.height()));
+    });
 }
 
 template <> QRect Conversion<QRect>::from(RubyValue value)
 {
-    auto x = value.send("x").to<int>();
-    auto y = value.send("y").to<int>();
-    auto w = value.send("width").to<int>();
-    auto h = value.send("height").to<int>();
+    int x, y, w, h;
+    protect([&] {
+        x = NUM2INT(rb_funcall(value, RUBYQML_INTERN("x"), 0));
+        y = NUM2INT(rb_funcall(value, RUBYQML_INTERN("y"), 0));
+        w = NUM2INT(rb_funcall(value, RUBYQML_INTERN("width"), 0));
+        h = NUM2INT(rb_funcall(value, RUBYQML_INTERN("height"), 0));
+    });
     return QRect(QPoint(x, y), QSize(w, h));
 }
 
 template <> RubyValue Conversion<QRect>::to(const QRect &rect)
 {
-    return RubyClass::fromPath("QML::Geometry::Rectangle")
-        .newInstance(RubyValue::from(rect.x()), RubyValue::from(rect.y()),
-                     RubyValue::from(rect.width()), RubyValue::from(rect.height()));
+    static auto klass = RubyClass::fromPath("QML::Geometry::Rectangle");
+    return protect([&] {
+        return rb_funcall(klass, RUBYQML_INTERN("new"), 4,
+                          INT2NUM(rect.x()), INT2NUM(rect.y()),
+                          INT2NUM(rect.width()), INT2NUM(rect.height()));
+    });
 }
 
 template <> QRectF Conversion<QRectF>::from(RubyValue value)
 {
-    auto x = value.send("x").to<double>();
-    auto y = value.send("y").to<double>();
-    auto w = value.send("width").to<double>();
-    auto h = value.send("height").to<double>();
-    return QRect(QPoint(x, y), QSize(w, h));
+    double x, y, w, h;
+    protect([&] {
+        x = rb_num2dbl(rb_funcall(value, RUBYQML_INTERN("x"), 0));
+        y = rb_num2dbl(rb_funcall(value, RUBYQML_INTERN("y"), 0));
+        w = rb_num2dbl(rb_funcall(value, RUBYQML_INTERN("width"), 0));
+        h = rb_num2dbl(rb_funcall(value, RUBYQML_INTERN("height"), 0));
+    });
+    return QRectF(QPoint(x, y), QSize(w, h));
 }
 
 template <> RubyValue Conversion<QRectF>::to(const QRectF &rect)
 {
-    return RubyClass::fromPath("QML::Geometry::Rectangle")
-        .newInstance(RubyValue::from(rect.x()), RubyValue::from(rect.y()),
-                     RubyValue::from(rect.width()), RubyValue::from(rect.height()));
+    static auto klass = RubyClass::fromPath("QML::Geometry::Rectangle");
+    return protect([&] {
+        return rb_funcall(klass, RUBYQML_INTERN("new"), 4,
+                          rb_float_new(rect.x()), rb_float_new(rect.y()),
+                          rb_float_new(rect.width()), rb_float_new(rect.height()));
+    });
 }
 
 template <> QVariant Conversion<QVariant>::from(RubyValue x)
@@ -290,11 +338,9 @@ Q_GLOBAL_STATIC(QSet<int>, enumeratorMetaTypes)
 
 bool RubyValue::isKindOf(const RubyModule &module) const
 {
-    RubyValue result;
-    protect([&] {
-        result = rb_obj_is_kind_of(mValue, module.toValue());
+    return protect([&] {
+        return rb_obj_is_kind_of(mValue, module);
     });
-    return result;
 }
 
 bool RubyValue::isConvertibleTo(int metaType) const
@@ -396,7 +442,7 @@ bool RubyValue::isConvertibleTo(int metaType) const
             }
             return false;
         }
-        if (rb_obj_is_kind_of(x, wrapperRubyClass<Ext::MetaObject>().toValue())) {
+        if (rb_obj_is_kind_of(x, wrapperRubyClass<Ext::MetaObject>())) {
             return metaType == QMetaType::type("const QMetaObject*");
         }
         auto accessModule = RubyModule::fromPath("QML::Access");
@@ -471,7 +517,7 @@ int RubyValue::defaultMetaType() const
         if (rb_obj_is_kind_of(x, wrapperClass)) {
             return QMetaType::QObjectStar;
         }
-        if (rb_obj_is_kind_of(x, wrapperRubyClass<Ext::MetaObject>().toValue())) {
+        if (rb_obj_is_kind_of(x, wrapperRubyClass<Ext::MetaObject>())) {
             return QMetaType::type("const QMetaObject*");
         }
         auto accessModule = RubyModule::fromPath("QML::Access");
@@ -579,10 +625,14 @@ RubyValue RubyValue::fromQObject(QObject *obj, bool implicit)
 
     auto metaobj = Ext::MetaObject::fromMetaObject(obj->metaObject());
     auto pointer = Ext::Pointer::fromQObject(obj, false);
-    auto wrapper = metaobj.send("build_class").send("allocate");
-    wrapper.send("pointer=", pointer);
-    wrapper.send("initialize");
 
+    RubyValue wrapper;
+    protect([&] {
+        auto klass = rb_funcall(metaobj, RUBYQML_INTERN("build_class"), 0);
+        wrapper = rb_obj_alloc(klass);
+        rb_funcall(wrapper, RUBYQML_INTERN("pointer="), 1, pointer);
+        rb_obj_call_init(wrapper, 0, nullptr);
+    });
     data->wrapper = wrapper;
     return wrapper;
 }
@@ -594,9 +644,11 @@ QObject *RubyValue::toQObject() const
     if (x == RubyValue()) {
         return nullptr;
     }
-    auto accessModule = RubyModule::fromPath("QML::Access");
+    static auto accessModule = RubyModule::fromPath("QML::Access");
     if (x.isKindOf(accessModule)) {
-        auto support = x.send("class").send("access_support");
+        auto support = protect([&] {
+            return rb_funcall(rb_obj_class(x), RUBYQML_INTERN("access_support"), 0);
+        });
         return wrapperRubyClass<Ext::AccessSupport>().unwrap(support)->wrap(x);
     }
     static auto listModelClass = RubyModule::fromPath("QML::Data::ListModel");
@@ -604,15 +656,15 @@ QObject *RubyValue::toQObject() const
         return new ListModel(x);
     }
 
-    auto wrapperClass = RubyClass::fromPath("QML::Wrapper");
+    static auto wrapperClass = RubyClass::fromPath("QML::Wrapper");
     if (!x.isKindOf(wrapperClass)) {
         fail("QML::ConversionError",
              QString("expected QML::Wrapper , got %1")
                 .arg(x.send("class").send("name").to<QString>()));
     }
-    auto objptr = x.send("pointer");
+    auto objptr = x.send(RUBYQML_INTERN("pointer"));
     auto obj = wrapperRubyClass<Ext::Pointer>().unwrap(objptr)->fetchQObject();
-    Ext::MetaObject::fromMetaObject(obj->metaObject()).send("build_class");
+    Ext::MetaObject::fromMetaObject(obj->metaObject()).send(RUBYQML_INTERN("build_class"));
     return obj;
 }
 

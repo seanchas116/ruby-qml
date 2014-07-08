@@ -112,7 +112,7 @@ public:
     template <typename ... Args>
     RubyValue newInstance(Args ... args)
     {
-        return toValue().send("new", args...);
+        return toValue().send(RUBYQML_INTERN("new"), args...);
     }
 };
 

@@ -52,11 +52,7 @@ void RubyModule::aliasMethod(const char *newName, const char *originalName)
 
 void RubyModule::checkType()
 {
-    bool check;
-    protect([&] {
-        check = rb_obj_is_kind_of(mValue, rb_cModule);
-    });
-    if (!check) {
+    if (!protect([&] { return rb_obj_is_kind_of(mValue, rb_cModule); })) {
         throw std::logic_error("expected Module value");
     }
 }
@@ -71,11 +67,9 @@ namespace {
 
 RubyValue defineClass(const RubyModule &under, const char *name)
 {
-    RubyValue klass;
-    protect([&] {
-        klass = rb_define_class_under(under.toValue(), name, rb_cObject);
+    return protect([&] {
+        return rb_define_class_under(under.toValue(), name, rb_cObject);
     });
-    return klass;
 }
 
 }

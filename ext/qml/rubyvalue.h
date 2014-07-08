@@ -38,11 +38,9 @@ public:
     template <typename ... TArgs>
     RubyValue send(const char *method, TArgs ... args) const
     {
-        RubyValue ret;
-        protect([&] {
-            ret = rb_funcall(mValue, rb_intern(method), sizeof...(args), RubyValue(args)...);
+        return protect([&] {
+            return rb_funcall(mValue, rb_intern(method), sizeof...(args), RubyValue(args)...);
         });
-        return ret;
     }
 
     bool operator==(const RubyValue &other) const { return mValue == other.mValue; }
@@ -91,11 +89,9 @@ struct Conversion<T, typename std::enable_if<std::is_signed<T>::value && std::is
 {
     static T from(RubyValue x)
     {
-        T ret;
-        protect([&] {
-            ret = NUM2LL(x);
+        return protect([&] {
+            return NUM2LL(x);
         });
-        return ret;
     }
     static RubyValue to(T x)
     {
@@ -110,11 +106,9 @@ struct Conversion<T, typename std::enable_if<std::is_unsigned<T>::value && std::
 {
     static T from(RubyValue x)
     {
-        T ret;
-        protect([&] {
-            ret = NUM2ULL(x);
+        return protect([&] {
+            return NUM2ULL(x);
         });
-        return ret;
     }
     static RubyValue to(T x)
     {
@@ -129,16 +123,14 @@ struct Conversion<T, typename std::enable_if<std::is_floating_point<T>::value>::
 {
     static T from(RubyValue x)
     {
-        auto type = rb_type(x);
-        if (type == T_FIXNUM || type == T_BIGNUM) {
-            return NUM2LL(x);
-        }
-
-        T ret;
-        protect([&] {
-            ret = rb_float_value(x);
+        return protect([&] {
+            auto type = rb_type(x);
+            if (type == T_FIXNUM || type == T_BIGNUM) {
+                return double(NUM2LL(x));
+            } else {
+                return rb_float_value(x);
+            }
         });
-        return ret;
     }
     static RubyValue to(T x)
     {
@@ -170,9 +162,8 @@ struct Conversion<T<V>, typename std::enable_if<IsQListLike<T<V>>::value>::type>
     }
     static RubyValue to(const T<V> &list)
     {
-        RubyValue ary;
-        protect([&] {
-            ary = rb_ary_new();
+        RubyValue ary = protect([&] {
+            return rb_ary_new();
         });
         for (const auto &elem : list) {
             auto x = RubyValue::from(elem);
@@ -214,9 +205,8 @@ struct Conversion<T<K, V>, typename std::enable_if<IsQHashLike<T<K, V>>::value>:
     }
     static RubyValue to(const T<K, V> &hash)
     {
-        RubyValue rubyHash;
-        protect([&] {
-            rubyHash = rb_hash_new();
+        RubyValue rubyHash = protect([&] {
+            return rb_hash_new();
         });
         for (auto i = hash.begin(); i != hash.end(); ++i) {
             auto k = RubyValue::from(i.key());

@@ -2,6 +2,7 @@
 
 #include <QMetaType>
 #include <functional>
+#include <type_traits>
 #include <ruby.h>
 
 namespace RubyQml {
@@ -17,8 +18,22 @@ private:
     int mState = 0;
 };
 
+
 // Convert Ruby exceptions into C++ exceptions (RubyException)
 void protect(const std::function<void()> &doAction);
+
+template <typename F>
+typename std::enable_if<
+    !std::is_same<typename std::result_of<F()>::type, void>::value,
+    typename std::result_of<F()>::type>::type
+protect(const F &doAction)
+{
+    typename std::result_of<F()>::type ret;
+    protect([&] {
+        ret = doAction();
+    });
+    return ret;
+}
 
 // Regenerate Ruby exceptions that are converted into RubyException
 // and convert std::exception exceptions into Ruby errors.

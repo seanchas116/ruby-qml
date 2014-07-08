@@ -23,14 +23,12 @@ namespace {
 
 RubyValue convertToString(RubyValue x)
 {
-    RubyValue ret;
-    protect([&] {
+    return protect([&] {
         if (rb_type(x) == T_SYMBOL) {
             x = rb_sym_to_s(x);
         }
-        ret = rb_convert_type(x, T_STRING, "String", "to_str");
+        return rb_convert_type(x, T_STRING, "String", "to_str");
     });
-    return ret;
 }
 
 struct ConverterHash
@@ -119,11 +117,9 @@ Q_GLOBAL_STATIC(ConverterHash, converterHash)
 
 RubyValue Conversion<const char *>::to(const char *str)
 {
-    RubyValue ret;
-    protect([&] {
-        ret = rb_enc_str_new_cstr(str, rb_utf8_encoding());
+    return protect([&] {
+        return rb_enc_str_new_cstr(str, rb_utf8_encoding());
     });
-    return ret;
 }
 
 template <> QByteArray Conversion<QByteArray>::from(RubyValue x)
@@ -375,7 +371,8 @@ bool RubyValue::isConvertibleTo(int metaType) const
 
         break;
     }
-    auto test = [&] {
+
+    return protect([&] {
         if (rb_obj_is_kind_of(x, rb_cTime)) {
             return metaType == QMetaType::QDateTime;
         }
@@ -424,12 +421,7 @@ bool RubyValue::isConvertibleTo(int metaType) const
             return metaType == QMetaType::QObjectStar;
         }
         return false;
-    };
-    bool result;
-    protect([&] {
-        result = test();
     });
-    return result;
 }
 
 int RubyValue::defaultMetaType() const
@@ -461,7 +453,7 @@ int RubyValue::defaultMetaType() const
     default:
         break;
     }
-    auto get = [&]() -> int {
+    return protect([&]() -> int {
         if (rb_obj_is_kind_of(x, rb_cTime)) {
             return QMetaType::QDateTime;
         }
@@ -502,12 +494,7 @@ int RubyValue::defaultMetaType() const
             return  QMetaType::QObjectStar;
         }
         return QMetaType::UnknownType;
-    };
-    int result;
-    protect([&] {
-        result = get();
     });
-    return result;
 }
 
 RubyValue RubyValue::fromVariant(const QVariant &variant)
@@ -627,11 +614,9 @@ QObject *RubyValue::toQObject() const
 
 ID RubyValue::toID() const
 {
-    ID id;
-    protect([&] {
-        id = SYM2ID(rb_convert_type(*this, T_SYMBOL, "Symbol", "to_sym"));
+    return protect([&] {
+        return SYM2ID(rb_convert_type(*this, T_SYMBOL, "Symbol", "to_sym"));
     });
-    return id;
 }
 
 void RubyValue::addEnumeratorMetaType(int metaType)

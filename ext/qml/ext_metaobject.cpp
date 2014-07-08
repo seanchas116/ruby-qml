@@ -20,14 +20,13 @@ namespace {
 
 RubyValue idListToArray(const QList<ID> &xs)
 {
-    RubyValue ary;
-    protect([&] {
-        ary = rb_ary_new();
+    return protect([&] {
+        auto ary = rb_ary_new();
         for (ID id : xs) {
             rb_ary_push(ary, ID2SYM(id));
         }
+        return ary;
     });
-    return ary;
 }
 
 }

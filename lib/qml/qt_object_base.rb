@@ -1,7 +1,7 @@
 require 'qml/dispatchable'
 
 module QML
-  class Wrapper
+  class QtObjectBase
     include Dispatchable
     include Reactive::Object
 

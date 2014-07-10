@@ -41,7 +41,7 @@ module QML
     end
 
     # Instantiates a object from the QML file.
-    # @return [Wrapper] The created Qt object
+    # @return [QtObjectBase] The created Qt object
     def create
       @extension.create(@context)
     end

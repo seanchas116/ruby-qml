@@ -20,7 +20,7 @@ ObjectData *ObjectData::getOrCreate(QObject *target)
 
 void ObjectData::gc_mark()
 {
-    rb_gc_mark(wrapper);
+    rb_gc_mark(rubyObject);
 }
 
 } // namespace RubyQml

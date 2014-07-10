@@ -128,8 +128,8 @@ public:
             return Qnil;
         } else {
             auto ret = RubyValue::from(returnValue);
-            static auto wrapperClass = RubyClass::fromPath("QML::Wrapper");
-            if (ret.isKindOf(wrapperClass)) {
+            static auto objectBaseClass = RubyClass::fromPath("QML::QtObjectBase");
+            if (ret.isKindOf(objectBaseClass)) {
                 auto pointer = wrapperRubyClass<Pointer>().unwrap(ret.send("pointer"));
                 pointer->preferManaged(true);
             }

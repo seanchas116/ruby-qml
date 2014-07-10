@@ -436,8 +436,8 @@ bool RubyValue::isConvertibleTo(int metaType) const
         if (rb_obj_is_kind_of(x, dateClass)) {
             return metaType == QMetaType::QDate || metaType == QMetaType::QDateTime;
         }
-        static auto wrapperClass = RubyClass::fromPath("QML::Wrapper");
-        if (rb_obj_is_kind_of(x, wrapperClass)) {
+        static auto objectBaseClass = RubyClass::fromPath("QML::QtObjectBase");
+        if (rb_obj_is_kind_of(x, objectBaseClass)) {
             if (metaType == QMetaType::QObjectStar) {
                 return true;
             }
@@ -520,8 +520,8 @@ int RubyValue::defaultMetaType() const
             return QMetaType::QDate;
         }
 
-        static auto wrapperClass = RubyClass::fromPath("QML::Wrapper");
-        if (rb_obj_is_kind_of(x, wrapperClass)) {
+        static auto objectBaseClass = RubyClass::fromPath("QML::QtObjectBase");
+        if (rb_obj_is_kind_of(x, objectBaseClass)) {
             return QMetaType::QObjectStar;
         }
         if (rb_obj_is_kind_of(x, wrapperRubyClass<Ext::MetaObject>())) {
@@ -626,8 +626,8 @@ RubyValue RubyValue::fromQObject(QObject *obj, bool implicit)
     }
 
     auto data = ObjectData::getOrCreate(obj);
-    if (data->wrapper) {
-        return data->wrapper;
+    if (data->rubyObject) {
+        return data->rubyObject;
     }
 
     auto metaobj = Ext::MetaObject::fromMetaObject(obj->metaObject());
@@ -640,7 +640,7 @@ RubyValue RubyValue::fromQObject(QObject *obj, bool implicit)
         rb_funcall(wrapper, RUBYQML_INTERN("pointer="), 1, pointer);
         rb_obj_call_init(wrapper, 0, nullptr);
     });
-    data->wrapper = wrapper;
+    data->rubyObject = wrapper;
     return wrapper;
 }
 
@@ -663,10 +663,10 @@ QObject *RubyValue::toQObject() const
         return new ListModel(x);
     }
 
-    static auto wrapperClass = RubyClass::fromPath("QML::Wrapper");
-    if (!x.isKindOf(wrapperClass)) {
+    static auto objectBaseClass = RubyClass::fromPath("QML::QtObjectBase");
+    if (!x.isKindOf(objectBaseClass)) {
         fail("QML::ConversionError",
-             QString("expected QML::Wrapper , got %1")
+             QString("expected QML::QtObjectbase, got %1")
                 .arg(x.send("class").send("name").to<QString>()));
     }
     auto objptr = x.send(RUBYQML_INTERN("pointer"));

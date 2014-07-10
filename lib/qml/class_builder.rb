@@ -1,5 +1,5 @@
 require 'logger'
-require 'qml/wrapper'
+require 'qml/qt_object_base'
 require 'qml/qml'
 require 'qml/name_helper'
 
@@ -78,7 +78,7 @@ module QML
 
     def create
       super_metaobj = @metaobj.super_class
-      @klass = Class.new(super_metaobj ? super_metaobj.build_class : Wrapper)
+      @klass = Class.new(super_metaobj ? super_metaobj.build_class : QtObjectBase)
     end
 
     def define_method(name)

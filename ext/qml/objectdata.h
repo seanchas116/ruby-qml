@@ -9,7 +9,7 @@ class ObjectData : public QObject, public Markable
 {
 public:
     ObjectData(QObject *target);
-    RubyValue wrapper;
+    RubyValue rubyObject;
     bool owned = false;
 
     void gc_mark() override;

@@ -31,7 +31,7 @@ module QML
     # Evaluates an JavaScript expression on the object in this context.
     # @param obj The object the expression is evaluated on
     # @param str The JavaScript expression string
-    # @see Wrapper#qml_eval
+    # @see QtObjectBase#qml_eval
     def eval(obj, str)
       @extension.evaluate(obj, str)
     end
@@ -43,7 +43,7 @@ module QML
     def []=(key, value)
       # be sure that the value is managed when it is a QObject
       value = value.create_wrapper if value.is_a? Wrappable
-      value.prefer_managed true if value.is_a? Wrapper
+      value.prefer_managed true if value.is_a? QtObjectBase
 
       # hold referenece because QQmlContext::setContextProperty does not take ownership of objects
       @context_properties[key] = value

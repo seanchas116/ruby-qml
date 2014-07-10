@@ -134,7 +134,7 @@ describe "test object" do
     end
   end
 
-  describe 'Wrapper#inspect' do
+  describe 'QtObjectBase#inspect' do
     it 'inspects the class name and property values' do
       expect(obj.inspect).to eq %{#<[class for RubyQml::TestObject]:#{obj.__id__} enumValue=0 name="" objectName="" someValue=0.0>}
     end

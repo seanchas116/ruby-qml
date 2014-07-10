@@ -23,8 +23,8 @@ describe QML::Access do
   end
 end
 
-describe QML::Wrapper do
+describe QML::QtObjectBase do
   it 'includes Dispatchable' do
-    expect(QML::Wrapper.include?(QML::Dispatchable)).to eq true
+    expect(QML::QtObjectBase.include?(QML::Dispatchable)).to eq true
   end
 end

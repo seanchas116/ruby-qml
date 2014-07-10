@@ -46,6 +46,8 @@ public:
     static void defineClass();
 
 private:
+    void checkThread() const;
+
     QList<int> findMethods(RubyValue name) const;
     int findProperty(RubyValue name) const;
 

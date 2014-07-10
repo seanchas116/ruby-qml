@@ -146,4 +146,41 @@ describe "test object" do
       expect(subobj.normalMethod(1, "23")).to eq(24)
     end
   end
+
+  context 'in non-main threads' do
+
+    require 'celluloid'
+
+    class TestCaller
+      include Celluloid
+
+      def initialize(obj)
+        @obj = obj
+      end
+
+      def call(method, *args)
+        @obj.public_send(method, *args)
+      rescue => e
+        e
+      end
+    end
+
+    let(:test_caller) { TestCaller.new(obj) }
+
+    describe '#normal_method' do
+      it 'fails' do
+        expect(test_caller.call(:normal_method, 1, "23")).to be_a QML::InvalidThreadError
+      end
+    end
+    describe '#name' do
+      it 'fails' do
+        expect(test_caller.call(:name)).to be_a QML::InvalidThreadError
+      end
+    end
+    describe '#name=' do
+      it 'fails' do
+        expect(test_caller.call(:name=, "hoge")).to be_a QML::InvalidThreadError
+      end
+    end
+  end
 end

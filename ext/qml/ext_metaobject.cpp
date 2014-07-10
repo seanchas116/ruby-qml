@@ -143,6 +143,8 @@ private:
 
 RubyValue MetaObject::invokeMethod(RubyValue object, RubyValue methodName, RubyValue args) const
 {
+    checkThread();
+
     auto methodIndexes = findMethods(methodName);
 
     protect([&] {
@@ -202,6 +204,8 @@ RubyValue MetaObject::propertyNames() const
 
 RubyValue MetaObject::getProperty(RubyValue object, RubyValue name) const
 {
+    checkThread();
+
     auto metaProperty = mMetaObject->property(findProperty(name));
 
     auto qobj = wrapperRubyClass<Pointer>().unwrap(object)->fetchQObject();
@@ -214,6 +218,8 @@ RubyValue MetaObject::getProperty(RubyValue object, RubyValue name) const
 
 RubyValue MetaObject::setProperty(RubyValue object, RubyValue name, RubyValue newValue) const
 {
+    checkThread();
+
     auto metaProperty = mMetaObject->property(findProperty(name));
     if (!newValue.isConvertibleTo(metaProperty.userType())) {
         protect([&] {
@@ -242,6 +248,13 @@ RubyValue MetaObject::notifySignal(RubyValue name) const
     }
     else {
         return Qnil;
+    }
+}
+
+void MetaObject::checkThread() const
+{
+    if (rb_thread_current() != rb_thread_main()) {
+        fail("QML::InvalidThreadError", "Qt object accessed from non-main thread");
     }
 }
 

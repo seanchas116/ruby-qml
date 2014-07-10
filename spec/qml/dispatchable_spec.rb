@@ -17,14 +17,10 @@ describe QML::Dispatchable do
   end
 end
 
-describe QML::Access do
-  it 'includes Dispatchable' do
-    expect(QML::Access.include?(QML::Dispatchable)).to eq true
-  end
-end
-
-describe QML::QtObjectBase do
-  it 'includes Dispatchable' do
-    expect(QML::QtObjectBase.include?(QML::Dispatchable)).to eq true
+[QML::Access, QML::QtObjectBase, QML::Data::ListModel].each do |mod|
+  describe mod do
+    it 'includes Dispatchable' do
+      expect(mod.include?(QML::Dispatchable)).to eq true
+    end
   end
 end

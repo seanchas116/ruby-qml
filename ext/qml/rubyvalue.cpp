@@ -615,7 +615,7 @@ RubyValue RubyValue::fromQObject(QObject *obj, bool implicit)
     }
 
     if (implicit) {
-        auto accessObj = dynamic_cast<AccessObject *>(obj);
+        auto accessObj = dynamic_cast<AccessWrapper *>(obj);
         if (accessObj) {
             return accessObj->wrappedValue();
         }
@@ -653,10 +653,10 @@ QObject *RubyValue::toQObject() const
     }
     static auto accessModule = RubyModule::fromPath("QML::Access");
     if (x.isKindOf(accessModule)) {
-        auto support = protect([&] {
-            return rb_funcall(rb_obj_class(x), RUBYQML_INTERN("access_support"), 0);
+        auto wrapperFactory = protect([&] {
+            return rb_funcall(rb_obj_class(x), RUBYQML_INTERN("access_wrapper_factory"), 0);
         });
-        return wrapperRubyClass<Ext::AccessSupport>().unwrap(support)->wrap(x);
+        return wrapperRubyClass<Ext::AccessWrapperFactory>().unwrap(wrapperFactory)->create(x);
     }
     static auto listModelClass = RubyModule::fromPath("QML::Data::ListModel");
     if (x.isKindOf(listModelClass)) {

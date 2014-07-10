@@ -49,18 +49,18 @@ void QmlTypeRegisterer::registerType(const char *uri, int versionMajor, int vers
 
     QQmlPrivate::RegisterType type = {
         0,
-        qRegisterNormalizedMetaType<AccessObject *>(className),
-        qRegisterNormalizedMetaType<QQmlListProperty<AccessObject> >(listName),
-        sizeof(AccessObject), mFactoryFunc,
+        qRegisterNormalizedMetaType<AccessWrapper *>(className),
+        qRegisterNormalizedMetaType<QQmlListProperty<AccessWrapper> >(listName),
+        sizeof(AccessWrapper), mFactoryFunc,
         QString(),
 
         uri, versionMajor, versionMinor, qmlName, mMetaObject.get(),
 
         0, 0,
 
-        QQmlPrivate::StaticCastSelector<AccessObject,QQmlParserStatus>::cast(),
-        QQmlPrivate::StaticCastSelector<AccessObject,QQmlPropertyValueSource>::cast(),
-        QQmlPrivate::StaticCastSelector<AccessObject,QQmlPropertyValueInterceptor>::cast(),
+        QQmlPrivate::StaticCastSelector<AccessWrapper,QQmlParserStatus>::cast(),
+        QQmlPrivate::StaticCastSelector<AccessWrapper,QQmlPropertyValueSource>::cast(),
+        QQmlPrivate::StaticCastSelector<AccessWrapper,QQmlPropertyValueInterceptor>::cast(),
 
         0, 0,
 

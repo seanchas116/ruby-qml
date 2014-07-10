@@ -9,16 +9,16 @@
 namespace RubyQml {
 namespace Ext {
 
-AccessSupport::AccessSupport(RubyValue self) :
+AccessWrapperFactory::AccessWrapperFactory(RubyValue self) :
     self(self)
 {
 }
 
-AccessSupport::~AccessSupport()
+AccessWrapperFactory::~AccessWrapperFactory()
 {
 }
 
-RubyValue AccessSupport::initialize(RubyValue rubyClass, RubyValue className, RubyValue methodInfos, RubyValue signalInfos, RubyValue propertyInfos)
+RubyValue AccessWrapperFactory::ext_initialize(RubyValue rubyClass, RubyValue className, RubyValue methodInfos, RubyValue signalInfos, RubyValue propertyInfos)
 {
     mRubyClass = rubyClass;
     mAccessClass = makeSP<AccessClass>(className, methodInfos, signalInfos, propertyInfos);
@@ -26,7 +26,7 @@ RubyValue AccessSupport::initialize(RubyValue rubyClass, RubyValue className, Ru
     return self;
 }
 
-RubyValue AccessSupport::emitSignal(RubyValue obj, RubyValue name, RubyValue args)
+RubyValue AccessWrapperFactory::ext_emitSignal(RubyValue obj, RubyValue name, RubyValue args)
 {
     auto accessObj = wrapperRubyClass<Pointer>().unwrap(obj.send("access_object"))->fetchQObject();
     auto nameId = name.toID();
@@ -37,30 +37,40 @@ RubyValue AccessSupport::emitSignal(RubyValue obj, RubyValue name, RubyValue arg
     return Qnil;
 }
 
-AccessObject *AccessSupport::wrap(RubyValue access)
+RubyValue AccessWrapperFactory::ext_registerToQml(RubyValue path, RubyValue majorVersion, RubyValue minorVersion, RubyValue name)
 {
-    return new AccessObject(mMetaObject, access);
-}
-
-RubyValue AccessSupport::registerToQml(RubyValue path, RubyValue majorVersion, RubyValue minorVersion, RubyValue name)
-{
+    using namespace std::placeholders;
     if (!mTypeRegisterer) {
-        mTypeRegisterer = makeSP<QmlTypeRegisterer>(mMetaObject, [this](void *where) {
-            withGvl([&] {
-                new(where) AccessObject(mMetaObject, mRubyClass.send("new"));
-            });
-        });
+        mTypeRegisterer = makeSP<QmlTypeRegisterer>(mMetaObject, std::bind(&AccessWrapperFactory::newInstanceInto, this, _1));
         mTypeRegisterer->registerType(path.to<QByteArray>(), majorVersion.to<int>(), minorVersion.to<int>(), name.to<QByteArray>());
     }
     return self;
 }
 
-void AccessSupport::defineClass()
+RubyValue AccessWrapperFactory::ext_create(RubyValue access)
 {
-    WrapperRubyClass<AccessSupport> klass(RubyModule::fromPath("QML"), "AccessSupport");
-    klass.defineMethod(MethodAccess::Protected, "initialize", RUBYQML_MEMBER_FUNCTION_INFO(&AccessSupport::initialize));
-    klass.defineMethod("emit_signal", RUBYQML_MEMBER_FUNCTION_INFO(&AccessSupport::emitSignal));
-    klass.defineMethod("register_to_qml", RUBYQML_MEMBER_FUNCTION_INFO(&AccessSupport::registerToQml));
+    return RubyValue::fromQObject(create(access), false);
+}
+
+AccessWrapper *AccessWrapperFactory::create(RubyValue access)
+{
+    return new AccessWrapper(mMetaObject, access);
+}
+
+void AccessWrapperFactory::newInstanceInto(void *where)
+{
+    withGvl([&] {
+        new(where) AccessWrapper(mMetaObject, mRubyClass.send("new"));
+    });
+}
+
+void AccessWrapperFactory::defineClass()
+{
+    WrapperRubyClass<AccessWrapperFactory> klass(RubyModule::fromPath("QML"), "AccessWrapperFactory");
+    klass.defineMethod(MethodAccess::Protected, "initialize", RUBYQML_MEMBER_FUNCTION_INFO(&AccessWrapperFactory::ext_initialize));
+    klass.defineMethod("emit_signal", RUBYQML_MEMBER_FUNCTION_INFO(&AccessWrapperFactory::ext_emitSignal));
+    klass.defineMethod("register_to_qml", RUBYQML_MEMBER_FUNCTION_INFO(&AccessWrapperFactory::ext_registerToQml));
+    klass.defineMethod("create", RUBYQML_MEMBER_FUNCTION_INFO(&AccessWrapperFactory::ext_create));
 }
 
 } // namespace Ext

@@ -26,7 +26,7 @@ void defineClasses()
     Ext::Pointer::defineClass();
     Ext::PluginLoader::defineClass();
     Ext::GCMarker::defineClass();
-    Ext::AccessSupport::defineClass();
+    Ext::AccessWrapperFactory::defineClass();
     Ext::TestUtil::defineModule();
     Ext::Kernel::defineModule();
 }

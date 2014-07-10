@@ -7,26 +7,29 @@ namespace RubyQml {
 class AccessClass;
 class ForeignMetaObject;
 class QmlTypeRegisterer;
-class AccessObject;
+class AccessWrapper;
 
 namespace Ext {
 
-class AccessSupport
+class AccessWrapperFactory
 {
 public:
-    AccessSupport(RubyValue self);
-    ~AccessSupport();
+    AccessWrapperFactory(RubyValue self);
+    ~AccessWrapperFactory();
 
-    RubyValue initialize(RubyValue rubyClass, RubyValue className, RubyValue methodInfos, RubyValue signalInfos, RubyValue propertyInfos);
-    RubyValue emitSignal(RubyValue obj, RubyValue name, RubyValue args);
-    RubyValue registerToQml(RubyValue path, RubyValue majorVersion, RubyValue minorVersion, RubyValue name);
+    RubyValue ext_initialize(RubyValue rubyClass, RubyValue className, RubyValue methodInfos, RubyValue signalInfos, RubyValue propertyInfos);
+    RubyValue ext_emitSignal(RubyValue obj, RubyValue name, RubyValue args);
+    RubyValue ext_registerToQml(RubyValue path, RubyValue majorVersion, RubyValue minorVersion, RubyValue name);
+    RubyValue ext_create(RubyValue access);
 
-    AccessObject *wrap(RubyValue access);
+    AccessWrapper *create(RubyValue access);
 
     void gc_mark() {}
     static void defineClass();
 
 private:
+
+    void newInstanceInto(void *where);
 
     const RubyValue self;
     RubyValue mRubyClass;

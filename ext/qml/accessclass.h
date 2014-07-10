@@ -4,7 +4,7 @@
 
 namespace RubyQml {
 
-class AccessObject;
+class AccessWrapper;
 
 class AccessClass : public ForeignClass
 {

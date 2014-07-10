@@ -5,11 +5,11 @@
 
 namespace RubyQml {
 
-class AccessObject : public ForeignObject, public Markable
+class AccessWrapper : public ForeignObject, public Markable
 {
 public:
-    AccessObject(const SP<ForeignMetaObject> &metaobj, RubyValue wrappedValue);
-    ~AccessObject();
+    AccessWrapper(const SP<ForeignMetaObject> &metaobj, RubyValue wrappedValue);
+    ~AccessWrapper();
 
     RubyValue wrappedValue() { return mWrapped.value(); }
     void gc_mark() override;

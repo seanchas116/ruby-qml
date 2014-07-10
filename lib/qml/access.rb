@@ -9,7 +9,7 @@ module QML
     def self.included(derived)
       derived.class_eval do
         include Reactive::Object
-        include InstanceMethods
+        include SignalInitialization
         extend ClassMethods
       end
     end
@@ -52,23 +52,32 @@ module QML
         fail AccessError, 'insufficient version (major and minor versions required)' unless versions.size >= 2
         name ||= path.last
 
-        @qml_registeration = [under, versions[0], versions[1], name]
+        @qml_registeration = {
+          under: under,
+          version_major: versions[0],
+          version_minor: versions[1],
+          name: name
+        }
         Access.unregistered_classes << self
       end
 
       # @api private
       def register_to_qml_real
-        access_support.register_to_qml(*@qml_registeration) if @qml_registeration
+        access_wrapper_factory.register_to_qml(
+          @qml_registeration[:under],
+          @qml_registeration[:version_major],
+          @qml_registeration[:version_minor],
+          @qml_registeration[:name])
       end
 
       # @api private
-      def access_support
-        @access_support ||= create_access_support
+      def access_wrapper_factory
+        @access_wrapper_factory ||= create_access_wrapper_factory
       end
 
       private
 
-      def create_access_support
+      def create_access_wrapper_factory
         classname = "RubyQml::Access::#{name}"
 
         signals = instance_signals.grep(ALLOWED_PATTERN)
@@ -91,27 +100,30 @@ module QML
           .select { |method| method.parameters.all? { |param| param[0] == :req } }
           .map { |method| OpenStruct.new(name: method.name, params: method.parameters.map(&:last)) }
 
-        AccessSupport.new(self, classname, method_infos, signal_infos, property_infos)
+        AccessWrapperFactory.new(self, classname, method_infos, signal_infos, property_infos)
       end
     end
 
-    module InstanceMethods
+    module SignalInitialization
       def initialize(*args, &block)
         super
         signal_names = signals + properties.map { |name| :"#{name}_changed" }
-        access_support = self.class.access_support
         signal_names.each do |name|
           __send__(name).connect do |*args|
-            @access_objects.each do |obj|
+            @access_wrappers.each do |obj|
               obj.class.meta_object.invoke_method(obj.pointer, name, args)
             end
           end
         end
-        @access_objects = []
       end
+    end
 
-      # @api private
-      attr_reader :access_objects
+    # @api private
+    attr_reader :access_wrappers
+
+    def initialize(*args, &block)
+      super
+      @access_wrappers = []
     end
   end
 end

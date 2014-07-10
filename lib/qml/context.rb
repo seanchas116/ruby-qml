@@ -41,9 +41,13 @@ module QML
     # @param value The value
     # @return The value
     def []=(key, value)
+      # be sure that the value is managed when it is a QObject
+      value = value.create_wrapper if value.is_a? Wrappable
       value.prefer_managed true if value.is_a? Wrapper
-      # just hold referenece
+
+      # hold referenece because QQmlContext::setContextProperty does not take ownership of objects
       @context_properties[key] = value
+
       @extension.setContextProperty(key, value)
       value
     end

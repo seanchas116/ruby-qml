@@ -1,10 +1,12 @@
 require 'ostruct'
 require 'qml/qml'
 require 'qml/dispatchable'
+require 'qml/wrappable'
 
 module QML
   module Access
     include Dispatchable
+    include Wrappable
 
     def self.included(derived)
       derived.class_eval do
@@ -124,6 +126,10 @@ module QML
     def initialize(*args, &block)
       super
       @access_wrappers = []
+    end
+
+    def create_wrapper
+      self.class.access_wrapper_factory.create(self)
     end
   end
 end

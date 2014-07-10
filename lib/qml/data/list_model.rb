@@ -1,9 +1,11 @@
 require 'qml/data/error'
+require 'qml/wrappable'
 
 module QML
   module Data
     class ListModel
       include ::Enumerable
+      include Wrappable
 
       class << self
         def column(*columns)

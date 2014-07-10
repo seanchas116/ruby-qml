@@ -9,6 +9,7 @@
 #include "signalforwarder.h"
 #include "valuereference.h"
 #include "objectgc.h"
+#include "listmodel.h"
 #include <QtCore/QSet>
 
 using namespace RubyQml;
@@ -29,6 +30,7 @@ void defineClasses()
     Ext::AccessWrapperFactory::defineClass();
     Ext::TestUtil::defineModule();
     Ext::Kernel::defineModule();
+    ListModel::defineUtilMethods();
 }
 
 void setupGlobalGCMarking()
@@ -59,7 +61,7 @@ void Init_qml()
     rb_require("qml/error_converter");
     auto args = RubyValue(rb_argv).to<QList<QByteArray>>();
 
-    protect([&] {
+    unprotect([&] {
         Application::init(args);
         defineMetaTypes();
         defineClasses();

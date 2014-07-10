@@ -1,4 +1,5 @@
 #include "listmodel.h"
+#include "rubyclass.h"
 #include <QMetaObject>
 #include <QMetaMethod>
 
@@ -91,6 +92,21 @@ void ListModel::update(int first, int last)
 void ListModel::gc_mark()
 {
     rb_gc_mark(mRubyModel);
+}
+
+namespace {
+
+RubyValue createWrapper(RubyValue self)
+{
+    return RubyValue::fromQObject(new ListModel(self), false);
+}
+
+}
+
+void ListModel::defineUtilMethods()
+{
+    auto klass = RubyClass(RubyModule(RubyModule("QML"), "Data"), "ListModel");
+    klass.defineMethod("create_wrapper", RUBYQML_FUNCTION_INFO(&createWrapper));
 }
 
 } // namespace RubyQml

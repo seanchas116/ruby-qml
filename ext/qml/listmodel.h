@@ -23,6 +23,8 @@ public:
 
     void gc_mark() override;
 
+    static void defineUtilMethods();
+
 public slots:
     void beginMove(int first, int last, int destination);
     void endMove();

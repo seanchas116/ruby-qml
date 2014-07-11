@@ -14,7 +14,6 @@ require 'qml/image_provider'
 require 'qml/qt'
 require 'qml/access'
 require 'qml/root_path'
-require 'qml/callback_loop'
 require 'qml/dispatcher'
 require 'qml/dispatchable'
 

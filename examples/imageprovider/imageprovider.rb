@@ -17,8 +17,13 @@ module Examples
         @url = url
       end
 
-      def fetch
-        open(@url, 'rb') { |f| f.read } rescue nil
+      def fetch(request)
+        image =
+          case request.id
+          when "image"
+            open(@url, 'rb') { |f| f.read } rescue nil
+          end
+        request.finish(image || "")
       end
     end
 
@@ -36,10 +41,10 @@ module Examples
 
     class Provider < QML::ImageProvider
 
-      def request(id)
-        case id
+      def request(req)
+        case req.id
         when 'image'
-          ImageFetcher.instance.fetch
+          ImageFetcher.instance.fetch(req)
         end
       end
     end

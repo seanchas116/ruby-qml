@@ -17,7 +17,7 @@ SOURCES += coreplugin.cpp \
     contextextension.cpp \
     engineextension.cpp \
     imageprovider.cpp \
-    rubycallbackloop.cpp
+    imagerequestpromise.cpp
 
 HEADERS += coreplugin.h \
     qmlexception.h \
@@ -26,4 +26,4 @@ HEADERS += coreplugin.h \
     contextextension.h \
     engineextension.h \
     imageprovider.h \
-    rubycallbackloop.h
+    imagerequestpromise.h

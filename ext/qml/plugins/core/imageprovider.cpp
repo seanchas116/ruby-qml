@@ -1,12 +1,11 @@
 #include "imageprovider.h"
-#include "rubycallbackloop.h"
+#include "imagerequestpromise.h"
 #include <QDebug>
 
 namespace RubyQml {
 
-ImageProvider::ImageProvider(RubyCallbackLoop *callbackLoop, QObject *rubyCallback) :
-    QQuickImageProvider(QQuickImageProvider::Image),
-    mCallbackLoop(callbackLoop),
+ImageProvider::ImageProvider(QObject *rubyCallback) :
+    QQuickImageProvider(QQuickImageProvider::Image, QQuickImageProvider::ForceAsynchronousImageLoading),
     mRubyCallback(rubyCallback)
 {
     rubyCallback->setParent(this);
@@ -14,22 +13,18 @@ ImageProvider::ImageProvider(RubyCallbackLoop *callbackLoop, QObject *rubyCallba
 
 QImage ImageProvider::requestImage(const QString &id, QSize *size, const QSize &requestedSize)
 {
-    QVariant result;
-    mCallbackLoop->runTask([&] {
-        mRubyCallback->metaObject()->invokeMethod(
-            mRubyCallback,
-            "request",
-            Qt::DirectConnection,
-            Q_RETURN_ARG(QVariant, result),
-            Q_ARG(QVariant, id));
-    });
+    std::promise<QImage> promise;
+    auto future = promise.get_future();
+    ImageRequestPromise promiseObj(std::move(promise));
 
-    auto data = result.toByteArray();
-    auto image = QImage::fromData(data);
-    if (image.isNull()) {
-        qWarning() << __PRETTY_FUNCTION__ << ": invalid image returned";
-    }
+    mRubyCallback->metaObject()->invokeMethod(
+        mRubyCallback,
+        "request",
+        Qt::QueuedConnection,
+        Q_ARG(QVariant, id),
+        Q_ARG(QVariant, QVariant::fromValue(&promiseObj)));
 
+    auto image = future.get();
     if (requestedSize.isValid() && image.size() != requestedSize) {
         image = image.scaled(requestedSize, Qt::IgnoreAspectRatio, Qt::SmoothTransformation);
     }

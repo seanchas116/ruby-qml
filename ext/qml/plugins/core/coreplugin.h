@@ -14,18 +14,15 @@ class ApplicationExtension;
 class ComponentExtension;
 class EngineExtension;
 class ContextExtension;
-class RubyCallbackLoop;
 class ImageProvider;
 
 class CorePlugin : public QObject
 {
     Q_OBJECT
     Q_PLUGIN_METADATA(IID "org.ruby-qml.RubyQml.Core")
-    Q_PROPERTY(RubyQml::RubyCallbackLoop* callbackLoop READ callbackLoop)
 
 public:
     CorePlugin(QObject *parent = 0);
-    RubyQml::RubyCallbackLoop *callbackLoop() { return mCallbackLoop; }
 
 public slots:
     QVariantHash metaObjects() { return mMetaObjects; }
@@ -46,7 +43,6 @@ public slots:
 
 private:
     QVariantHash mMetaObjects;
-    RubyCallbackLoop *mCallbackLoop;
 };
 
 

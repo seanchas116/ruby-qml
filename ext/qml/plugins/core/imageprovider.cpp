@@ -1,6 +1,7 @@
 #include "imageprovider.h"
 #include "imagerequestpromise.h"
 #include <QDebug>
+#include <QApplication>
 
 namespace RubyQml {
 
@@ -15,14 +16,15 @@ QImage ImageProvider::requestImage(const QString &id, QSize *size, const QSize &
 {
     std::promise<QImage> promise;
     auto future = promise.get_future();
-    ImageRequestPromise promiseObj(std::move(promise));
+    auto promiseObj = new ImageRequestPromise(std::move(promise));
+    promiseObj->moveToThread(qApp->thread());
 
     mRubyCallback->metaObject()->invokeMethod(
         mRubyCallback,
         "request",
         Qt::QueuedConnection,
         Q_ARG(QVariant, id),
-        Q_ARG(QVariant, QVariant::fromValue(&promiseObj)));
+        Q_ARG(QVariant, QVariant::fromValue(promiseObj)));
 
     auto image = future.get();
     if (requestedSize.isValid() && image.size() != requestedSize) {

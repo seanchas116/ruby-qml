@@ -80,6 +80,7 @@ module QML
       end
 
       def request(id, promise)
+        promise.prefer_managed true
         @provider.request(Request.new(id, promise))
       end
     end

@@ -1,5 +1,7 @@
 # ruby-qml
 
+**NOTE: ruby-qml is not yet released as a gem.**
+
 ruby-qml is a QML / Qt Quick wrapper for Ruby.
 It provides bindings between QML and Ruby and enables you to use Qt Quick-based GUI from Ruby.
 

@@ -9,7 +9,7 @@ Gem::Specification.new do |spec|
   spec.authors       = ["Ryohei Ikegami"]
   spec.email         = ["iofg2100@gmail.com"]
   spec.summary       = %q{A QML / Qt Quick wrapper for Ruby}
-  spec.description   = ""
+  spec.description   = "ruby-qml provides bindings between QML and Ruby and enables you to use Qt Quick-based GUI from Ruby."
   spec.homepage      = ""
   spec.license       = "MIT"
 

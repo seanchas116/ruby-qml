@@ -11,11 +11,13 @@ module Examples
 
       property :input, '0'
       property :result , ''
+      signal :inputWasFizzBuzz, []
 
       on_changed :input do
         i = input.to_i
         self.result = case
-        when i % 3 == 0 && i % 5 == 0
+        when i % 15 == 0
+          inputWasFizzBuzz.emit
           "FizzBuzz"
         when i % 3 == 0
           "Fizz"

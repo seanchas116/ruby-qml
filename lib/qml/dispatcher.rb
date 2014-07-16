@@ -39,6 +39,21 @@ module QML
     end
   end
 
+  # Runs a block asynchronously within the event loop.
+  #
+  # QML UI is not thread-safe and can only be accessed from the main thread.
+  # Use this method to set results of asynchronous tasks to UI.
+  # @example
+  #   def on_button_clicked
+  #     Thread.new do
+  #       result = do_task
+  #       QML.later do
+  #         set_result_to_ui(result)
+  #       end
+  #     end
+  #   end
+  # @see Dispatchable#later
+  # @see Dispatcher#add_task
   def later(&block)
     Dispatcher.instance.add_task(&block)
   end

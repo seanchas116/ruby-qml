@@ -152,8 +152,8 @@ describe QML::Data::ArrayModel do
 
   describe '#delete_at' do
 
-    context 'when deleting 1 item' do
-      it 'returns it' do
+    context 'with no number' do
+      it 'deletes 1 item and returns it' do
         expect(model.delete_at(1)).to eq original_array[1]
       end
       context 'after called' do
@@ -166,8 +166,8 @@ describe QML::Data::ArrayModel do
       end
     end
 
-    context 'when deleting multiple items' do
-      it 'returns them as an array' do
+    context 'with number' do
+      it 'deletes multiple items and returns them as an array' do
         expect(model.delete_at(1, 2)).to eq original_array[1..2]
       end
       context 'after called' do

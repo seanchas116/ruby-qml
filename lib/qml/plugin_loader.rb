@@ -2,29 +2,45 @@ require 'pathname'
 require 'qml/platform'
 
 module QML
+  # {PluginLoader} loads Qt C++ plugins and enables you to use your Qt C++ codes from Ruby easily.
+  # @see http://qt-project.org/doc/qt-5/qpluginloader.html QPluginLoader (C++)
   class PluginLoader
 
-    module Extension
+    alias_method :initialize_orig, :initialize
+    private :initialize_orig
 
-      def initialize(dirname, libname)
-        dirname = Pathname.new(dirname) + lib_filename(libname)
-        super(dirname.to_s)
-      end
-
-      private
-
-      def lib_filename(libname)
-        case
-        when Platform::windows?
-          "#{libname}.dll"
-        when Platform::mac?
-          "lib#{libname}.dylib"
-        else
-          "lib#{libname}.so"
-        end
-      end
+    # @overload initialize(path)
+    #   @param [String|Pathname] path the library path (may be platform-dependent).
+    #   @example
+    #      loader = QML::PluginLoader.new('path/to/libhoge.dylib')
+    # @overload initialize(dir, libname)
+    #   @param [String|Pathname] dir the library directory.
+    #   @param [String] libname the platform-independent library name.
+    #   @example
+    #      loader = QML::PluginLoader.new('path/to', 'hoge')
+    def initialize(path, libname = nil)
+      path = Pathname(path) + self.class.lib_filename(libname) if libname
+      initialize_orig(path.to_s)
     end
 
-    prepend Extension
+    # @!method instance
+    #   Loads the plugin and returns the instance of the plugin.
+    #   @return [QtObjectBase]
+
+    # @param [String] libname
+    # @return [String] platform-dependent library file name.
+    # @example
+    #   # on Mac
+    #   QML::PluginLoader.lib_filename("hoge") #=> "libhoge.dylib"
+    def self.lib_filename(libname)
+      case
+      when Platform::windows?
+        "#{libname}.dll"
+      when Platform::mac?
+        "lib#{libname}.dylib"
+      else
+        "lib#{libname}.so"
+      end
+    end
   end
 end

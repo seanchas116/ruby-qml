@@ -6,7 +6,7 @@ import Examples.FizzBuzz 0.1
 ApplicationWindow {
     visible: true
     width: 200
-    height: 100
+    height: 200
     title: "FizzBuzz"
 
     ColumnLayout {
@@ -20,15 +20,19 @@ ApplicationWindow {
         Text {
             y: 100
             id: text
-            text: fizzbuzz.result
+            text: fizzBuzz.result
         }
         Button {
             text: 'Quit'
-            onClicked: fizzbuzz.quit()
+            onClicked: fizzBuzz.quit()
+        }
+        Text {
+            id: lastFizzBuzz
         }
     }
     FizzBuzz {
-        id: fizzbuzz
+        id: fizzBuzz
         input: textField.text
+        onInputWasFizzBuzz: lastFizzBuzz.text = "Last FizzBuzz: " + textField.text
     }
 }

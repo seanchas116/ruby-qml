@@ -7,9 +7,8 @@ module QML
     class Property < SimpleProperty
       include Bindable
 
-      # @param initial_value The initial value
-      # @param holder A custom value holder
-      # @yield The initial property binding (optional)
+      # @param initial_value the initial value.
+      # @yield the initial property binding (optional).
       def initialize(initial_value = nil, &block)
         super()
         self.value = initial_value if initial_value

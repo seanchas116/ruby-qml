@@ -1,5 +1,4 @@
 require 'qml/access'
-require 'qml/callback_loop'
 
 module QML
 

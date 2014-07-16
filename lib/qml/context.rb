@@ -1,13 +1,13 @@
 require 'qml/qt_classes'
 
 module QML
+  # @!parse class Context < QtObjectBase; end
 
   # {Context} represents QML contexts and used to expose Ruby values to QML.
   # Each context has values that is called "context properties" that can be accessed in QML by their names.
   #
-  # This class is automatically created from Qt class QQmlContext.
-  # Signals, slots and properties of QQmlContext can also be used in {Context}.
-  # (See {http://qt-project.org/doc/qt-5/qqmlcontext.html Qt C++ documentation} for details)
+  # This class is automatically created from QQmlContext (C++).
+  # @see http://qt-project.org/doc/qt-5/qqmlcontext.html QQmlContext(C++)
   #
   # @example
   #   QML.application do |app|

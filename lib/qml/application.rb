@@ -1,12 +1,12 @@
 require 'qml/qt_classes'
 
 module QML
+  # @!parse class Application < QtObjectBase; end
 
-  # {Application} represents a QML application instance.
+  # {Application} represents a Qt application instance.
+  # It provides the event loop and manages Application-level configurations.
   #
-  # This class is automatically created from Qt class QApplication.
-  # Signals, slots and properties of QApplication (like #quit or #application_name) can also be used in {Application}.
-  # (See {http://qt-project.org/doc/qt-5/qapplication.html Qt C++ documentation} for details)
+  # @see http://qt-project.org/doc/qt-5/qapplication.html QApplication (C++)
   class Application
 
     # @return [Application] The application instance.
@@ -18,12 +18,14 @@ module QML
       instance.notify_error(error)
     end
 
-    # This method cannot be called because {Application} is singleton. 
-    # @api private
+    # @note This method cannot be called because {Application} is singleton. 
     def self.new
       fail ApplicationError, "cannot create Application instance manually"
     end
 
+    # @!method events_processed
+    # This signal is emitted every time events are processed in the event loop.
+    # @return [Reactive::Signal]
     signal :events_processed, []
 
     def initialize
@@ -83,6 +85,8 @@ module QML
       @extension.exec
     end
 
+    # Processes queued events in the event loop manually.
+    # This method is useful when you are combining an external event loop like EventMachine.
     def process_events
       @extension.process_events
     end
@@ -107,13 +111,17 @@ module QML
     end
   end
 
-  # Returns the instance of {Application}.
-  # If a block is given, yields the application instance and then call {Application#exec}.
-  # @example
-  #   QML.application do |app|
-  #     app.context[:foo] = 'foo'
-  #     app.load_path Pathname(__FILE__) + '../main.qml'
-  #   end
+  # @overload application
+  #   Returns the instance of {Application}.
+  #   @return [Application]
+  # @overload application
+  #   Yields the application instance and then call {Application#exec}.
+  #   @return [Application]
+  #   @example
+  #     QML.application do |app|
+  #       app.context[:foo] = 'foo'
+  #       app.load_path Pathname(__FILE__) + '../main.qml'
+  #     end
   # @see Application.instance
   def application
     Application.instance.tap do |app|

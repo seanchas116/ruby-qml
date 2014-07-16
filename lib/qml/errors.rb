@@ -9,6 +9,7 @@ module QML
   class QMLError < StandardError; end
   class AccessError < StandardError; end
   class ApplicationError < StandardError; end
+  class EngineError < StandardError; end
   class InvalidThreadError < StandardError; end
 
   class CppError < StandardError

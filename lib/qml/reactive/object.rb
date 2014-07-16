@@ -7,6 +7,7 @@ module QML
     # {Object} is used to define signals and properties within class definition.
     # Signals and properties will be inherited by and can be overridden in subclasses.
     # @note Currently {Object} can be included only by classes, not modules.
+    # @see Object::ClassMethods
     module Object
 
       # When {Object} is included by a class, the class extends {ClassMethods} to add the common class methods.
@@ -76,6 +77,8 @@ module QML
           end
         EOS
       end
+
+      # @!parse extend ClassMethods
 
       module ClassMethods
 

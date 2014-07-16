@@ -1,12 +1,16 @@
 require 'qml/engine'
 
 module QML
+  # @!parse class Component < QtObjectBase; end
+
   # The Component class is used to instantiate objects like Window / ApplicationWindow objects from QML files.
+  #
   # You usually do not need to use this class because Application#load, #load_path, #load_data do same
   # for the application top-level objects such as main windows.
   # @example
   #   component = Component.new(path: path_to_qml_file)
   #   root_object = component.create
+  # @see http://qt-project.org/doc/qt-5/qqmlcomponent.html QQmlComponent (C++)
   class Component
     attr_reader :data, :path, :context
 

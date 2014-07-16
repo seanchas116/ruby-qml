@@ -1,3 +1,6 @@
+require 'qml/qt_classes'
+
 module QML
-  Qt = Plugins.core.metaObjects['Qt'].build_class
+  # @!parse class Qt < QtObjectBase; end
+  class Qt; end
 end

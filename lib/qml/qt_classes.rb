@@ -5,4 +5,5 @@ module QML
   Engine = Kernel.engine_meta_object.build_class
   Context = Plugins.core.metaObjects['QQmlContext'].build_class
   Component = Plugins.core.metaObjects['QQmlComponent'].build_class
+  Qt = Plugins.core.metaObjects['Qt'].build_class
 end

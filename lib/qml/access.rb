@@ -4,9 +4,15 @@ require 'qml/dispatchable'
 require 'qml/wrappable'
 
 module QML
+
+  # {Access} enables classes to be exposed to QML.
+  #
   module Access
     include Dispatchable
     include Wrappable
+    # @!parse include Reactive::Object
+    # @!parse include SignalInitialization
+    # @!parse extend ClassMethods
 
     def self.included(derived)
       derived.class_eval do
@@ -26,19 +32,15 @@ module QML
       unregistered_classes.each(&:register_to_qml_real)
     end
 
+    # allowed name patterns for exposed method names
     ALLOWED_PATTERN = /^[a-zA-Z_]\w*$/
 
     module ClassMethods
 
       # Registers the class as a QML type.
-      # @param under [String|nil] The namespece which encapsulates the exported QML type. If not specified, automatically inferred from the module nesting of the class.
-      # @param version [String|nil] The version of the type. Defaults to VERSION constant of the encapsulating module / class of the class.
-      # @param name [String|nil] The name of the type. Defaults to the name of the class.
-      # @example
-      #   class Foo
-      #     # ... definitions
-      #     register_to_qml
-      #   end
+      # @param under [String|nil] the namespece which encapsulates the exported QML type. If not specified, automatically inferred from the module nesting of the class.
+      # @param version [String|nil] the version of the type. Defaults to VERSION constant of the encapsulating module / class of the class.
+      # @param name [String|nil] the name of the type. Defaults to the name of the class.
       def register_to_qml(under: nil, version: nil, name: nil)
         if !under || !version || !name
           path = self.name.split('::')

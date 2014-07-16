@@ -4,20 +4,28 @@ require 'qml/dispatchable'
 
 module QML
   module Data
+    # {ListModel} is the base class of list models which provides data to QML list views.
+    # @see http://qt-project.org/doc/qt-5/qabstractitemmodel.html QAbstractItemModel (C++)
+    # @see http://qt-project.org/doc/qt-5/qabstractlistmodel.html QAbstractListModel (C++)
     class ListModel
       include ::Enumerable
       include Wrappable
       include Dispatchable
 
       class << self
+        # Declares the columns of the model.
+        # @param [Array<Symbol|String>] columns 
         def column(*columns)
           @columns ||= []
           @columns |= columns
         end
 
+        # The columns of the model.
         attr_reader :columns
       end
 
+      # @api private
+      # @return [Array<QtObjectBase>]
       attr_reader :qt_models
 
       def initialize
@@ -25,29 +33,53 @@ module QML
         @qt_models = []
       end
 
+      # Iterates each item.
+      # @overload each
+      #   @return [Enumerator]
+      # @overload each
+      #   @yield [item]
+      #   @return [self]
       def each
         return to_enum unless block_given?
         count.times do |i|
           yield self[i]
         end
+        self
       end
 
+      # @abstract
+      # @return [Integer] the number of the items.
       def count
         fail ::NotImplementedError
       end
 
+      # Returns an item.
+      # @abstract
+      # @param [Integer] index the index of the item.
+      # @return the item.
       def [](index)
         fail ::NotImplementedError
       end
 
       protected
 
+      # Notifies the list views that the data of the items was changed.
+      # @param [Range<Integer>] range the index range of changed items.
       def update(range)
         @qt_models.each do |qt_model|
           qt_model.update(range.min, range.max)
         end
       end
 
+      # Notifies the list views that items are about to be and were moved.
+      # @param [Range<Integer>] range the index range of the item being moved.
+      # @param [Integer] destination the first index of the items after moved.
+      # @yield the block that actually do moving operation of the items.
+      # @return the result of given block.
+      # @see http://qt-project.org/doc/qt-5/qabstractitemmodel.html#beginMoveRows QAbstractItemModel::beginMoveRows
+      # @see http://qt-project.org/doc/qt-5/qabstractitemmodel.html#endMoveRows QAbstractItemModel::endMoveRows
+      # @see #inserting
+      # @see #removing
       def moving(range, destination, &block)
         @qt_models.each do |qt_model|
           qt_model.begin_move(range.min, range.max, destination)
@@ -62,6 +94,18 @@ module QML
         ret
       end
 
+      # Notifies the list views that items are about to be and were inserted.
+      # @param [Range<Integer>] range the index range of the items after inserted.
+      # @yield the block that actually do insertion of the items.
+      # @return the result of give block.
+      # @example
+      #   inserting(index ... index + items.size) do
+      #     @array.insert(index, *items)
+      #   end
+      # @see http://qt-project.org/doc/qt-5/qabstractitemmodel.html#beginInsertRows QAbstractItemModel::beginInsertRows
+      # @see http://qt-project.org/doc/qt-5/qabstractitemmodel.html#endInsertRows QAbstractItemModel::endInsertRows
+      # @see #removing
+      # @see #moving
       def inserting(range, &block)
         @qt_models.each do |qt_model|
           qt_model.begin_insert(range.min, range.max)
@@ -76,6 +120,14 @@ module QML
         ret
       end
 
+      # Notifies the list views that items are about to be and were removed.
+      # @param [Range<Integer>] range the index range of the items before removed.
+      # @yield the block that actually do removal of the items.
+      # @return the result of give block.
+      # @see http://qt-project.org/doc/qt-5/qabstractitemmodel.html#beginRemoveRows QAbstractItemModel::beginRemoveRows
+      # @see http://qt-project.org/doc/qt-5/qabstractitemmodel.html#endRemoveRows QAbstractItemModel::endRemoveRows
+      # @see #inserting
+      # @see #moving
       def removing(range, &block)
         @qt_models.each do |qt_model|
           qt_model.begin_remove(range.min, range.max)

@@ -19,7 +19,7 @@ module QML
 
       # Initializes the Signal.
       # The signal will be variadic if an empty array is given.
-      # @param *params[Array<#to_sym>, Array<()>] The argument names
+      # @param [Array<#to_sym>, Array<()>] params The parameter names.
       def initialize(*params, variadic: false)
         @listeners = []
         if variadic
@@ -33,7 +33,7 @@ module QML
 
       # Calls every connected procedure with given arguments.
       # Raises an ArgumentError when the arity is wrong.
-      # @param *args The arguments
+      # @param args the arguments.
       def emit(*args)
         if @arity >= 0 && args.size != @arity
           fail ::ArgumentError ,"wrong number of arguments for signal (#{args.size} for #{@arity})"
@@ -65,7 +65,7 @@ module QML
       end
 
       # Connects a procedure.
-      # @yield Called when #emit runs
+      # @yield called when #emit is called.
       # @return [QML::Reactive::Signal::Connection]
       def connect(&listener)
         @listeners << listener

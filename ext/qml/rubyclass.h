@@ -2,6 +2,7 @@
 #include "functioninfo.h"
 #include "rubyvalue.h"
 #include <QDebug>
+#include <memory>
 
 namespace RubyQml {
 
@@ -16,7 +17,8 @@ public:
     RubyModule(RubyValue moduleValue);
     RubyModule(const char *name);
     RubyModule(const RubyModule &under, const char *name);
-    RubyModule(const RubyModule &other) = default;
+    RubyModule(const RubyModule &) = default;
+    RubyModule(RubyModule &&) = default;
     RubyModule &operator=(const RubyModule &other);
 
     static RubyModule fromPath(const char *path);
@@ -88,8 +90,10 @@ private:
         static VALUE apply(typename std::conditional<true, VALUE, TArgs>::type... args)
         {
             RubyValue ret;
+            // use tuple to avoid gcc 4.8's bug (https://gcc.gnu.org/bugzilla/show_bug.cgi?id=55914)
+            auto tuple = std::make_tuple(args...);
             unprotect([&] {
-                ret = function(RubyValue(args)...);
+                ret = applyWithTuple(function, tuple);
             });
             return ret;
         }

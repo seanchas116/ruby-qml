@@ -7,6 +7,37 @@
 
 namespace RubyQml {
 
+template <size_t... Indices>
+struct IntegerSequence {};
+
+template <size_t N, typename Seq = IntegerSequence<>, bool Last = N == 0>
+struct MakeIntegerSequenceImpl
+{
+    using type = Seq;
+};
+
+template <size_t N, size_t... Indices>
+struct MakeIntegerSequenceImpl<N, IntegerSequence<Indices...>, false> :
+        MakeIntegerSequenceImpl<N - 1, IntegerSequence<N - 1, Indices...>>
+{};
+
+template <size_t N>
+using MakeIntegerSequence = typename MakeIntegerSequenceImpl<N>::type;
+
+template <typename F, typename... Args, size_t... Indices>
+typename std::result_of<F(Args...)>::type
+applyWithTupleImpl(const F &func, const std::tuple<Args...> &args, IntegerSequence<Indices...>)
+{
+    return func(std::get<Indices>(args)...);
+}
+
+template <typename F, typename... Args>
+typename std::result_of<F(Args...)>::type
+applyWithTuple(const F &func, const std::tuple<Args...> &args)
+{
+    return applyWithTupleImpl(func, args, MakeIntegerSequence<sizeof...(Args)>());
+}
+
 class RubyValue;
 
 class RubyException
@@ -53,9 +84,10 @@ void fail(const char *errorClassName, const QString &message);
 template <typename ... TArgs>
 void callSuper(TArgs ... args)
 {
+    int argc = sizeof...(args);
+    VALUE argv[] = { args... };
     protect([&] {
-        VALUE argv[] = { args... };
-        rb_call_super(sizeof...(args), argv);
+        rb_call_super(argc, argv);
     });
 }
 

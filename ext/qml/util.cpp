@@ -3,6 +3,7 @@
 #include <QString>
 #include <ruby/thread.h>
 #include <string>
+#include <memory>
 #include <cxxabi.h>
 
 namespace RubyQml {

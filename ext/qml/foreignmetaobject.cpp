@@ -40,7 +40,7 @@ public:
 
             // write array data
             auto arrayDataOffset = stringOffset + sizeof(QByteArrayData) * (count - i);
-            arrayDatas[i] = QArrayData { Q_REFCOUNT_INITIALIZE_STATIC, size, 0, 0, qptrdiff(arrayDataOffset) };
+            new(arrayDatas + i) QArrayData { Q_REFCOUNT_INITIALIZE_STATIC, size, 0, 0, qptrdiff(arrayDataOffset) };
 
             // write string data
             strcpy(stringData + stringOffset, string.data());

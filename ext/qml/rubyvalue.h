@@ -41,8 +41,10 @@ public:
     template <typename ... TArgs>
     RubyValue send(ID method, TArgs ... args) const
     {
+        int argc = sizeof...(args);
+        VALUE argv[] = { VALUE(args)... };
         return protect([&] {
-            return rb_funcall(mValue, method, sizeof...(args), RubyValue(args)...);
+            return rb_funcallv(mValue, method, argc, argv);
         });
     }
 

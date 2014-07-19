@@ -3,6 +3,7 @@
 #include <QMetaType>
 #include <functional>
 #include <type_traits>
+#include <array>
 #include <ruby.h>
 
 namespace RubyQml {
@@ -84,10 +85,10 @@ void fail(const char *errorClassName, const QString &message);
 template <typename ... TArgs>
 void callSuper(TArgs ... args)
 {
-    int argc = sizeof...(args);
-    VALUE argv[] = { args... };
+    constexpr int argc = sizeof...(args);
+    std::array<VALUE, argc> argv = {{ VALUE(args)... }};
     protect([&] {
-        rb_call_super(argc, argv);
+        rb_call_super(argc, argv.data());
     });
 }
 

@@ -1,6 +1,7 @@
 #pragma once
 #include "util.h"
 #include <ruby.h>
+#include <array>
 
 class QVariant;
 
@@ -41,10 +42,10 @@ public:
     template <typename ... TArgs>
     RubyValue send(ID method, TArgs ... args) const
     {
-        int argc = sizeof...(args);
-        VALUE argv[] = { VALUE(args)... };
+        constexpr int argc = sizeof...(args);
+        std::array<VALUE, argc> argv = {{ VALUE(args)... }};
         return protect([&] {
-            return rb_funcallv(mValue, method, argc, argv);
+            return rb_funcallv(mValue, method, argc, argv.data());
         });
     }
 

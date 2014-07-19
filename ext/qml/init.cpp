@@ -59,10 +59,8 @@ void Init_qml()
     rb_require("date");
     rb_require("qml/errors");
     rb_require("qml/error_converter");
-    auto args = RubyValue(rb_argv).to<QList<QByteArray>>();
 
     unprotect([&] {
-        Application::init(args);
         defineMetaTypes();
         defineClasses();
         setupGlobalGCMarking();

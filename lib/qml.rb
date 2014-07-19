@@ -21,7 +21,19 @@ require 'qml/data'
 require 'qml/test_util'
 
 module QML
-  application.events_processed.each do
-    Dispatcher.instance.run_tasks
+
+  def initialized?
+    Kernel.initialized?
   end
+
+  def init(offscreen: false)
+    fail AlreadyInitializedError, "ruby-qml already initialized" if initialized?
+    argv = [$PROGRAM_NAME]
+    argv += %w{-platform offscreen} if offscreen
+    Kernel.init(argv)
+    application.events_processed.each do
+      Dispatcher.instance.run_tasks
+    end
+  end
+  module_function :initialized?, :init
 end

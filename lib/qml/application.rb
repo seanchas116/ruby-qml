@@ -124,11 +124,14 @@ module QML
   #     end
   # @see Application.instance
   def application
-    Application.instance.tap do |app|
-      if block_given?
+    if block_given?
+      QML.init unless QML.initialized?
+      Application.instance.tap do |app|
         yield app
         app.exec
       end
+    else
+      Application.instance
     end
   end
 

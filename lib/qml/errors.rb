@@ -11,6 +11,8 @@ module QML
   class ApplicationError < StandardError; end
   class EngineError < StandardError; end
   class InvalidThreadError < StandardError; end
+  class UninitializedError < StandardError; end
+  class AlreadyInitializedError < StandardError; end
 
   class CppError < StandardError
     attr_reader :class_name, :raw_message

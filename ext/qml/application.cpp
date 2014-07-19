@@ -1,4 +1,5 @@
 #include "application.h"
+#include "util.h"
 
 namespace RubyQml {
 namespace Application {
@@ -14,14 +15,28 @@ QQmlEngine *engine_;
 
 }
 
+void failIfUninitialized()
+{
+    if (!initialized()) {
+        fail("QML::UninitializedError", "ruby-qml not yet initialized");
+    }
+}
+
 QApplication *application()
 {
+    failIfUninitialized();
     return application_;
 }
 
 QQmlEngine *engine()
 {
+    failIfUninitialized();
     return engine_;
+}
+
+bool initialized()
+{
+    return application_;
 }
 
 void init(const QList<QByteArray> &args)

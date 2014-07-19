@@ -9,6 +9,7 @@ namespace Application {
 
 QApplication *application();
 QQmlEngine *engine();
+bool initialized();
 
 void init(const QList<QByteArray> &args);
 

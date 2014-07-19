@@ -8,6 +8,7 @@ ruby-qml is a QML / Qt Quick wrapper for Ruby.
 It provides bindings between QML and Ruby and enables you to use Qt Quick-based GUI from Ruby.
 
 * [Documentation](http://rubydoc.info/github/seanchas116/ruby-qml/master/frames)
+* [Examples](https://github.com/seanchas116/ruby-qml/tree/master/examples)
 
 ## Installation
 
@@ -51,6 +52,11 @@ For example:
 
 The configuration will be saved in `~/.bundle/config`
 
+## Gallery
+
+[![Screenshot](https://raw.github.com/seanchas116/ruby-qml/master/examples/fizzbuzz/capture.png)](https://github.com/seanchas116/ruby-qml/tree/master/examples/todo)
+[![Screenshot](https://raw.github.com/seanchas116/ruby-qml/master/examples/twitter/capture.png)](https://github.com/seanchas116/ruby-qml/tree/master/examples/twitter)
+
 ## Usage
 
 ### Load QML file
@@ -63,9 +69,8 @@ QML.application do |app|
 end
 ```
 
-#### main.qml
-
 ```qml
+// main.qml
 import QtQuick 2.2
 import QtQuick.Controls 1.1
 
@@ -86,7 +91,10 @@ By including `QML::Access`, you can also define **properties and signals** in Ru
 Properties are used to bind data between QML and Ruby.
 Signals are used to provide the observer pattern-like notification from Ruby to QML.
 
+![Screenshot](https://raw.github.com/seanchas116/ruby-qml/master/examples/fizzbuzz/capture.png)
+
 ```ruby
+# Ruby
 class FizzBuzz
   include QML::Access
   register_to_qml under: "Example", version: "1.0"
@@ -118,8 +126,7 @@ end
 ```
 
 ```qml
-// main.qml
-
+// QML - main.qml
 import QtQuick 2.2
 import QtQuick.Controls 1.1
 import QtQuick.Layouts 1.1
@@ -204,6 +211,7 @@ This example uses `ArrayModel` to provide list data for a QML ListView.
 When the content of the ArrayModel is changed, the list view is also automatically updated.
 
 ```ruby
+# Ruby
 class TodoModel < QML::Data::ArrayModel
   column :title, :description, :due_date
 end
@@ -226,6 +234,7 @@ end
 ```
 
 ```qml
+// QML
 ListView {
     model: todo.model
     delegate: Text {
@@ -234,6 +243,50 @@ ListView {
 }
 TodoController {
   id: todo
+}
+```
+
+### Combile asynchronous operations
+
+In QML, all UI-related operations are done synchronously in the event loop.
+To set result of asynchronous operations to the UI, use `QML.later` or `QML::Dispatchable#later`.
+
+```ruby
+# Ruby
+class HeavyTaskController
+  # QML::Access includes QML::Dispathable
+  include QML::Access
+  register_to_qml under: "Example", version: "1.0"
+
+  property :result, ''
+
+  def set_result(result)
+    self.result = result
+  end
+
+  def start_heavy_task
+    Thread.new do
+      self.later.set_result do_heavy_task() # #set_result is called in the main thread in the next event loop
+      # or
+      QML.later do
+        set_result do_heavy_task()
+      end
+    end
+  end
+end
+```
+
+```qml
+// QML
+Text {
+  text: controller.result
+}
+Button {
+  text: "Start!!"
+  onClicked: controller.start_heavy_task()
+}
+HeavyTaskController {
+  id: controller
 }
 ```
 
@@ -296,7 +349,7 @@ It enables you to use your Qt C++ codes from Ruby easily.
 
 
 ```c++
-// plugin example
+// C++ - plugin example
 class MyPlugin : public QObject
 {
     Q_OBJECT
@@ -309,6 +362,7 @@ public slots:
 ```
 
 ```ruby
+# Ruby
 plugin = QML::PluginLoader.new(directory, "myplugin").instance
 plugin.foo
 ```
@@ -326,7 +380,7 @@ All objects created inside QML and objects returned from C++ methods will be *ma
 #### Unmanaged objects
 
 *Unmanaged* objects are not managed and never garbage collected.
-Objects that have parents and that obtained from properties of other Qt objects will be *unmanaged* by default.
+Objects that have parents or that obtained from properties of other Qt objects will be *unmanaged* by default.
 
 #### Specify management status explicitly
 
@@ -339,10 +393,6 @@ plugin = PluginLoader.new(path).instance
 obj = plugin.create_object
 obj.prefer_managed false
 ```
-
-## Examples
-
-See the `/example` directory.
 
 ## Contributing
 

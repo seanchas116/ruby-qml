@@ -55,7 +55,7 @@ ApplicationWindow {
                         text: "\uf073"
                     }
                     Text {
-                        text: due_date
+                        text: Qt.formatDateTime(due_date)
                     }
                 }
             }

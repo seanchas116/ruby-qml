@@ -2,7 +2,7 @@
 
 [![Gem Version](https://badge.fury.io/rb/qml.svg)](http://badge.fury.io/rb/qml)
 [![Build Status](https://travis-ci.org/seanchas116/ruby-qml.svg?branch=master)](https://travis-ci.org/seanchas116/ruby-qml)
-[![Coverage Status](https://coveralls.io/repos/seanchas116/ruby-qml/badge.png)](https://coveralls.io/r/seanchas116/ruby-qml)
+[![Coverage Status](https://coveralls.io/repos/seanchas116/ruby-qml/badge.png?branch=master)](https://coveralls.io/r/seanchas116/ruby-qml?branch=master)
 
 ruby-qml is a QML / Qt Quick wrapper for Ruby.
 It provides bindings between QML and Ruby and enables you to use Qt Quick-based GUI from Ruby.

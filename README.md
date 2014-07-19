@@ -10,6 +10,12 @@ It provides bindings between QML and Ruby and enables you to use Qt Quick-based 
 * [Documentation](http://rubydoc.info/github/seanchas116/ruby-qml/master/frames)
 * [Examples](https://github.com/seanchas116/ruby-qml/tree/master/examples)
 
+## Gallery
+
+[![Screenshot](https://raw.github.com/seanchas116/ruby-qml/master/examples/todo/capture.png)](https://github.com/seanchas116/ruby-qml/tree/master/examples/todo)
+
+[![Screenshot](https://raw.github.com/seanchas116/ruby-qml/master/examples/twitter/capture.png)](https://github.com/seanchas116/ruby-qml/tree/master/examples/twitter)
+
 ## Installation
 
 ruby-qml currently requires **Ruby 2.0 or later**.
@@ -51,11 +57,6 @@ For example:
     $ bundle config build.qml --with-libffi-dir=$(brew --prefix libffi) --with-qt-dir=$(brew --prefix qt5)
 
 The configuration will be saved in `~/.bundle/config`
-
-## Gallery
-
-[![Screenshot](https://raw.github.com/seanchas116/ruby-qml/master/examples/fizzbuzz/capture.png)](https://github.com/seanchas116/ruby-qml/tree/master/examples/todo)
-[![Screenshot](https://raw.github.com/seanchas116/ruby-qml/master/examples/twitter/capture.png)](https://github.com/seanchas116/ruby-qml/tree/master/examples/twitter)
 
 ## Usage
 

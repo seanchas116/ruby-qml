@@ -34,7 +34,11 @@ QVariant ListModel::data(const QModelIndex &index, int role) const
         return QVariant();
     }
 
-    return mRubyModel.send("[]", RubyValue::from(index.row())).send("[]", RubyValue::fromID(mColumnIDs[role])).to<QVariant>();
+    QVariant result;
+    withGvl([&] {
+        result = mRubyModel.send("[]", RubyValue::from(index.row())).send("[]", RubyValue::fromID(mColumnIDs[role])).to<QVariant>();
+    });
+    return result;
 }
 
 int ListModel::rowCount(const QModelIndex &parent) const
@@ -42,8 +46,11 @@ int ListModel::rowCount(const QModelIndex &parent) const
     if (parent.isValid()) {
         return 0;
     }
-
-    return mRubyModel.send("count").to<int>();
+    int count;
+    withGvl([&] {
+        count = mRubyModel.send("count").to<int>();
+    });
+    return count;
 }
 
 QModelIndex ListModel::index(int row, int column, const QModelIndex &parent) const

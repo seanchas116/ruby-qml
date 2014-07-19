@@ -1,5 +1,7 @@
 # ruby-qml
 
+[![Build Status](https://travis-ci.org/seanchas116/ruby-qml.svg?branch=master)](https://travis-ci.org/seanchas116/ruby-qml)
+
 **NOTE: ruby-qml is not yet released as a gem.**
 
 ruby-qml is a QML / Qt Quick wrapper for Ruby.

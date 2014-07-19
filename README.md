@@ -2,12 +2,12 @@
 
 [![Build Status](https://travis-ci.org/seanchas116/ruby-qml.svg?branch=master)](https://travis-ci.org/seanchas116/ruby-qml)
 
-**NOTE: ruby-qml is not yet released as a gem.**
-
 ruby-qml is a QML / Qt Quick wrapper for Ruby.
 It provides bindings between QML and Ruby and enables you to use Qt Quick-based GUI from Ruby.
 
 ## Installation
+
+ruby-qml currently requires **Ruby 2.0 or later**.
 
 ### OS X with Homebrew
 

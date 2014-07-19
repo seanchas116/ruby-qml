@@ -98,6 +98,15 @@ module QML
       def pop(count = nil)
         delete_at(@array.size - count, count)
       end
+
+      # Deletes all items.
+      # @return [self]
+      def clear
+        removing(0 ... count) do
+          @array.clear
+        end
+        self
+      end
     end
   end
 end

@@ -207,9 +207,23 @@ describe QML::Data::ArrayModel do
     end
   end
 
-  describe '<<' do
+  describe '#<<' do
     it 'is an alias of #push' do
       expect((model << additional_array[0]).to_a).to eq(expected_array << additional_array[0])
+    end
+  end
+
+  describe '#clear' do
+    it 'returns self' do
+      expect(model.clear).to be(model)
+    end
+    context 'after called' do
+      before do
+        model.clear
+        expected_array.clear
+      end
+      include_examples 'model content', 'clears items'
+      include_examples 'ListView'
     end
   end
 end

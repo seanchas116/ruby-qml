@@ -6,6 +6,8 @@
 ruby-qml is a QML / Qt Quick wrapper for Ruby.
 It provides bindings between QML and Ruby and enables you to use Qt Quick-based GUI from Ruby.
 
+* [Documentation](http://rubydoc.info/github/seanchas116/ruby-qml/master/frames)
+
 ## Installation
 
 ruby-qml currently requires **Ruby 2.0 or later**.

@@ -115,7 +115,7 @@ module QML
   #   Returns the instance of {Application}.
   #   @return [Application]
   # @overload application
-  #   Yields the application instance and then call {Application#exec}.
+  #   Call {init} if ruby-qml is not initialized, then yields the application instance and then call {Application#exec}.
   #   @return [Application]
   #   @example
   #     QML.application do |app|

@@ -26,6 +26,8 @@ module QML
     Kernel.initialized?
   end
 
+  # Initializes ruby-qml.
+  # @param [Boolean] offscreen set this to true to run application offscreen (without GUI)
   def init(offscreen: false)
     fail AlreadyInitializedError, "ruby-qml already initialized" if initialized?
     argv = [$PROGRAM_NAME]

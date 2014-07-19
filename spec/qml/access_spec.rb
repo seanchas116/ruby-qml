@@ -140,10 +140,10 @@ describe QML::Access do
         expect { root.qml_eval('foo.variadic_method()') }.to raise_error(QML::QMLError)
       end
     end
-    describe 'Foo name property' do
+    describe 'Foo text property' do
       it 'can get and set value' do
-        root.qml_eval('foo.name = "test"')
-        expect(root.qml_eval('foo.name')).to eq 'test'
+        root.qml_eval('foo').text = 'test'
+        expect(root.qml_eval('foo').text).to eq 'test'
       end
       it 'can be used for property binding' do
         foo.text = 'hoge'

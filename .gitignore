@@ -16,6 +16,7 @@ test/tmp
 test/version_tmp
 tmp
 *.log
+.ruby-version
 
 # C++ objects and libs
 

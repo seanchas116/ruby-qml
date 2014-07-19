@@ -6,6 +6,10 @@
 #include <array>
 #include <ruby.h>
 
+#ifndef RARRAY_AREF
+#define RARRAY_AREF(a, i)    ((RARRAY_PTR(a)[i]))
+#endif
+
 namespace RubyQml {
 
 template <size_t... Indices>

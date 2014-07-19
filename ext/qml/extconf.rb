@@ -72,7 +72,7 @@ class Configurator
     end
 
     CLASSES.each do |header|
-      Pathname("moc_#{header}.cpp").write(`#{@moc} #{header}.h`)
+      File.write("moc_#{header}.cpp", `#{@moc} #{header}.h`)
     end
 
     create_makefile 'qml/qml'

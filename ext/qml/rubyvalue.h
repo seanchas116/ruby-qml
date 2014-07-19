@@ -45,7 +45,7 @@ public:
         constexpr int argc = sizeof...(args);
         std::array<VALUE, argc> argv = {{ VALUE(args)... }};
         return protect([&] {
-            return rb_funcallv(mValue, method, argc, argv.data());
+            return rb_funcall2(mValue, method, argc, argv.data());
         });
     }
 

@@ -58,6 +58,7 @@ class Configurator
 
     $CPPFLAGS += " #{@cppflags.join(" ")}"
     $LDFLAGS += " #{@ldflags.join(" ")}"
+    $CPPFLAGS += " -fPIC"
 
     HEADERS.each do |h|
       abort "header not found: #{h}" unless have_header(h)

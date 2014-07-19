@@ -81,6 +81,8 @@ module QML
       # @see #inserting
       # @see #removing
       def moving(range, destination, &block)
+        return if range.size == 0
+
         @qt_models.each do |qt_model|
           qt_model.begin_move(range.min, range.max, destination)
         end
@@ -107,6 +109,8 @@ module QML
       # @see #removing
       # @see #moving
       def inserting(range, &block)
+        return if range.size == 0
+
         @qt_models.each do |qt_model|
           qt_model.begin_insert(range.min, range.max)
         end
@@ -129,6 +133,8 @@ module QML
       # @see #inserting
       # @see #moving
       def removing(range, &block)
+        return if range.size == 0
+
         @qt_models.each do |qt_model|
           qt_model.begin_remove(range.min, range.max)
         end

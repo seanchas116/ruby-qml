@@ -117,7 +117,7 @@ Q_GLOBAL_STATIC(ConverterHash, converterHash)
 RubyValue Conversion<const char *>::to(const char *str)
 {
     return protect([&] {
-        return rb_enc_str_new_cstr(str, rb_utf8_encoding());
+        return rb_enc_str_new(str, strlen(str), rb_utf8_encoding());
     });
 }
 

@@ -1,5 +1,6 @@
 # ruby-qml
 
+[![Gem Version](https://badge.fury.io/rb/qml.svg)](http://badge.fury.io/rb/qml)
 [![Build Status](https://travis-ci.org/seanchas116/ruby-qml.svg?branch=master)](https://travis-ci.org/seanchas116/ruby-qml)
 
 ruby-qml is a QML / Qt Quick wrapper for Ruby.

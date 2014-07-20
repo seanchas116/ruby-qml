@@ -45,7 +45,7 @@ describe QML::Data::ArrayModel do
 
   let(:model) do
     TestArrayModel.new.tap do |model|
-      model.push *original_array
+      model.push(*original_array)
     end
   end
 

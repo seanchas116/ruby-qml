@@ -33,6 +33,7 @@ module QML
       @objptr = objptr
       @metaobj = metaobj
       @name = name
+      @initialized = false
     end
 
     private

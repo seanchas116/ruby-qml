@@ -8,12 +8,13 @@ class WeakValueReference
 public:
     WeakValueReference(RubyValue value);
 
-    bool hasValue() const { return mHasValue; }
-    RubyValue value() const { return mValue; }
+    bool hasValue() const;
+    RubyValue value() const;
+
+    struct Data;
+
 private:
-    static VALUE finalize(VALUE arg, VALUE data);
-    bool mHasValue;
-    RubyValue mValue;
+    std::shared_ptr<Data> d;
 };
 
 } // namespace RubyQml

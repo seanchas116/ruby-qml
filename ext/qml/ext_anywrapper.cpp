@@ -27,7 +27,9 @@ void AnyWrapper::defineClass()
 
 void AnyWrapper::gc_mark()
 {
-    mMarkFunction(mValue);
+    if (mMarkFunction) {
+        mMarkFunction(mValue);
+    }
 }
 
 } // namespace Ext

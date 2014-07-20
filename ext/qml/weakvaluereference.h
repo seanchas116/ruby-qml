@@ -1,5 +1,6 @@
 #pragma once
 #include "rubyvalue.h"
+#include <memory>
 
 namespace RubyQml {
 

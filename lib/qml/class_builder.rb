@@ -33,6 +33,7 @@ module QML
       @objptr = objptr
       @metaobj = metaobj
       @name = name
+      @initialized = false
     end
 
     private
@@ -55,18 +56,24 @@ module QML
 
     def build
       create unless @klass
-      return if @klass.meta_object == @metaobj
+      return self if @klass.meta_object == @metaobj
 
-      @metaobj.method_names.reject { |name| @metaobj.signal?(name) }.each do |name|
-        define_method(name)
-      end
-      @metaobj.method_names.select { |name| @metaobj.signal?(name) }.each do |name|
-        define_signal(name)
-      end
-      @metaobj.property_names.each do |name|
+      properties = @metaobj.property_names
+      notifiers = properties.map { |name| @metaobj.notify_signal(name) }
+      signals = @metaobj.method_names.select { |name| @metaobj.signal?(name) } - notifiers
+      methods = @metaobj.method_names.reject { |name| @metaobj.signal?(name) }
+      enums = @metaobj.enumerators
+
+      properties.each do |name|
         define_property(name)
       end
-      @metaobj.enumerators.each do |k, v|
+      signals.each do |name|
+        define_signal(name)
+      end
+      methods.each do |name|
+        define_method(name)
+      end
+      enums.each do |k, v|
         define_enum(k, v)
       end
       @klass.__send__ :meta_object=, @metaobj
@@ -84,6 +91,7 @@ module QML
     def define_method(name)
       metaobj = @metaobj
       return if metaobj.private?(name)
+      return if @klass.instance_methods.include?(name)
       @klass.__send__ :define_method, name do |*args|
         metaobj.invoke_method(@pointer, name, args)
       end
@@ -93,6 +101,7 @@ module QML
     end
 
     def define_signal(name)
+      return if @klass.instance_signals.include?(name)
       @klass.__send__ :variadic_signal, name, factory: proc { |obj|
         QtSignal.new(@metaobj, obj.pointer, name)
       }
@@ -101,6 +110,7 @@ module QML
     end
 
     def define_property(name)
+      return if @klass.instance_properties.include?(name)
       metaobj = @metaobj
       @klass.__send__ :property, name, factory: proc { |obj|
         QtProperty.new(@metaobj, obj.pointer, name)

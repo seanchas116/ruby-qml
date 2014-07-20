@@ -106,7 +106,9 @@ public:
         bool voidReturning = (returnType == QMetaType::Void);
         QVariant returnValue;
         if (!voidReturning) {
-            returnValue = QVariant(returnType, QMetaType::create(returnType));
+            auto data = QMetaType::create(returnType);
+            returnValue = QVariant(returnType, data);
+            QMetaType::destroy(returnType, data);
         }
 
         bool result;

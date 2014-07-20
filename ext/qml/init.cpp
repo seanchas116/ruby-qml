@@ -1,7 +1,7 @@
 #include "ext_metaobject.h"
 #include "ext_pointer.h"
 #include "ext_pluginloader.h"
-#include "ext_gcmarker.h"
+#include "ext_anywrapper.h"
 #include "ext_accesssupport.h"
 #include "ext_testutil.h"
 #include "ext_kernel.h"
@@ -26,7 +26,7 @@ void defineClasses()
     Ext::MetaObject::defineClass();
     Ext::Pointer::defineClass();
     Ext::PluginLoader::defineClass();
-    Ext::GCMarker::defineClass();
+    Ext::AnyWrapper::defineClass();
     Ext::AccessWrapperFactory::defineClass();
     Ext::TestUtil::defineModule();
     Ext::Kernel::defineModule();
@@ -35,7 +35,7 @@ void defineClasses()
 
 void setupGlobalGCMarking()
 {
-    auto marker = Ext::GCMarker::fromMarkFunction([] {
+    auto marker = Ext::AnyWrapper::create(QVariant(), [](const QVariant &) {
         ValueReference::markAllReferences();
         ObjectGC::instance()->markNonOwnedObjects();
     });

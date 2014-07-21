@@ -208,8 +208,14 @@ To bind list data between QML ListView and Ruby, you can use ListModels.
 
 * `QML::Data::ArrayModel` - provides a simple list model implementation using Array.
 
+* `QML::Data::QueryModel` - for databases (like ActiveRecord, Sequel or something)
+
 This example uses `ArrayModel` to provide list data for a QML ListView.
 When the content of the ArrayModel is changed, the list view is also automatically updated.
+
+#### Examples
+
+* [Todo example](https://github.com/seanchas116/ruby-qml/tree/master/examples/todo_sequel)
 
 ```ruby
 # Ruby
@@ -220,10 +226,12 @@ class TodoController
   property :model, QML::Data::ArrayModel.new(:title, :description, :due_date)
 
   def add(title, description, due_date)
-    item = OpenStruct.new(
+    # Items of list models must be "Hash-like" (have #[] method to get columns)
+    item = {
       title: title,
       description: description,
-      due_date: due_date)
+      due_date: due_date
+    }
     p item
     model << item
   end
@@ -247,6 +255,10 @@ TodoController {
 
 In QML, all UI-related operations are done synchronously in the event loop.
 To set result of asynchronous operations to the UI, use `QML.later` or `QML::Dispatchable#later`.
+
+#### Examples
+
+* [Twitter Example](https://github.com/seanchas116/ruby-qml/tree/master/examples/twitter)
 
 ```ruby
 # Ruby

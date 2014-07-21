@@ -77,6 +77,7 @@ protect(const F &doAction)
 void unprotect(const std::function<void()> &doAction) noexcept;
 
 void rescue(const std::function<void ()> &doAction, const std::function<void (RubyValue)> &handleException);
+void rescueNotify(const std::function<void ()> &doAction);
 
 // call function with GVL unlocked
 void withoutGvl(const std::function<void()> &doAction);

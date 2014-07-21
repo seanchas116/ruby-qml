@@ -71,6 +71,13 @@ void rescue(const std::function<void ()> &doAction, const std::function<void (Ru
     rb_rescue((VALUE (*)(...))callback, (VALUE)&doAction, (VALUE (*)(...))rescueCallback, (VALUE)&handleException);
 }
 
+void rescueNotify(const std::function<void ()> &doAction)
+{
+    rescue(doAction, [&](RubyValue excObject) {
+        rb_funcall(rb_path2class("QML::Application"), rb_intern("notify_error"), 1, excObject);
+    });
+}
+
 namespace {
 
 void changeGvl(const std::function<void ()> &doAction, bool gvl)

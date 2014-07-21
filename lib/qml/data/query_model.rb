@@ -2,11 +2,6 @@ module QML
   module Data
     # {QueryModel} provides a list model implementation with database backends like ActiveRecord.
     class QueryModel < ListModel
-
-      Cache = Struct.new(:block_index, :items)
-      CACHE_SIZE = 256
-      CACHE_COUNT = 4
-
       attr_reader :count
 
       # @param [Array<Symbol|String>] columns
@@ -49,6 +44,10 @@ module QML
       end
 
       private
+
+      Cache = Struct.new(:block_index, :items)
+      CACHE_SIZE = 256
+      CACHE_COUNT = 4
 
       def add_cache(block_offset)
         @caches.shift if @caches.size >= CACHE_COUNT

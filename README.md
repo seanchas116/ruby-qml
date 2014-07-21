@@ -213,15 +213,11 @@ When the content of the ArrayModel is changed, the list view is also automatical
 
 ```ruby
 # Ruby
-class TodoModel < QML::Data::ArrayModel
-  column :title, :description, :due_date
-end
-
 class TodoController
   include QML::Access
   register_to_qml under: "Example", version: "1.0"
 
-  property :model, TodoModel.new
+  property :model, QML::Data::ArrayModel.new(:title, :description, :due_date)
 
   def add(title, description, due_date)
     item = OpenStruct.new(

@@ -9,7 +9,7 @@ ListModel::ListModel(RubyValue rubyModel, QObject *parent) :
     QAbstractListModel(parent),
     mRubyModel(rubyModel)
 {
-    auto columns = rubyModel.send("class").send("columns").to<QList<QByteArray>>();
+    auto columns = rubyModel.send("columns").to<QList<QByteArray>>();
     for (int i = 0; i < columns.size(); ++i) {
         auto role = Qt::UserRole + i;
         mColumnNames[role] = columns[i];

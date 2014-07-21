@@ -40,15 +40,11 @@ module Examples
       end
     end
 
-    class TwitterModel < QML::Data::ArrayModel
-      column :tweet_text, :user_name, :user_icon
-    end
-
     class TwitterController
       include QML::Access
       register_to_qml
 
-      property :model, TwitterModel.new
+      property :model, QML::Data::ArrayModel.new(:tweet_text, :user_name, :user_icon)
       property :word
 
       def initialize

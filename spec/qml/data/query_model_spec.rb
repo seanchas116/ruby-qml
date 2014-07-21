@@ -2,25 +2,26 @@ require 'spec_helper'
 
 describe QML::Data::QueryModel do
 
-  class Model < QML::Data::QueryModel
-    column :title, :number
-    attr_accessor :data
+  let(:klass) do
+    Class.new(QML::Data::QueryModel) do
+      attr_accessor :data
 
-    def initialize(count)
-      @data = count.times.map { |i| {title: "title: #{i}", number: i} }
-      super()
-    end
+      def initialize(count)
+        @data = count.times.map { |i| {title: "title: #{i}", number: i} }
+        super(:title, :number)
+      end
 
-    def query(offset, count)
-      @data[offset ... offset + count]
-    end
+      def query(offset, count)
+        @data[offset ... offset + count]
+      end
 
-    def query_count
-      @data.size
+      def query_count
+        @data.size
+      end
     end
   end
 
-  let(:model) { Model.new(2000) }
+  let(:model) { klass.new(2000) }
   let(:expected_array) { model.data }
 
   describe '#count' do
@@ -56,6 +57,6 @@ describe QML::Data::QueryModel do
 
   include_context 'ListView for model available'
   it_behaves_like 'ListView data source' do
-    let(:model) { Model.new(10) }
+    let(:model) { klass.new(10) }
   end
 end

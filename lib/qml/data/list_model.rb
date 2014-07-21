@@ -12,24 +12,16 @@ module QML
       include Wrappable
       include Dispatchable
 
-      class << self
-        # Declares the columns of the model.
-        # @param [Array<Symbol|String>] columns 
-        def column(*columns)
-          @columns ||= []
-          @columns |= columns
-        end
-
-        # The columns of the model.
-        attr_reader :columns
-      end
-
       # @api private
       # @return [Array<QtObjectBase>]
       attr_reader :qt_models
 
-      def initialize
-        fail Error, 'columns not specified' unless self.class.columns
+      # @return [Array<Symbol|String>]
+      attr_reader :columns
+
+      # @param [Array<Symbol|String>] columns the column names of the model.
+      def initialize(*columns)
+        @columns = columns
         @qt_models = []
       end
 

@@ -2,11 +2,10 @@ require 'spec_helper'
 
 describe QML::Data::ArrayModel do
 
-  class NoColumnArrayModel < QML::Data::ArrayModel
-  end
-
   class TestArrayModel < QML::Data::ArrayModel
-    column :title, :number
+    def initialize
+      super(:title, :number)
+    end
   end
 
   let(:original_array) do
@@ -37,14 +36,6 @@ describe QML::Data::ArrayModel do
   shared_examples 'same as expected array' do |text|
     it text do
       expect(model.to_a).to eq(expected_array)
-    end
-  end
-
-  describe '#initialize' do
-    context 'when columns are not specified' do
-      it 'fails' do
-        expect { NoColumnArrayModel.new }.to raise_error(QML::Data::Error)
-      end
     end
   end
 

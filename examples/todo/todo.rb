@@ -6,10 +6,6 @@ module Examples
   module Todo
     VERSION = '0.1'
 
-    class TodoModel < QML::Data::ArrayModel
-      column :title, :description, :due_date
-    end
-
     class TodoController
       include QML::Access
       register_to_qml
@@ -17,13 +13,14 @@ module Examples
       property :title, ''
       property :description, ''
       property :due_date, ''
-      property :model, TodoModel.new
+      property :model, QML::Data::ArrayModel.new(:title, :description, :due_date)
 
       def add
-        item = OpenStruct.new(
+        item = {
           title: title,
           description: description,
-          due_date: due_date)
+          due_date: due_date
+        }
         p item
         model << item
       end

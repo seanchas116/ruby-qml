@@ -2,8 +2,10 @@ module QML
   module Data
     # {ArrayModel} is one of ruby-qml's list models and it stores data in Array simply.
     class ArrayModel < ListModel
-      def initialize
-        super()
+
+      # @param [Array<Symbol|String>] columns
+      def initialize(*columns)
+        super
         @array = []
       end
 

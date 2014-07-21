@@ -9,8 +9,9 @@ module QML
 
       attr_reader :count
 
-      def initialize
-        super()
+      # @param [Array<Symbol|String>] columns
+      def initialize(*columns)
+        super
         @count = 0
         @caches = []
         update

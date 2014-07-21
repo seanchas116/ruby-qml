@@ -29,7 +29,7 @@ Run the following commands to install ruby-qml on OS X with Homebrew:
     $ brew install qt5
     $ gem install qml -- --with-libffi-dir=$(brew --prefix libffi) --with-qt-dir=$(brew --prefix qt5)
 
-### General
+### General (OSX and Linux)
 
 #### Requirements
 

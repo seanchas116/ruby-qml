@@ -80,19 +80,16 @@ module QML
       # @see http://qt-project.org/doc/qt-5/qabstractitemmodel.html#endMoveRows QAbstractItemModel::endMoveRows
       # @see #inserting
       # @see #removing
-      def moving(range, destination, &block)
+      def moving(range, destination)
         return if range.size == 0
 
         @qt_models.each do |qt_model|
           qt_model.begin_move(range.min, range.max, destination)
         end
-
-        ret = block.call
-
+        ret = yield
         @qt_models.each do |qt_model|
           qt_model.end_move
         end
-
         ret
       end
 
@@ -114,13 +111,10 @@ module QML
         @qt_models.each do |qt_model|
           qt_model.begin_insert(range.min, range.max)
         end
-
-        ret = block.call
-
+        ret = yield
         @qt_models.each do |qt_model|
           qt_model.end_insert
         end
-
         ret
       end
 
@@ -138,13 +132,21 @@ module QML
         @qt_models.each do |qt_model|
           qt_model.begin_remove(range.min, range.max)
         end
-
-        ret = block.call
-
+        ret = yield
         @qt_models.each do |qt_model|
           qt_model.end_remove
         end
+        ret
+      end
 
+      def resetting(&block)
+        @qt_models.each do |qt_model|
+          qt_model.begin_reset
+        end
+        ret = yield
+        @qt_models.each do |qt_model|
+          qt_model.end_reset
+        end
         ret
       end
     end

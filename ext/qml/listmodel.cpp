@@ -91,6 +91,16 @@ void ListModel::endRemove()
     endRemoveRows();
 }
 
+void ListModel::beginReset()
+{
+    beginResetModel();
+}
+
+void ListModel::endReset()
+{
+    endResetModel();
+}
+
 void ListModel::update(int first, int last)
 {
     emit dataChanged(index(first), index(last));

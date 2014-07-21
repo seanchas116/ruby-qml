@@ -32,6 +32,8 @@ public slots:
     void endInsert();
     void beginRemove(int first, int last);
     void endRemove();
+    void beginReset();
+    void endReset();
     void update(int first, int last);
 
 private:

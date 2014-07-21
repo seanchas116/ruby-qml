@@ -107,6 +107,16 @@ module QML
         end
         self
       end
+
+      # Replaces entire array with given array.
+      # @param [Array] ary
+      # @return [self]
+      def replace(ary)
+        resetting do
+          @array = ary.dup
+        end
+        self
+      end
     end
   end
 end

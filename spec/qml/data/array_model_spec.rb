@@ -9,23 +9,6 @@ describe QML::Data::ArrayModel do
     column :title, :number
   end
 
-  let(:context) { QML::Context.new }
-
-  let(:component) do
-    QML::Component.new context: context, data: <<-EOS
-      import QtQuick 2.0
-      ListView {
-        model: arrayModel
-        delegate: Item {
-          property var itemTitle: title
-          property var itemNumber: number
-        }
-      }
-    EOS
-  end
-
-  let(:list_view) { component.create }
-
   let(:original_array) do
     [
       {title: 'hoge', number: 12},
@@ -49,26 +32,11 @@ describe QML::Data::ArrayModel do
     end
   end
 
-  before do
-    context[:arrayModel] = model
-  end
+  include_context 'ListView for model available'
 
-  shared_examples 'model content' do |text|
+  shared_examples 'same as expected array' do |text|
     it text do
       expect(model.to_a).to eq(expected_array)
-    end
-  end
-
-  shared_examples 'ListView' do
-    it 'updates QML ListView correctly' do
-      count = list_view.count
-      expect(count).to eq expected_array.size
-      list_view.count.times do |i|
-        list_view.current_index = i
-        current = list_view.current_item
-        expect(current.item_title).to eq(expected_array[i][:title])
-        expect(current.item_number).to eq(expected_array[i][:number])
-      end
     end
   end
 
@@ -129,8 +97,8 @@ describe QML::Data::ArrayModel do
         model[2] = additional_array[0]
         expected_array[2] = additional_array[0]
       end
-      include_examples 'model content', 'sets the element to given index'
-      include_examples 'ListView'
+      it_behaves_like 'same as expected array', 'sets the element to given index'
+      it_behaves_like 'ListView data source'
     end
   end
 
@@ -145,8 +113,8 @@ describe QML::Data::ArrayModel do
         model.insert(1, *additional_array)
         expected_array.insert(1, *additional_array)
       end
-      include_examples 'model content', 'inserts item'
-      include_examples 'ListView'
+      it_behaves_like 'same as expected array', 'inserts item'
+      it_behaves_like 'ListView data source'
     end
   end
 
@@ -161,8 +129,8 @@ describe QML::Data::ArrayModel do
           model.delete_at(1)
           expected_array.delete_at(1)
         end
-        include_examples 'model content', 'deletes item'
-        include_examples 'ListView'
+        it_behaves_like 'same as expected array', 'deletes item'
+        it_behaves_like 'ListView data source'
       end
     end
 
@@ -175,8 +143,8 @@ describe QML::Data::ArrayModel do
           model.delete_at(1, 2)
           2.times { expected_array.delete_at(1) }
         end
-        include_examples 'model content', 'deletes items'
-        include_examples 'ListView'
+        it_behaves_like 'same as expected array', 'deletes items'
+        it_behaves_like 'ListView data source'
       end
     end
   end
@@ -222,8 +190,22 @@ describe QML::Data::ArrayModel do
         model.clear
         expected_array.clear
       end
-      include_examples 'model content', 'clears items'
-      include_examples 'ListView'
+      it_behaves_like 'same as expected array', 'clears items'
+      it_behaves_like 'ListView data source'
+    end
+  end
+
+  describe '#replace' do
+    it 'returns self' do
+      expect(model.replace(expected_array + additional_array)).to be(model)
+    end
+    context 'after called' do
+      before do
+        model.replace(expected_array + additional_array)
+        expected_array.push *additional_array
+      end
+      it_behaves_like 'same as expected array', 'replaces entire array'
+      it_behaves_like 'ListView data source'
     end
   end
 end

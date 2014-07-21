@@ -25,6 +25,7 @@ module QML
 
       # Updates the model.
       def update
+        @caches = []
         resetting do
           @count = query_count
         end

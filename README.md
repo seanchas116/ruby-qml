@@ -12,7 +12,7 @@ It provides bindings between QML and Ruby and enables you to use Qt Quick-based 
 
 ## Gallery
 
-[![Screenshot](https://raw.github.com/seanchas116/ruby-qml/master/examples/todo/capture.png)](https://github.com/seanchas116/ruby-qml/tree/master/examples/todo)
+[![Screenshot](https://raw.github.com/seanchas116/ruby-qml/master/examples/todo_sequel/capture.png)](https://github.com/seanchas116/ruby-qml/tree/master/examples/todo_sequel)
 
 [![Screenshot](https://raw.github.com/seanchas116/ruby-qml/master/examples/twitter/capture.png)](https://github.com/seanchas116/ruby-qml/tree/master/examples/twitter)
 

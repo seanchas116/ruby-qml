@@ -26,7 +26,7 @@ Gem::Specification.new do |spec|
   spec.add_development_dependency "rspec", "~> 3.0"
   spec.add_development_dependency 'pry'
   spec.add_development_dependency 'celluloid'
-  spec.add_development_dependency 'twitter'
-  spec.add_development_dependency 'sequel'
-  spec.add_development_dependency 'sqlite3'
+  spec.add_development_dependency 'twitter', '~> 5.11'
+  spec.add_development_dependency 'sequel', '~> 4.12'
+  spec.add_development_dependency 'sqlite3', '~> 1.3'
 end

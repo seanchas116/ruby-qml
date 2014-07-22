@@ -2,6 +2,7 @@ language: ruby
 rvm:
   - 2.1.2
   - 2.0.0
+  - 1.9.3
 before_install:
   - sudo apt-add-repository -y ppa:beineri/opt-qt521
   - sudo add-apt-repository -y ppa:ubuntu-toolchain-r/test

@@ -140,7 +140,7 @@ struct Conversion<T, typename std::enable_if<std::is_floating_point<T>::value>::
             if (type == T_FIXNUM || type == T_BIGNUM) {
                 return double(NUM2LL(x));
             } else {
-                return rb_float_value(x);
+                return RFLOAT_VALUE(VALUE(x));
             }
         });
     }

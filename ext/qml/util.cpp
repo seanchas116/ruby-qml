@@ -1,10 +1,18 @@
 #include "util.h"
 #include "rubyvalue.h"
 #include <QString>
-#include <ruby/thread.h>
 #include <string>
 #include <memory>
 #include <cxxabi.h>
+
+#ifdef HAVE_RUBY_THREAD_H
+#include <ruby/thread.h>
+#else
+extern "C" {
+void *rb_thread_call_with_gvl(void *(*func)(void *), void *data1);
+void *rb_thread_call_without_gvl(void *(*func)(void *), void *data1, rb_unblock_function_t *ubf, void *data2);
+}
+#endif
 
 namespace RubyQml {
 
@@ -94,9 +102,9 @@ void changeGvl(const std::function<void ()> &doAction, bool gvl)
     };
     void *result;
     if (gvl) {
-        result = rb_thread_call_with_gvl(f, actionPtr );
+        result = rb_thread_call_with_gvl(f, actionPtr);
     } else {
-        result = rb_thread_call_without_gvl(f, actionPtr , RUBY_UBF_IO, nullptr);
+        result = rb_thread_call_without_gvl(f, actionPtr, RUBY_UBF_IO, nullptr);
     }
     std::unique_ptr<std::exception_ptr> exc(static_cast<std::exception_ptr *>(result));
     if (exc && *exc) {

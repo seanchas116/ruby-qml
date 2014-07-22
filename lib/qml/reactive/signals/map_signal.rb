@@ -5,7 +5,7 @@ module QML
     module Signals
       class MapSignal < ChainedSignal
         def initialize(source, func)
-          super(:mapped)
+          super([:mapped])
           @source = source
           @func = func
         end

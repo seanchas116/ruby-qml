@@ -41,9 +41,9 @@ module QML
       def bind(obj)
         return @factory.call(obj, self) if @factory
         if @variadic
-          Signal.new(variadic: true)
+          Signal.new([], variadic: true)
         else
-          Signal.new(*@params)
+          Signal.new(@params)
         end
       end
     end

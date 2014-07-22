@@ -3,8 +3,8 @@ require 'spec_helper'
 describe QML::Reactive::Signal do
 
   before do
-    @signal = QML::Reactive::Signal.new(:foo, :bar)
-    @variadic_signal = QML::Reactive::Signal.new(variadic: true)
+    @signal = QML::Reactive::Signal.new([:foo, :bar])
+    @variadic_signal = QML::Reactive::Signal.new([], variadic: true)
   end
 
   describe 'connection' do
@@ -65,7 +65,7 @@ describe QML::Reactive::Signal do
       end
 
       it 'disconnects the whole chained connections if possible' do
-        signal = QML::Reactive::Signal.new :arg
+        signal = QML::Reactive::Signal.new [:arg]
         mapped = signal.map { |arg| arg * 2 }
 
         connection = mapped.connect {}
@@ -175,8 +175,8 @@ describe QML::Reactive::Signal do
       it 'merges multiple signals' do
         received = []
 
-        signal = QML::Reactive::Signal.new :foo
-        signal2 = QML::Reactive::Signal.new :foo
+        signal = QML::Reactive::Signal.new [:foo]
+        signal2 = QML::Reactive::Signal.new [:foo]
         signal.merge(signal2).connect { |foo| received << foo }
 
         signal.emit(:one)

@@ -25,8 +25,8 @@ describe QML::Reactive::Property do
     describe '#value, #value=' do
       it 'sets and gets the contained value' do
         property = QML::Reactive::Property.new
-        property.value = '(´･_･`)'
-        expect(property.value).to eq('(´･_･`)')
+        property.value = 'hogehoge'
+        expect(property.value).to eq('hogehoge')
       end
     end
   end

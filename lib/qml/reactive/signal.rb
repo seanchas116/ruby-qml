@@ -20,9 +20,12 @@ module QML
       # Initializes the Signal.
       # The signal will be variadic if an empty array is given.
       # @param [Array<#to_sym>, Array<()>] params The parameter names.
-      def initialize(*params, variadic: false)
+      # @param [Hash] opts
+      # @option opts [Boolean] (false) :variadic
+      def initialize(params, opts = {})
+        opts = {variadic: false}.merge opts
         @listeners = []
-        if variadic
+        if opts[:variadic]
           @params = nil
           @arity = -1
         else

@@ -5,7 +5,7 @@ module QML
     module Signals
       class SelectSignal < ChainedSignal
         def initialize(source, pred)
-          super(*source.parameters.map(&:last))
+          super(source.parameters.map(&:last))
           @source = source
           @pred = pred
         end

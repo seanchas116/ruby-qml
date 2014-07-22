@@ -5,9 +5,7 @@ require 'qml/name_helper'
 
 module QML
 
-  class QtProperty
-    prepend Reactive::Bindable
-
+  class QtPropertyBase
     attr_reader :changed
 
     def initialize(metaobj, objptr, name)
@@ -27,9 +25,13 @@ module QML
     end
   end
 
+  class QtProperty < QtPropertyBase
+    include Reactive::Bindable
+  end
+
   class QtSignal < Reactive::Signal
     def initialize(metaobj, objptr, name)
-      super(variadic: true)
+      super([], variadic: true)
       @objptr = objptr
       @metaobj = metaobj
       @name = name
@@ -103,7 +105,7 @@ module QML
 
     def define_property(name)
       metaobj = @metaobj
-      @klass.__send__ :property, name, factory: proc { |obj|
+      @klass.__send__ :property, name, nil, factory: proc { |obj|
         QtProperty.new(@metaobj, obj.pointer, name)
       }
       underscore = NameHelper.to_underscore(name)

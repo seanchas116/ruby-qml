@@ -15,11 +15,15 @@ module QML
     attr_reader :data, :path, :context
 
     # Creates an component. Either data or path must be specified.
-    # @param context [QML::Context|nil] The context that the created objects will depend on (default to the root context of the application engine)
-    # @param data [String] The QML file data
-    # @param path [#to_s] The QML file path
+    # @param opts [Hash]
+    # @option opts [QML::Context] :context the context that the created objects will depend on (default to the root context of the application engine).
+    # @option opts [String] :data the QML file data.
+    # @option opts [#to_s] :path the QML file path.
     # @return QML::Component
-    def self.new(context: nil, data: nil, path: nil)
+    def self.new(opts)
+      context = opts[:context]
+      data = opts[:data]
+      path = opts[:path]
       context ||= Engine.instance.context
       Plugins.core.createComponent(Engine.instance).instance_eval do
         @data = data

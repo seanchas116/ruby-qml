@@ -181,14 +181,14 @@ describe QML::Reactive::Object do
     context 'when include_super is false' do
       it 'returns all signal definitions of the class' do
         signals = ToggleButton.instance_signals(false)
-        expect(signals).to match_array %i{pressed toggled name_changed info_changed}
+        expect(signals).to match_array %w{pressed toggled name_changed info_changed}.map(&:to_sym)
       end
     end
 
     context 'when include_super is not specified' do
       it 'returns all signal definitions of the class and its superclasses' do
         signals = ToggleButton.instance_signals
-        expect(signals).to match_array %i{pressed message toggled name_changed id_changed info_changed name_double_changed clicked title_changed}
+        expect(signals).to match_array %w{pressed message toggled name_changed id_changed info_changed name_double_changed clicked title_changed}.map(&:to_sym)
       end
     end
   end
@@ -197,14 +197,14 @@ describe QML::Reactive::Object do
     context 'when include_super is false' do
       it 'returns all property definitions of the class' do
         properties = ToggleButton.instance_properties(false)
-        expect(properties).to match_array %i{name info}
+        expect(properties).to match_array %w{name info}.map(&:to_sym)
       end
     end
 
     context 'when include_super is not specified' do
       it 'returns all property definitions of the class and its superclasses' do
         properties = ToggleButton.instance_properties
-        expect(properties).to match_array %i{name id info name_double title}
+        expect(properties).to match_array %w{name id info name_double title}.map(&:to_sym)
       end
     end
   end
@@ -239,13 +239,13 @@ describe QML::Reactive::Object do
 
   describe '#signals' do
     it 'returns signal names for object' do
-      expect(toggle_button.signals).to match_array %i{pressed message toggled id_changed name_changed info_changed name_double_changed clicked title_changed}
+      expect(toggle_button.signals).to match_array %w{pressed message toggled id_changed name_changed info_changed name_double_changed clicked title_changed}.map(&:to_sym)
     end
   end
 
   describe '#properties' do
     it 'return property names for object' do
-      expect(toggle_button.properties).to match_array %i{name id info name_double title}
+      expect(toggle_button.properties).to match_array %w{name id info name_double title}.map(&:to_sym)
     end
   end
 

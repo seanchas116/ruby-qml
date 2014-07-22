@@ -125,6 +125,8 @@ module QML
         # The signal will be variadic if args == nil.
         # @param name [#to_sym] The signal name
         # @param params [Array<#to_sym>, nil] The signal parameter names
+        # @param opts [Hash]
+        # @option opts [Proc] :factory (nil)
         # @return [Symbol] The signal name
         # @example
         #   class Button
@@ -146,19 +148,21 @@ module QML
         #   color_button = ColorButton.new
         #   color_button.pressed.connect { |pos, color| "#{color} button pressed at #{pos}" }
         #   color_button.press([10, 20], 'red')
-        def signal(name, params, factory: nil)
+        def signal(name, params, opts = {})
           name.to_sym.tap do |name|
             params = params.map(&:to_sym)
-            add_signal(UnboundSignal.new(name, params, false, self, factory))
+            add_signal(UnboundSignal.new(name, params, false, self, opts[:factory]))
           end
         end
 
         # Defines a variadic signal.
         # Variadic signals do not restrict the number of arguments.
+        # @param opts [Hash]
+        # @option opts [Proc] :factory (nil)
         # @see #signal
-        def variadic_signal(name, factory: nil)
+        def variadic_signal(name, opts = {})
           name.to_sym.tap do |name|
-            add_signal(UnboundSignal.new(name, nil, true, self, factory))
+            add_signal(UnboundSignal.new(name, nil, true, self, opts[:factory]))
           end
         end
 
@@ -172,6 +176,8 @@ module QML
         # Defines a property for the class.
         # @param name [#to_sym] The name of the property
         # @param init_value The initial value (optional)
+        # @param opts [Hash]
+        # @option opts [Proc] :factory (nil)
         # @yield The initial property binding (optional)
         # @return [Symbol] The name
         # @example
@@ -190,9 +196,9 @@ module QML
         #     property(:name) { 'piyopiyo' }
         #   end
         #   Bar.new.name #=> 'piyopiyo'
-        def property(name, init_value = nil, factory: nil, &init_binding)
+        def property(name, init_value = nil, opts = {}, &init_binding)
           name = name.to_sym
-          add_property(UnboundProperty.new(name, init_value, init_binding, self, factory))
+          add_property(UnboundProperty.new(name, init_value, init_binding, self, opts[:factory]))
           name
         end
 
@@ -259,10 +265,10 @@ module QML
           add_signal(property.notifier_signal)
         end
 
-        def initial_connections_hash(include_super: true)
+        def initial_connections_hash(include_super = true)
           if include_super && superclass.include?(Object)
             superclass.send(:initial_connections_hash).dup.tap do |hash|
-              initial_connections_hash(include_super: false).each do |key, blocks|
+              initial_connections_hash(false).each do |key, blocks|
                 hash[key] ||= []
                 hash[key] += blocks
               end

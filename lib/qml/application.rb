@@ -56,9 +56,12 @@ module QML
     end
 
     # Loads a QML file. The loaded component can be accessed by {#root_component}
+    # @param [Hash] opts
+    # @option opts [String] :data
+    # @option opts [String] :path
     # @see Component
-    def load(data: nil, path: nil)
-      @root_component = Component.new(data: data, path: path)
+    def load(opts)
+      @root_component = Component.new(data: opts[:data], path: opts[:path])
       @root = @root_component.create
     end
 

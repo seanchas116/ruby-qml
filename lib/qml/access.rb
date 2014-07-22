@@ -38,10 +38,15 @@ module QML
     module ClassMethods
 
       # Registers the class as a QML type.
-      # @param under [String|nil] the namespece which encapsulates the exported QML type. If not specified, automatically inferred from the module nesting of the class.
-      # @param version [String|nil] the version of the type. Defaults to VERSION constant of the encapsulating module / class of the class.
-      # @param name [String|nil] the name of the type. Defaults to the name of the class.
-      def register_to_qml(under: nil, version: nil, name: nil)
+      # @param opts [Hash]
+      # @option opts [String] :under the namespece which encapsulates the exported QML type. If not specified, automatically inferred from the module nesting of the class.
+      # @option opts [String] :version the version of the type. Defaults to VERSION constant of the encapsulating module / class of the class.
+      # @option opts [String] :name the name of the type. Defaults to the name of the class.
+      def register_to_qml(opts = {})
+        under = opts[:under]
+        version = opts[:version]
+        name = opts[:name]
+
         if !under || !version || !name
           path = self.name.split('::')
         end

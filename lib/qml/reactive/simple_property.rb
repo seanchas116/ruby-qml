@@ -10,7 +10,7 @@ module QML
       attr_reader :changed
 
       def initialize
-        @changed = Signal.new(:new_value)
+        @changed = Signal.new([:new_value])
       end
     end
   end

@@ -6,7 +6,7 @@ module QML
       class MergeSignal < ChainedSignal
         def initialize(sources)
           param_count = sources.map(&:arity).max
-          super(*param_count.times.map { |i| :"arg#{i}" })
+          super(param_count.times.map { |i| :"arg#{i}" })
           @sources = sources
         end
 

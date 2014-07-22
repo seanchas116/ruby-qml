@@ -27,11 +27,13 @@ module QML
   end
 
   # Initializes ruby-qml.
-  # @param [Boolean] offscreen set this to true to run application offscreen (without GUI)
-  def init(offscreen: false)
+  # @param [Hash] opts
+  # @option opts [Boolean] :offscreen (false) set this to true to run application offscreen (without GUI)
+  def init(opts = {})
+    opts = {offscreen: false}.merge opts
     fail AlreadyInitializedError, "ruby-qml already initialized" if initialized?
     argv = [$PROGRAM_NAME]
-    argv += %w{-platform offscreen} if offscreen
+    argv += %w{-platform offscreen} if opts[:offscreen]
     Kernel.init(argv)
     application.events_processed.each do
       Dispatcher.instance.run_tasks

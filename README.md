@@ -7,6 +7,13 @@
 ruby-qml is a QML / Qt Quick wrapper for Ruby.
 It provides bindings between QML and Ruby and enables you to use Qt Quick-based GUI from Ruby.
 
+## What you can do with ruby-qml
+
+* Develop desktop GUI applications only with Ruby and QML
+* Easily combine codes written in C++ and Qt with your Ruby code
+
+## Documentation and Examples
+
 * [Documentation](http://rubydoc.info/github/seanchas116/ruby-qml/master/frames)
 * [Examples](https://github.com/seanchas116/ruby-qml/tree/master/examples)
 
@@ -18,7 +25,7 @@ It provides bindings between QML and Ruby and enables you to use Qt Quick-based 
 
 ## Installation
 
-ruby-qml currently requires **Ruby 2.0 or later**.
+ruby-qml requires **Ruby 1.9 or later**.
 
 ### OS X with Homebrew
 
@@ -56,7 +63,7 @@ For example:
 
     $ bundle config build.qml --with-libffi-dir=$(brew --prefix libffi) --with-qt-dir=$(brew --prefix qt5)
 
-The configuration will be saved in `~/.bundle/config`
+The configuration will be saved in `~/.bundle/config`.
 
 ## Usage
 
@@ -410,5 +417,6 @@ Contributions are welcome. When you are contributing to ruby-qml:
 1. Fork it ( http://github.com/seanchas116/ruby-qml/fork )
 2. Create your feature branch (`git checkout -b my-new-feature`)
 3. Commit your changes (`git commit -am 'Add some feature'`)
-4. Push to the branch (`git push origin my-new-feature`)
-5. Create new Pull Request
+4. Write some tests if possible
+5. Push to the branch (`git push origin my-new-feature`)
+6. Create new Pull Request

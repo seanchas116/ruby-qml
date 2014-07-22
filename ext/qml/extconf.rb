@@ -11,6 +11,7 @@ class Configurator
     find_dependencies
     @cppflags = []
     @ldflags = []
+    @debug_enabled = enable_config('debug')
   end
 
   def find_dependencies
@@ -35,9 +36,10 @@ class Configurator
 
   def build_plugins
     puts "building plugins..."
+    qmake_opts = @debug_enabled ? 'CONFIG+=debug' : ''
     Pathname(__FILE__).+("../plugins").children.select(&:directory?).each do |dir|
       Dir.chdir(dir) do
-        system("#{@qmake}") && system('make') or abort "failed to build plugin: #{dir.basename}"
+        system("#{@qmake} #{qmake_opts}") && system('make clean') && system('make') or abort "failed to build plugin: #{dir.basename}"
       end
     end
   end
@@ -65,7 +67,7 @@ class Configurator
     end
 
     $CPPFLAGS += " -std=c++11 -Wall -Wextra -pipe"
-    if enable_config('debug')
+    if @debug_enabled
       $CPPFLAGS += " -O0 -ggdb3"
     else
       $CPPFLAGS += " -O3"

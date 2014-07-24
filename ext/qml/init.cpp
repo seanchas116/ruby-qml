@@ -2,7 +2,7 @@
 #include "ext_pointer.h"
 #include "ext_pluginloader.h"
 #include "ext_anywrapper.h"
-#include "ext_accesssupport.h"
+#include "ext_accesswrapperfactory.h"
 #include "ext_testutil.h"
 #include "ext_kernel.h"
 #include "application.h"

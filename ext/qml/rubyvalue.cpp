@@ -5,7 +5,7 @@
 #include "objectdata.h"
 #include "accessobject.h"
 #include "listmodel.h"
-#include "ext_accesssupport.h"
+#include "ext_accesswrapperfactory.h"
 #include <ruby/intern.h>
 #define ONIG_ESCAPE_UCHAR_COLLISION
 #include <ruby/encoding.h>

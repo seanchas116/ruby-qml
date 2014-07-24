@@ -1,4 +1,4 @@
-#include "ext_accesssupport.h"
+#include "ext_accesswrapperfactory.h"
 #include "ext_pointer.h"
 #include "rubyclass.h"
 #include "accessclass.h"

@@ -5,7 +5,7 @@
 #include <QQmlEngine>
 
 namespace RubyQml {
-namespace Application {
+namespace Kernel {
 
 QApplication *application();
 QQmlEngine *engine();

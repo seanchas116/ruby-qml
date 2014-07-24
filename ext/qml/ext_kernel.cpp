@@ -1,5 +1,5 @@
 #include "ext_kernel.h"
-#include "application.h"
+#include "kernel.h"
 #include "rubyvalue.h"
 #include "rubyclass.h"
 
@@ -11,13 +11,13 @@ namespace {
 RubyValue application(RubyValue self)
 {
     Q_UNUSED(self);
-    return RubyValue::from(Application::application());
+    return RubyValue::from(Kernel::application());
 }
 
 RubyValue engine(RubyValue self)
 {
     Q_UNUSED(self);
-    return RubyValue::from(Application::engine());
+    return RubyValue::from(Kernel::engine());
 }
 
 RubyValue applicationMetaObject()
@@ -33,14 +33,14 @@ RubyValue engineMetaObject()
 RubyValue init(RubyValue self, RubyValue argv)
 {
     Q_UNUSED(self);
-    Application::init(argv.to<QList<QByteArray>>());
+    Kernel::init(argv.to<QList<QByteArray>>());
     return Qnil;
 }
 
 RubyValue initialized(RubyValue self)
 {
     Q_UNUSED(self);
-    return RubyValue::from(Application::initialized());
+    return RubyValue::from(Kernel::initialized());
 }
 
 }

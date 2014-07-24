@@ -2,7 +2,7 @@
 #include "markable.h"
 #include "objectdata.h"
 #include "objectgc.h"
-#include "application.h"
+#include "kernel.h"
 #include <QObject>
 #include <QHash>
 #include <QQmlEngine>
@@ -55,7 +55,7 @@ void Ext_Pointer::setManaged(bool managed)
     if (mObject) {
         if (managed) {
             QQmlEngine::setObjectOwnership(mObject, QQmlEngine::JavaScriptOwnership);
-            mJSValue = Application::engine()->newQObject(mObject);
+            mJSValue = Kernel::engine()->newQObject(mObject);
         } else {
             QQmlEngine::setObjectOwnership(mObject, QQmlEngine::CppOwnership);
             mJSValue = QJSValue();

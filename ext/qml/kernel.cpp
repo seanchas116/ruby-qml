@@ -1,8 +1,8 @@
-#include "application.h"
+#include "kernel.h"
 #include "util.h"
 
 namespace RubyQml {
-namespace Application {
+namespace Kernel {
 
 namespace {
 

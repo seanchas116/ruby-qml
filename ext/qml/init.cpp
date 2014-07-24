@@ -5,7 +5,7 @@
 #include "ext_accesswrapperfactory.h"
 #include "ext_testutil.h"
 #include "ext_kernel.h"
-#include "application.h"
+#include "kernel.h"
 #include "signalforwarder.h"
 #include "valuereference.h"
 #include "objectgc.h"

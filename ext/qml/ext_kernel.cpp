@@ -4,8 +4,7 @@
 #include "rubyclass.h"
 
 namespace RubyQml {
-namespace Ext {
-namespace Kernel {
+namespace Ext_Kernel {
 
 namespace {
 
@@ -58,5 +57,4 @@ void defineModule()
 }
 
 } // namespace Kernel
-} // namespace Ext
 } // namespace RubyQml

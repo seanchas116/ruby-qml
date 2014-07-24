@@ -1,11 +1,9 @@
 #pragma once
 
 namespace RubyQml {
-namespace Ext {
-namespace TestUtil {
+namespace Ext_TestUtil {
 
 void defineModule();
 
 } // namespace TestUtil
-} // namespace Ext
 } // namespace RubyQml

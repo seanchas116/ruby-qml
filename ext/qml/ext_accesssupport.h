@@ -9,13 +9,11 @@ class ForeignMetaObject;
 class QmlTypeRegisterer;
 class AccessWrapper;
 
-namespace Ext {
-
-class AccessWrapperFactory
+class Ext_AccessWrapperFactory
 {
 public:
-    AccessWrapperFactory(RubyValue self);
-    ~AccessWrapperFactory();
+    Ext_AccessWrapperFactory(RubyValue self);
+    ~Ext_AccessWrapperFactory();
 
     RubyValue ext_initialize(RubyValue rubyClass, RubyValue className, RubyValue methodInfos, RubyValue signalInfos, RubyValue propertyInfos);
     RubyValue ext_emitSignal(RubyValue obj, RubyValue name, RubyValue args);
@@ -38,5 +36,4 @@ private:
     SP<QmlTypeRegisterer> mTypeRegisterer;
 };
 
-} // namespace Ext
 } // namespace RubyQml

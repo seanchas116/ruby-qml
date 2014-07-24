@@ -2,16 +2,15 @@
 #include "rubyclass.h"
 
 namespace RubyQml {
-namespace Ext {
 
-AnyWrapper::AnyWrapper(RubyValue self)
+Ext_AnyWrapper::Ext_AnyWrapper(RubyValue self)
 {
     Q_UNUSED(self);
 }
 
-RubyValue AnyWrapper::create(const QVariant &value, void (*markFunction)(const QVariant &))
+RubyValue Ext_AnyWrapper::create(const QVariant &value, void (*markFunction)(const QVariant &))
 {
-    auto klass = wrapperRubyClass<AnyWrapper>();
+    auto klass = wrapperRubyClass<Ext_AnyWrapper>();
     auto wrapper = klass.newInstance();
     auto ptr = klass.unwrap(wrapper);
     ptr->mValue = value;
@@ -19,18 +18,17 @@ RubyValue AnyWrapper::create(const QVariant &value, void (*markFunction)(const Q
     return wrapper;
 }
 
-void AnyWrapper::defineClass()
+void Ext_AnyWrapper::defineClass()
 {
-    WrapperRubyClass<AnyWrapper> klass(RubyModule::fromPath("QML"), "AnyWrapper");
+    WrapperRubyClass<Ext_AnyWrapper> klass(RubyModule::fromPath("QML"), "AnyWrapper");
     Q_UNUSED(klass);
 }
 
-void AnyWrapper::gc_mark()
+void Ext_AnyWrapper::gc_mark()
 {
     if (mMarkFunction) {
         mMarkFunction(mValue);
     }
 }
 
-} // namespace Ext
 } // namespace RubyQml

@@ -3,8 +3,7 @@
 #include "objectgc.h"
 
 namespace RubyQml {
-namespace Ext {
-namespace TestUtil {
+namespace Ext_TestUtil {
 
 namespace {
 
@@ -38,5 +37,4 @@ void defineModule()
 }
 
 } // namespace TestUtil
-} // namespace Ext
 } // namespace RubyQml

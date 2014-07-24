@@ -5,12 +5,10 @@ namespace RubyQml {
 
 class RubyValue;
 
-namespace Ext {
-
-class AnyWrapper
+class Ext_AnyWrapper
 {
 public:
-    AnyWrapper(RubyValue self);
+    Ext_AnyWrapper(RubyValue self);
     static RubyValue create(const QVariant &value, void (*markFunction)(const QVariant &) = nullptr);
     static void defineClass();
 
@@ -22,5 +20,4 @@ private:
     void (*mMarkFunction)(const QVariant &);
 };
 
-} // namespace Ext
 } // namespace RubyQml

@@ -6,13 +6,12 @@
 class QPluginLoader;
 
 namespace RubyQml {
-namespace Ext {
 
-class PluginLoader
+class Ext_PluginLoader
 {
 public:
-    PluginLoader(RubyValue self);
-    ~PluginLoader();
+    Ext_PluginLoader(RubyValue self);
+    ~Ext_PluginLoader();
 
     RubyValue initialize(RubyValue path);
     RubyValue load();
@@ -27,6 +26,5 @@ private:
     std::unique_ptr<QPluginLoader> mPluginLoader;
 };
 
-} // namespace Ext
 } // namespace RubyQml
 

@@ -328,7 +328,7 @@ template <> const QMetaObject *Conversion<const QMetaObject *>::from(RubyValue x
     if (x == RubyValue()) {
         return nullptr;
     }
-    return wrapperRubyClass<Ext::MetaObject>().unwrap(x)->metaObject();
+    return wrapperRubyClass<Ext_MetaObject>().unwrap(x)->metaObject();
 }
 
 template <> RubyValue Conversion<const QMetaObject *>::to(const QMetaObject *metaobj)
@@ -336,7 +336,7 @@ template <> RubyValue Conversion<const QMetaObject *>::to(const QMetaObject *met
     if (!metaobj) {
         return Qnil;
     }
-    return Ext::MetaObject::fromMetaObject(metaobj);
+    return Ext_MetaObject::fromMetaObject(metaobj);
 }
 
 } // namespace detail
@@ -449,7 +449,7 @@ bool RubyValue::isConvertibleTo(int metaType) const
             }
             return false;
         }
-        if (rb_obj_is_kind_of(x, wrapperRubyClass<Ext::MetaObject>())) {
+        if (rb_obj_is_kind_of(x, wrapperRubyClass<Ext_MetaObject>())) {
             return metaType == QMetaType::type("const QMetaObject*");
         }
         auto accessModule = RubyModule::fromPath("QML::Access");
@@ -524,7 +524,7 @@ int RubyValue::defaultMetaType() const
         if (rb_obj_is_kind_of(x, objectBaseClass)) {
             return QMetaType::QObjectStar;
         }
-        if (rb_obj_is_kind_of(x, wrapperRubyClass<Ext::MetaObject>())) {
+        if (rb_obj_is_kind_of(x, wrapperRubyClass<Ext_MetaObject>())) {
             return QMetaType::type("const QMetaObject*");
         }
         auto accessModule = RubyModule::fromPath("QML::Access");
@@ -630,8 +630,8 @@ RubyValue RubyValue::fromQObject(QObject *obj, bool implicit)
         return data->rubyObject;
     }
 
-    auto metaobj = Ext::MetaObject::fromMetaObject(obj->metaObject());
-    auto pointer = Ext::Pointer::fromQObject(obj, false);
+    auto metaobj = Ext_MetaObject::fromMetaObject(obj->metaObject());
+    auto pointer = Ext_Pointer::fromQObject(obj, false);
 
     RubyValue wrapper;
     protect([&] {
@@ -656,7 +656,7 @@ QObject *RubyValue::toQObject() const
         auto wrapperFactory = protect([&] {
             return rb_funcall(rb_obj_class(x), RUBYQML_INTERN("access_wrapper_factory"), 0);
         });
-        return wrapperRubyClass<Ext::AccessWrapperFactory>().unwrap(wrapperFactory)->create(x);
+        return wrapperRubyClass<Ext_AccessWrapperFactory>().unwrap(wrapperFactory)->create(x);
     }
     static auto listModelClass = RubyModule::fromPath("QML::Data::ListModel");
     if (x.isKindOf(listModelClass)) {
@@ -670,8 +670,8 @@ QObject *RubyValue::toQObject() const
                 .arg(x.send("class").send("name").to<QString>()));
     }
     auto objptr = x.send(RUBYQML_INTERN("pointer"));
-    auto obj = wrapperRubyClass<Ext::Pointer>().unwrap(objptr)->fetchQObject();
-    Ext::MetaObject::fromMetaObject(obj->metaObject()).send(RUBYQML_INTERN("build_class"));
+    auto obj = wrapperRubyClass<Ext_Pointer>().unwrap(objptr)->fetchQObject();
+    Ext_MetaObject::fromMetaObject(obj->metaObject()).send(RUBYQML_INTERN("build_class"));
     return obj;
 }
 

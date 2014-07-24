@@ -4,13 +4,12 @@
 #include <QJSValue>
 
 namespace RubyQml {
-namespace Ext {
 
-class Pointer
+class Ext_Pointer
 {
 public:
-    Pointer(RubyValue self);
-    ~Pointer();
+    Ext_Pointer(RubyValue self);
+    ~Ext_Pointer();
 
     static RubyValue fromQObject(QObject *obj, bool owned);
 
@@ -39,5 +38,4 @@ private:
     QJSValue mJSValue;
 };
 
-} // namespace Ext
 } // namespace RubyQml

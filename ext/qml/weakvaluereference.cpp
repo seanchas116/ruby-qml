@@ -13,7 +13,7 @@ struct WeakValueReference::Data
 
     static VALUE finalize(VALUE args, VALUE data) {
         Q_UNUSED(args);
-        auto variant = wrapperRubyClass<Ext::AnyWrapper>().unwrap(data)->value();
+        auto variant = wrapperRubyClass<Ext_AnyWrapper>().unwrap(data)->value();
         auto sp = variant.value<std::shared_ptr<Data>>();
         sp->invalidiate();
         return Qnil;
@@ -33,7 +33,7 @@ WeakValueReference::WeakValueReference(RubyValue value) :
     d->mValue = value;
     static auto objspace = RubyModule::fromPath("ObjectSpace");
     protect([&] {
-        auto proc = rb_proc_new((VALUE (*)(...))&Data::finalize, Ext::AnyWrapper::create(QVariant::fromValue(d)));
+        auto proc = rb_proc_new((VALUE (*)(...))&Data::finalize, Ext_AnyWrapper::create(QVariant::fromValue(d)));
         VALUE args[] = { value };
         rb_funcall_with_block(objspace, RUBYQML_INTERN("define_finalizer"), 1, args, proc);
     });

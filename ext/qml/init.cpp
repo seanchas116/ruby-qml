@@ -23,19 +23,19 @@ void defineMetaTypes()
 
 void defineClasses()
 {
-    Ext::MetaObject::defineClass();
-    Ext::Pointer::defineClass();
-    Ext::PluginLoader::defineClass();
-    Ext::AnyWrapper::defineClass();
-    Ext::AccessWrapperFactory::defineClass();
-    Ext::TestUtil::defineModule();
-    Ext::Kernel::defineModule();
+    Ext_MetaObject::defineClass();
+    Ext_Pointer::defineClass();
+    Ext_PluginLoader::defineClass();
+    Ext_AnyWrapper::defineClass();
+    Ext_AccessWrapperFactory::defineClass();
+    Ext_TestUtil::defineModule();
+    Ext_Kernel::defineModule();
     ListModel::defineUtilMethods();
 }
 
 void setupGlobalGCMarking()
 {
-    auto marker = Ext::AnyWrapper::create(QVariant(), [](const QVariant &) {
+    auto marker = Ext_AnyWrapper::create(QVariant(), [](const QVariant &) {
         ValueReference::markAllReferences();
         ObjectGC::instance()->markNonOwnedObjects();
     });

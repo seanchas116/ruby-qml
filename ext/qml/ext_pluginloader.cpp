@@ -5,25 +5,24 @@
 #include <QtCore/QSet>
 
 namespace RubyQml {
-namespace Ext {
 
-PluginLoader::PluginLoader(RubyValue self) :
+Ext_PluginLoader::Ext_PluginLoader(RubyValue self) :
     self(self),
     mPluginLoader(new QPluginLoader())
 {
 }
 
-PluginLoader::~PluginLoader()
+Ext_PluginLoader::~Ext_PluginLoader()
 {
 }
 
-RubyValue PluginLoader::initialize(RubyValue path)
+RubyValue Ext_PluginLoader::initialize(RubyValue path)
 {
     mPluginLoader->setFileName(path.to<QString>());
     return self;
 }
 
-RubyValue PluginLoader::load()
+RubyValue Ext_PluginLoader::load()
 {
     auto ok = mPluginLoader->load();
     if (!ok) {
@@ -32,7 +31,7 @@ RubyValue PluginLoader::load()
     return self;
 }
 
-RubyValue PluginLoader::instance()
+RubyValue Ext_PluginLoader::instance()
 {
     self.send("load");
     auto instance = mPluginLoader->instance();
@@ -43,13 +42,12 @@ RubyValue PluginLoader::instance()
     }
 }
 
-void PluginLoader::defineClass()
+void Ext_PluginLoader::defineClass()
 {
-    WrapperRubyClass<PluginLoader> klass(RubyModule::fromPath("QML"), "PluginLoader");
-    klass.defineMethod(MethodAccess::Private, "initialize", RUBYQML_MEMBER_FUNCTION_INFO(&PluginLoader::initialize));
-    klass.defineMethod(MethodAccess::Public, "load", RUBYQML_MEMBER_FUNCTION_INFO(&PluginLoader::load));
-    klass.defineMethod(MethodAccess::Public, "instance", RUBYQML_MEMBER_FUNCTION_INFO(&PluginLoader::instance));
+    WrapperRubyClass<Ext_PluginLoader> klass(RubyModule::fromPath("QML"), "PluginLoader");
+    klass.defineMethod(MethodAccess::Private, "initialize", RUBYQML_MEMBER_FUNCTION_INFO(&Ext_PluginLoader::initialize));
+    klass.defineMethod(MethodAccess::Public, "load", RUBYQML_MEMBER_FUNCTION_INFO(&Ext_PluginLoader::load));
+    klass.defineMethod(MethodAccess::Public, "instance", RUBYQML_MEMBER_FUNCTION_INFO(&Ext_PluginLoader::instance));
 }
 
-} // namespace Ext
 } // namespace RubyQml

@@ -7,12 +7,11 @@
 #include <QtCore/QObject>
 
 namespace RubyQml {
-namespace Ext {
 
-class MetaObject
+class Ext_MetaObject
 {
 public:
-    MetaObject(RubyValue self);
+    Ext_MetaObject(RubyValue self);
 
     RubyValue className() const;
 
@@ -58,5 +57,4 @@ private:
     QHash<ID, int> mPropertyHash;
 };
 
-} // namespace Ext
 } // namespace RubyQml

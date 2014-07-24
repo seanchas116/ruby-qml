@@ -13,9 +13,6 @@ class ApplicationExtension : public QObject
 public:
     explicit ApplicationExtension(QApplication *app);
 
-signals:
-    void eventsProcessed();
-
 public slots:
     void exec();
     void processEvents();

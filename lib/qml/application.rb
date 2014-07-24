@@ -23,17 +23,9 @@ module QML
       fail ApplicationError, "cannot create Application instance manually"
     end
 
-    # @!method events_processed
-    # This signal is emitted every time events are processed in the event loop.
-    # @return [Reactive::Signal]
-    signal :events_processed, []
-
     def initialize
       super()
       @extension = Plugins.core.createApplicationExtension(self)
-      @extension.events_processed.each do
-        events_processed.call
-      end
     end
 
     # @return [Engine] The engine of the application.

@@ -55,7 +55,7 @@ void Ext_Pointer::setManaged(bool managed)
     if (mObject) {
         if (managed) {
             QQmlEngine::setObjectOwnership(mObject, QQmlEngine::JavaScriptOwnership);
-            mJSValue = Kernel::engine()->newQObject(mObject);
+            mJSValue = Kernel::instance()->engine()->newQObject(mObject);
         } else {
             QQmlEngine::setObjectOwnership(mObject, QQmlEngine::CppOwnership);
             mJSValue = QJSValue();

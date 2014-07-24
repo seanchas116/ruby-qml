@@ -10,6 +10,7 @@ describe QML::Dispatchable do
     it 'queues a method call as a task to the dispatcher' do
       foo = DispatchableFoo.new
       foo.later.value = 'hoge'
+      QML.application.process_events # wait for event loop hook to be enabled
       expect(foo.value).to be_nil
       QML.application.process_events
       expect(foo.value).to eq 'hoge'

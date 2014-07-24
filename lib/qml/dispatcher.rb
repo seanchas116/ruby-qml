@@ -10,12 +10,13 @@ module QML
     MAX_DURATION = 1/10.to_r
 
     def initialize
-      @tasks = []
       super
+      @tasks = []
     end
 
     def add_task(&task)
       synchronize do
+        Kernel.set_event_loop_hook_enabled_later true if @tasks.empty?
         @tasks << task
       end
     end
@@ -35,7 +36,15 @@ module QML
           task = @tasks.shift
           task.call
         end
+        Kernel.set_event_loop_hook_enabled_later false if @tasks.empty?
       end
+    end
+  end
+
+  on_init do
+    Kernel.event_loop_hook_timer.timeout.connect do
+      puts "======== run tasks"
+      Dispatcher.instance.run_tasks
     end
   end
 

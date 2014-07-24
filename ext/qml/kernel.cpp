@@ -1,54 +1,39 @@
 #include "kernel.h"
 #include "util.h"
+#include <QTimer>
 
 namespace RubyQml {
-namespace Kernel {
 
-namespace {
-
-int argc;
-QList<QByteArray> argData;
-char **argv;
-
-QApplication *application_;
-QQmlEngine *engine_;
-
-}
-
-void failIfUninitialized()
+Kernel *Kernel::instance()
 {
-    if (!initialized()) {
+    if (!mInstance) {
         fail("QML::UninitializedError", "ruby-qml not yet initialized");
     }
+    return mInstance;
 }
 
-QApplication *application()
+void Kernel::init(const QList<QByteArray> &args)
 {
-    failIfUninitialized();
-    return application_;
+    if (mInstance) {
+        fail("QML::AlreadyInitializedErryr", "ruby-qml already initialized");
+    }
+    mInstance = new Kernel(args);
 }
 
-QQmlEngine *engine()
+Kernel::Kernel(const QList<QByteArray> &args)
 {
-    failIfUninitialized();
-    return engine_;
+    mArgc = args.size();
+    mArgData = args;
+    mArgv = new char*[mArgc];
+    std::transform(mArgData.begin(), mArgData.end(), mArgv, [](QByteArray &ba) { return ba.data(); });
+
+    mApplication = new QApplication(mArgc, mArgv);
+    mEngine = new QQmlEngine();
+    mEventLoopHookTimer = new QTimer();
+    mEventLoopHookTimer->setInterval(0);
+    mEventLoopHookTimer->setSingleShot(false);
 }
 
-bool initialized()
-{
-    return application_;
-}
+Kernel *Kernel::mInstance = nullptr;
 
-void init(const QList<QByteArray> &args)
-{
-    argc = args.size();
-    argData = args;
-    argv = new char*[argc];
-    std::transform(argData.begin(), argData.end(), argv, [](QByteArray &ba) { return ba.data(); });
-
-    application_ = new QApplication(argc, argv);
-    engine_ = new QQmlEngine();
-}
-
-}
 } // namespace RubyQml

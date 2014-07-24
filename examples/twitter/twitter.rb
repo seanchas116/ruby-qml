@@ -33,8 +33,7 @@ module Examples
         @streaming_client.filter(track: word) do |object|
           case object
           when ::Twitter::Tweet
-            puts object
-            QML.later { yield object }
+            yield object
           end
         end
       end

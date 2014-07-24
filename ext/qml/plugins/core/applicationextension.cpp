@@ -8,11 +8,6 @@ namespace RubyQml {
 ApplicationExtension::ApplicationExtension(QApplication *app) :
     mApp(app)
 {
-    auto timer = new QTimer(this);
-    timer->setInterval(0);
-    timer->setSingleShot(false);
-    timer->start();
-    connect(timer, &QTimer::timeout, this, &ApplicationExtension::eventsProcessed);
 }
 
 void ApplicationExtension::exec()

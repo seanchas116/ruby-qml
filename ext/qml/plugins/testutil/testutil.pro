@@ -1,6 +1,6 @@
 TEMPLATE = lib
 CONFIG += plugin c++11
-QT += qml
+QT += qml quick
 
 TARGET = rubyqml-testutil
 INCLUDEPATH += .
@@ -10,11 +10,13 @@ SOURCES += testobject.cpp \
     testobjectsubclass.cpp \
     ownershiptest.cpp \
     testutilplugin.cpp \
-    objectlifechecker.cpp
+    objectlifechecker.cpp \
+    imageprovidertest.cpp
 
 HEADERS += \
     testobject.h \
     testobjectsubclass.h \
     ownershiptest.h \
     testutilplugin.h \
-    objectlifechecker.h
+    objectlifechecker.h \
+    imageprovidertest.h

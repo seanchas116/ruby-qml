@@ -39,7 +39,9 @@ class Configurator
     qmake_opts = @debug_enabled ? 'CONFIG+=debug' : ''
     Pathname(__FILE__).+("../plugins").children.select(&:directory?).each do |dir|
       Dir.chdir(dir) do
-        system("#{@qmake} #{qmake_opts}") && system('make clean') && system('make') or abort "failed to build plugin: #{dir.basename}"
+        system("#{@qmake} #{qmake_opts}") or abort "failed to configurate plugin: #{dir.basename}"
+        system('make clean') if enable_config('clean-plugin', false)
+        system('make') or abort "failed to build plugin: #{dir.basename}"
       end
     end
   end

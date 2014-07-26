@@ -3,7 +3,9 @@
 #include "testobjectsubclass.h"
 #include "ownershiptest.h"
 #include "objectlifechecker.h"
+#include "imageprovidertest.h"
 #include <QtQml>
+#include <QQuickWindow>
 
 Q_DECLARE_METATYPE(const QMetaObject*)
 
@@ -17,6 +19,7 @@ TestUtilPlugin::TestUtilPlugin(QObject *parent) :
     qRegisterMetaType<TestObjectSubclass *>();
     qRegisterMetaType<OwnershipTest *>();
     qRegisterMetaType<ObjectLifeChecker *>();
+    qRegisterMetaType<ImageProviderTest *>();
 
     auto metaObjects = { &TestObject::staticMetaObject, &ObjectLifeChecker::staticMetaObject};
     for (auto metaobj : metaObjects) {
@@ -42,6 +45,11 @@ OwnershipTest *TestUtilPlugin::createOwnershipTest()
 ObjectLifeChecker *TestUtilPlugin::createObjectLifeChecker(QObject *target)
 {
     return new ObjectLifeChecker(target);
+}
+
+ImageProviderTest *TestUtilPlugin::createImageProviderTest()
+{
+    return new ImageProviderTest();
 }
 
 } // namespace RubyQml

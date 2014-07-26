@@ -2,9 +2,24 @@ require 'spec_helper'
 
 describe QML::Application do
   let(:application) { QML.application }
-  describe '.instance' do
-    it 'returns the QML::Application instance' do
-      expect(application).to be_a(QML::Application)
+
+  describe '.new' do
+    it 'fails with QML::ApplicationError' do
+      expect { QML::Application.new }.to raise_error(QML::ApplicationError)
+    end
+  end
+  describe '.notify_error' do
+    let(:error) do
+      begin
+        fail "hoge"
+      rescue => e
+        e
+      end
+    end
+
+    it 'prints an error to stderr' do
+      expect { QML::Application.notify_error(error) }
+        .to output(/#{error.message}/).to_stderr
     end
   end
   describe '#engine' do
@@ -38,6 +53,14 @@ describe QML::Application do
       application.load_path path
       expect(application.root_component.path).to eq path
       expect(application.root.name).to eq 'foo'
+    end
+  end
+end
+
+describe QML do
+  describe '.application' do
+    it 'returns the QML::Application instance' do
+      expect(QML.application).to be_a(QML::Application)
     end
   end
 end

@@ -41,4 +41,12 @@ describe QML::Component do
       end
     end
   end
+
+  describe '#initialize' do
+    context 'when neither string nor path specified' do
+      it 'fails with QMLError' do
+        expect { QML::Component.new({}) }.to raise_error(QML::QMLError)
+      end
+    end
+  end
 end

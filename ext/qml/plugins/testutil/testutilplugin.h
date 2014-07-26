@@ -2,12 +2,15 @@
 #include <QObject>
 #include <QVariant>
 
+class QQuickWindow;
+
 namespace RubyQml {
 
 class TestObject;
 class TestObjectSubclass;
 class OwnershipTest;
 class ObjectLifeChecker;
+class ImageProviderTest;
 
 class TestUtilPlugin : public QObject
 {
@@ -24,6 +27,7 @@ public slots:
     RubyQml::TestObjectSubclass *createTestObjectSubclass();
     RubyQml::OwnershipTest *createOwnershipTest();
     RubyQml::ObjectLifeChecker *createObjectLifeChecker(QObject *target);
+    RubyQml::ImageProviderTest *createImageProviderTest();
 
 private:
     QVariantHash mMetaObjects;

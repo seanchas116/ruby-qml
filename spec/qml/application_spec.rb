@@ -8,6 +8,20 @@ describe QML::Application do
       expect { QML::Application.new }.to raise_error(QML::ApplicationError)
     end
   end
+  describe '.notify_error' do
+    let(:error) do
+      begin
+        fail "hoge"
+      rescue => e
+        e
+      end
+    end
+
+    it 'prints an error to stderr' do
+      expect { QML::Application.notify_error(error) }
+        .to output(/#{error.message}/).to_stderr
+    end
+  end
   describe '#engine' do
     it 'returns the default engine of the application' do
       expect(application.engine).to be_a(QML::Engine)

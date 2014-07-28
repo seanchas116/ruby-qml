@@ -1,24 +1,21 @@
-ruby-qml
+ruby-qml [![Gem Version](https://badge.fury.io/rb/qml.svg)](http://badge.fury.io/rb/qml)
 ================
 
-[![Gem Version](https://badge.fury.io/rb/qml.svg)](http://badge.fury.io/rb/qml)
+ruby-qml is a QML / Qt Quick wrapper for Ruby.
+It provides bindings between QML and Ruby and enables you to use Qt Quick-based GUI from Ruby.
+
+* [Documentation](http://rubydoc.info/github/seanchas116/ruby-qml/master/frames)
+* [Examples](https://github.com/seanchas116/ruby-qml/tree/master/examples)
+
 [![Dependency Status](https://gemnasium.com/seanchas116/ruby-qml.svg)](https://gemnasium.com/seanchas116/ruby-qml)
 [![Build Status](https://travis-ci.org/seanchas116/ruby-qml.svg?branch=master)](https://travis-ci.org/seanchas116/ruby-qml)
 [![Coverage Status](https://coveralls.io/repos/seanchas116/ruby-qml/badge.png?branch=master)](https://coveralls.io/r/seanchas116/ruby-qml?branch=master)
 [![Inline docs](http://inch-ci.org/github/seanchas116/ruby-qml.png?branch=master)](http://inch-ci.org/github/seanchas116/ruby-qml)
 
-ruby-qml is a QML / Qt Quick wrapper for Ruby.
-It provides bindings between QML and Ruby and enables you to use Qt Quick-based GUI from Ruby.
-
 ## What you can do with ruby-qml
 
 * Develop desktop GUI applications only with Ruby and QML
 * Easily combine codes written in C++ and Qt with your Ruby code
-
-## Documentation and Examples
-
-* [Documentation](http://rubydoc.info/github/seanchas116/ruby-qml/master/frames)
-* [Examples](https://github.com/seanchas116/ruby-qml/tree/master/examples)
 
 ## Gallery
 

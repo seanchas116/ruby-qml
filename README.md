@@ -25,7 +25,7 @@ It provides bindings between QML and Ruby and enables you to use Qt Quick-based 
 
 ## Installation
 
-ruby-qml requires **Ruby 1.9 or later**.
+ruby-qml requires **Ruby 1.9 or later** and currently supports **OS X** and **Linux**.
 
 ### OS X with Homebrew
 

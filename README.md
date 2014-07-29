@@ -72,6 +72,8 @@ The configuration will be saved in `~/.bundle/config`.
 The following code loads a QML file and shows an application window titled "Hello, world!".
 
 ```ruby
+require 'qml'
+
 QML.application do |app|
   app.load_path Pathname(__FILE__) + '../main.qml'
 end

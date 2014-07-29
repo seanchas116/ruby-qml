@@ -18,7 +18,6 @@ ApplicationWindow {
             id: textField
         }
         Text {
-            y: 100
             id: text
             text: fizzBuzz.result
         }

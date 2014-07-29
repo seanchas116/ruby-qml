@@ -371,9 +371,14 @@ class MyPlugin : public QObject
 {
     Q_OBJECT
     Q_PLUGIN_METADATA(IID "org.myplugin.MyPlugin")
+signals:
+    void added(int value);
+
 public slots:
-    void foo() {
-        qDebug() << "foo";
+    int add(int x, int y) {
+        int result = x + y;
+        emit added(result);
+        return result;
     }
 };
 ```
@@ -381,7 +386,12 @@ public slots:
 ```ruby
 # Ruby
 plugin = QML::PluginLoader.new(directory, "myplugin").instance
-plugin.foo
+
+plugin.added.connect do |value|
+  puts "added value: #{value}"
+end
+
+plugin.add(1, 2) #=> 3
 ```
 
 ### Garbage collection

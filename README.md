@@ -48,7 +48,7 @@ If you use [official Qt installation](http://qt-project.org/downloads), for exam
     $ brew install pkg-config libffi
     $ gem install qml -- --with-libffi-dir=$(brew --prefix libffi) --with-qt-dir=$HOME/Qt/5.3/clang_64
 
-The Qt installation path (`~/Qt/5.3/clang_64` in this example) depends on your Qt installation configuration and Qt version.
+The Qt installation path (`$HOME/Qt/5.3/clang_64` in this example) depends on your Qt installation configuration and Qt version.
 
 ### General (OSX and Linux)
 

@@ -51,13 +51,31 @@ class Configurator
 
     PKGS.each do |mod|
       @cppflags << `#{@pkgconfig} --cflags #{mod}`.chomp
-      @ldflags << `#{@pkgconfig} --libs #{mod}`.chomp
+
+      libs =`#{@pkgconfig} --libs #{mod}`.chomp
+      @ldflags << libs
+
+      # add framework search path to cppflags
+      libs.split.each do |lib|
+        @cppflags << lib if /^-F/ =~ lib
+      end
     end
 
+    # add private header directory of QtCore
     qtversion = `#{@pkgconfig} --modversion Qt5Core`.chomp
     `#{@pkgconfig} --cflags-only-I Qt5Core`.split.map { |i| Pathname(i.gsub("-I", "")) }.each do |dir|
       private_dir = dir + "#{qtversion}/QtCore"
       @cppflags << "-I#{private_dir}" if private_dir.exist?
+    end
+
+    # include framework headers in Mac
+    # (Qt official installer for Mac does not install header files in /include directory)
+    if /darwin/ =~ RUBY_PLATFORM
+      PKGS.map { |pkg| pkg.gsub(/^Qt5/, 'Qt') }.each do |framework|
+        @cppflags << "-I#{@qt_path + "lib/#{framework}.framework/Headers"}"
+      end
+      # add private header directory of QtCore
+      @cppflags << "-I#{@qt_path}/lib/QtCore.framework/Headers/#{qtversion}/QtCore"
     end
 
     $CPPFLAGS += " #{@cppflags.join(" ")}"

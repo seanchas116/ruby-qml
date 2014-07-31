@@ -6,6 +6,7 @@ It provides bindings between QML and Ruby and enables you to use Qt Quick-based 
 
 * [Documentation](http://rubydoc.info/github/seanchas116/ruby-qml/master/frames)
 * [Examples](https://github.com/seanchas116/ruby-qml/tree/master/examples)
+* [Changelog](https://github.com/seanchas116/ruby-qml/blob/master/changes.md)
 
 [![Dependency Status](https://gemnasium.com/seanchas116/ruby-qml.svg)](https://gemnasium.com/seanchas116/ruby-qml)
 [![Build Status](https://travis-ci.org/seanchas116/ruby-qml.svg?branch=master)](https://travis-ci.org/seanchas116/ruby-qml)
@@ -25,28 +26,40 @@ It provides bindings between QML and Ruby and enables you to use Qt Quick-based 
 
 ## Installation
 
-ruby-qml requires **Ruby 1.9 or later** and currently supports **OS X** and **Linux**.
+### Requirements
 
-### OS X with Homebrew
-
-Run the following commands to install ruby-qml on OS X with Homebrew:
-
-    $ brew install pkg-config
-    $ brew install libffi
-    $ brew install qt5
-    $ gem install qml -- --with-libffi-dir=$(brew --prefix libffi) --with-qt-dir=$(brew --prefix qt5)
-
-### General (OSX and Linux)
-
-#### Requirements
-
+* **Ruby 1.9 or later**
+* **OS X or Linux**
 * pkg-config
 * libffi
 * Qt 5.2 or later
 
-To install, use this command after installing requirements:
+### OS X with Homebrew
+
+To install ruby-qml on OS X with Homebrew, run the following commands:
+
+    $ brew install pkg-config libffi qt5
+    $ gem install qml -- --with-libffi-dir=$(brew --prefix libffi) --with-qt-dir=$(brew --prefix qt5)
+
+Both libffi and Qt5 are keg-only in Homebrew, so you must specify their paths explicitly (or force linking).
+
+If you use [official Qt installation](http://qt-project.org/downloads), for example:
+
+    $ brew install pkg-config libffi
+    $ gem install qml -- --with-libffi-dir=$(brew --prefix libffi) --with-qt-dir=~/Qt/5.3/clang_64
+
+The Qt installation path (`~/Qt/5.3/clang_64` in this example) depends on your Qt installation configuration and Qt version.
+
+### General (OSX and Linux)
 
     $ gem install qml
+
+#### Options
+
+* `--with-libffi-dir=[dir]`
+  * libffi installation directory (optional).
+* `--with-qt-dir=[dir]`
+  * Qt installation directory (optional).
 
 ### Use Gemfile
 

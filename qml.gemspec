@@ -10,7 +10,7 @@ Gem::Specification.new do |spec|
   spec.email         = ["iofg2100@gmail.com"]
   spec.summary       = %q{A QML / Qt Quick wrapper for Ruby}
   spec.description   = "ruby-qml provides bindings between QML and Ruby and enables you to use Qt Quick-based GUI from Ruby."
-  spec.homepage      = "https://github.com/seanchas116/ruby-qml"
+  spec.homepage      = "http://seanchas116.github.io/ruby-qml/"
   spec.license       = "MIT"
 
   spec.files         = `git ls-files -z`.split("\x0")

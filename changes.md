@@ -1,3 +1,7 @@
+## 0.0.5 (2014-07-31)
+
+* Support official Qt installation on Mac
+
 ## 0.0.4 (2014-07-24)
 
 * Fix 100% CPU usage in idling

@@ -46,7 +46,7 @@ Both libffi and Qt5 are keg-only in Homebrew, so you must specify their paths ex
 If you use [official Qt installation](http://qt-project.org/downloads), for example:
 
     $ brew install pkg-config libffi
-    $ gem install qml -- --with-libffi-dir=$(brew --prefix libffi) --with-qt-dir=~/Qt/5.3/clang_64
+    $ gem install qml -- --with-libffi-dir=$(brew --prefix libffi) --with-qt-dir=$HOME/Qt/5.3/clang_64
 
 The Qt installation path (`~/Qt/5.3/clang_64` in this example) depends on your Qt installation configuration and Qt version.
 

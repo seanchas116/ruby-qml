@@ -1,0 +1,491 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset='utf-8'>
+    <meta http-equiv="X-UA-Compatible" content="chrome=1">
+    <link href='https://fonts.googleapis.com/css?family=Chivo:900' rel='stylesheet' type='text/css'>
+    <link rel="stylesheet" type="text/css" href="stylesheets/stylesheet.css" media="screen">
+    <link rel="stylesheet" type="text/css" href="stylesheets/pygment_trac.css" media="screen">
+    <link rel="stylesheet" type="text/css" href="stylesheets/print.css" media="print">
+    <!--[if lt IE 9]>
+    <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <title>ruby-qml by seanchas116</title>
+  </head>
+
+  <body>
+    <div id="container">
+      <div class="inner">
+
+        <header>
+          <h1>ruby-qml</h1>
+          <h2>A QML / Qt Quick bindings for Ruby</h2>
+        </header>
+
+        <section id="downloads" class="clearfix">
+          <a href="https://github.com/seanchas116/ruby-qml/zipball/master" id="download-zip" class="button"><span>Download .zip</span></a>
+          <a href="https://github.com/seanchas116/ruby-qml/tarball/master" id="download-tar-gz" class="button"><span>Download .tar.gz</span></a>
+          <a href="https://github.com/seanchas116/ruby-qml" id="view-on-github" class="button"><span>View on GitHub</span></a>
+        </section>
+
+        <hr>
+
+        <section id="main_content">
+          <h1>
+<a name="ruby-qml-" class="anchor" href="#ruby-qml-"><span class="octicon octicon-link"></span></a>ruby-qml <a href="http://badge.fury.io/rb/qml"><img src="https://badge.fury.io/rb/qml.svg" alt="Gem Version"></a>
+</h1>
+
+<p>ruby-qml is a QML / Qt Quick wrapper for Ruby.
+It provides bindings between QML and Ruby and enables you to use Qt Quick-based GUI from Ruby.</p>
+
+<ul>
+<li><a href="http://rubydoc.info/github/seanchas116/ruby-qml/master/frames">Documentation</a></li>
+<li><a href="https://github.com/seanchas116/ruby-qml/tree/master/examples">Examples</a></li>
+</ul><p><a href="https://gemnasium.com/seanchas116/ruby-qml"><img src="https://gemnasium.com/seanchas116/ruby-qml.svg" alt="Dependency Status"></a>
+<a href="https://travis-ci.org/seanchas116/ruby-qml"><img src="https://travis-ci.org/seanchas116/ruby-qml.svg?branch=master" alt="Build Status"></a>
+<a href="https://coveralls.io/r/seanchas116/ruby-qml?branch=master"><img src="https://coveralls.io/repos/seanchas116/ruby-qml/badge.png?branch=master" alt="Coverage Status"></a>
+<a href="http://inch-ci.org/github/seanchas116/ruby-qml"><img src="http://inch-ci.org/github/seanchas116/ruby-qml.png?branch=master" alt="Inline docs"></a></p>
+
+<h2>
+<a name="what-you-can-do-with-ruby-qml" class="anchor" href="#what-you-can-do-with-ruby-qml"><span class="octicon octicon-link"></span></a>What you can do with ruby-qml</h2>
+
+<ul>
+<li>Develop desktop GUI applications only with Ruby and QML</li>
+<li>Easily combine codes written in C++ and Qt with your Ruby code</li>
+</ul><h2>
+<a name="gallery" class="anchor" href="#gallery"><span class="octicon octicon-link"></span></a>Gallery</h2>
+
+<p><a href="https://github.com/seanchas116/ruby-qml/tree/master/examples/todo_sequel"><img src="https://raw.github.com/seanchas116/ruby-qml/master/examples/todo_sequel/capture.png" alt="Screenshot"></a></p>
+
+<p><a href="https://github.com/seanchas116/ruby-qml/tree/master/examples/twitter"><img src="https://raw.github.com/seanchas116/ruby-qml/master/examples/twitter/capture.png" alt="Screenshot"></a></p>
+
+<h2>
+<a name="installation" class="anchor" href="#installation"><span class="octicon octicon-link"></span></a>Installation</h2>
+
+<p>ruby-qml requires <strong>Ruby 1.9 or later</strong> and currently supports <strong>OS X</strong> and <strong>Linux</strong>.</p>
+
+<h3>
+<a name="os-x-with-homebrew" class="anchor" href="#os-x-with-homebrew"><span class="octicon octicon-link"></span></a>OS X with Homebrew</h3>
+
+<p>Run the following commands to install ruby-qml on OS X with Homebrew:</p>
+
+<pre><code>$ brew install pkg-config
+$ brew install libffi
+$ brew install qt5
+$ gem install qml -- --with-libffi-dir=$(brew --prefix libffi) --with-qt-dir=$(brew --prefix qt5)
+</code></pre>
+
+<h3>
+<a name="general-osx-and-linux" class="anchor" href="#general-osx-and-linux"><span class="octicon octicon-link"></span></a>General (OSX and Linux)</h3>
+
+<h4>
+<a name="requirements" class="anchor" href="#requirements"><span class="octicon octicon-link"></span></a>Requirements</h4>
+
+<ul>
+<li>pkg-config</li>
+<li>libffi</li>
+<li>Qt 5.2 or later</li>
+</ul><p>To install, use this command after installing requirements:</p>
+
+<pre><code>$ gem install qml
+</code></pre>
+
+<h3>
+<a name="use-gemfile" class="anchor" href="#use-gemfile"><span class="octicon octicon-link"></span></a>Use Gemfile</h3>
+
+<p>Add this line to your Gemfile:</p>
+
+<pre><code>gem 'qml'
+</code></pre>
+
+<p>And then execute:</p>
+
+<pre><code>$ bundle install
+</code></pre>
+
+<p>To pass build options, use <code>bundle config</code>.
+For example:</p>
+
+<pre><code>$ bundle config build.qml --with-libffi-dir=$(brew --prefix libffi) --with-qt-dir=$(brew --prefix qt5)
+</code></pre>
+
+<p>The configuration will be saved in <code>~/.bundle/config</code>.</p>
+
+<h2>
+<a name="usage" class="anchor" href="#usage"><span class="octicon octicon-link"></span></a>Usage</h2>
+
+<h3>
+<a name="load-qml-file" class="anchor" href="#load-qml-file"><span class="octicon octicon-link"></span></a>Load QML file</h3>
+
+<p>The following code loads a QML file and shows an application window titled "Hello, world!".</p>
+
+<div class="highlight highlight-ruby"><pre><span class="nb">require</span> <span class="s1">'qml'</span>
+
+<span class="no">QML</span><span class="o">.</span><span class="n">application</span> <span class="k">do</span> <span class="o">|</span><span class="n">app</span><span class="o">|</span>
+  <span class="n">app</span><span class="o">.</span><span class="n">load_path</span> <span class="no">Pathname</span><span class="p">(</span><span class="bp">__FILE__</span><span class="p">)</span> <span class="o">+</span> <span class="s1">'../main.qml'</span>
+<span class="k">end</span>
+</pre></div>
+
+<div class="highlight highlight-qml"><pre><span class="c1">// main.qml</span>
+<span class="kr">import</span> <span class="nx">QtQuick</span> <span class="mf">2.2</span>
+<span class="kr">import</span> <span class="nx">QtQuick</span><span class="p">.</span><span class="nx">Controls</span> <span class="mf">1.1</span>
+
+<span class="nx">ApplicationWindow</span> <span class="p">{</span>
+    <span class="k">visible:</span> <span class="kc">true</span>
+    <span class="k">width:</span> <span class="mi">200</span>
+    <span class="k">height:</span> <span class="mi">100</span>
+    <span class="k">title:</span> <span class="s2">"Hello, world!"</span>
+<span class="p">}</span>
+</pre></div>
+
+<h3>
+<a name="use-ruby-class-in-qml" class="anchor" href="#use-ruby-class-in-qml"><span class="octicon octicon-link"></span></a>Use Ruby class in QML</h3>
+
+<p>To make your class available to QML, include <code>QML::Access</code> and call <code>register_to_qml</code>.</p>
+
+<p>By including <code>QML::Access</code>, you can also define <strong>properties and signals</strong> in Ruby classes like in QML.</p>
+
+<p>Properties are used to bind data between QML and Ruby.
+Signals are used to provide the observer pattern-like notification from Ruby to QML.</p>
+
+<p><img src="https://raw.github.com/seanchas116/ruby-qml/master/examples/fizzbuzz/capture.png" alt="Screenshot"></p>
+
+<div class="highlight highlight-ruby"><pre><span class="c1"># Ruby</span>
+<span class="k">class</span> <span class="nc">FizzBuzz</span>
+  <span class="kp">include</span> <span class="no">QML</span><span class="o">::</span><span class="no">Access</span>
+  <span class="n">register_to_qml</span> <span class="ss">under</span><span class="p">:</span> <span class="s2">"Example"</span><span class="p">,</span> <span class="ss">version</span><span class="p">:</span> <span class="s2">"1.0"</span>
+
+  <span class="n">property</span> <span class="ss">:input</span><span class="p">,</span> <span class="s1">'0'</span>
+  <span class="n">property</span> <span class="ss">:result</span> <span class="p">,</span> <span class="s1">''</span>
+  <span class="n">signal</span> <span class="ss">:inputWasFizzBuzz</span><span class="p">,</span> <span class="o">[]</span>
+
+  <span class="n">on_changed</span> <span class="ss">:input</span> <span class="k">do</span>
+    <span class="n">i</span> <span class="o">=</span> <span class="n">input</span><span class="o">.</span><span class="n">to_i</span>
+    <span class="nb">self</span><span class="o">.</span><span class="n">result</span> <span class="o">=</span> <span class="k">case</span>
+    <span class="k">when</span> <span class="n">i</span> <span class="o">%</span> <span class="mi">15</span> <span class="o">==</span> <span class="mi">0</span>
+      <span class="n">inputWasFizzBuzz</span><span class="o">.</span><span class="n">emit</span>
+      <span class="s2">"FizzBuzz"</span>
+    <span class="k">when</span> <span class="n">i</span> <span class="o">%</span> <span class="mi">3</span> <span class="o">==</span> <span class="mi">0</span>
+      <span class="s2">"Fizz"</span>
+    <span class="k">when</span> <span class="n">i</span> <span class="o">%</span> <span class="mi">5</span> <span class="o">==</span> <span class="mi">0</span>
+      <span class="s2">"Buzz"</span>
+    <span class="k">else</span>
+      <span class="n">i</span><span class="o">.</span><span class="n">to_s</span>
+    <span class="k">end</span>
+  <span class="k">end</span>
+
+  <span class="k">def</span> <span class="nf">quit</span>
+    <span class="nb">puts</span> <span class="s2">"quitting..."</span>
+    <span class="no">QML</span><span class="o">.</span><span class="n">application</span><span class="o">.</span><span class="n">quit</span>
+  <span class="k">end</span>
+<span class="k">end</span>
+</pre></div>
+
+<div class="highlight highlight-qml"><pre><span class="c1">// QML - main.qml</span>
+<span class="kr">import</span> <span class="nx">QtQuick</span> <span class="mf">2.2</span>
+<span class="kr">import</span> <span class="nx">QtQuick</span><span class="p">.</span><span class="nx">Controls</span> <span class="mf">1.1</span>
+<span class="kr">import</span> <span class="nx">QtQuick</span><span class="p">.</span><span class="nx">Layouts</span> <span class="mf">1.1</span>
+<span class="kr">import</span> <span class="nx">Example</span> <span class="mf">1.0</span>
+
+<span class="nx">ApplicationWindow</span> <span class="p">{</span>
+    <span class="k">visible:</span> <span class="kc">true</span>
+    <span class="k">width:</span> <span class="mi">200</span>
+    <span class="k">height:</span> <span class="mi">200</span>
+    <span class="k">title:</span> <span class="s2">"FizzBuzz"</span>
+
+    <span class="nx">ColumnLayout</span> <span class="p">{</span>
+        <span class="k">anchors.fill:</span> <span class="nx">parent</span>
+        <span class="k">anchors.margins:</span> <span class="mi">10</span>
+        <span class="nx">TextField</span> <span class="p">{</span>
+            <span class="k">placeholderText:</span> <span class="s2">"Input"</span>
+            <span class="k">text:</span> <span class="s2">"0"</span>
+            <span class="kd">id: textField</span>
+        <span class="p">}</span>
+        <span class="nx">Text</span> <span class="p">{</span>
+            <span class="kd">id: text</span>
+            <span class="k">text:</span> <span class="nx">fizzBuzz</span><span class="p">.</span><span class="nx">result</span>
+        <span class="p">}</span>
+        <span class="nx">Button</span> <span class="p">{</span>
+            <span class="k">text:</span> <span class="s1">'Quit'</span>
+            <span class="k">onClicked:</span> <span class="nx">fizzBuzz</span><span class="p">.</span><span class="nx">quit</span><span class="p">()</span>
+        <span class="p">}</span>
+        <span class="nx">Text</span> <span class="p">{</span>
+            <span class="kd">id: lastFizzBuzz</span>
+        <span class="p">}</span>
+    <span class="p">}</span>
+    <span class="nx">FizzBuzz</span> <span class="p">{</span>
+        <span class="kd">id: fizzBuzz</span>
+        <span class="k">input:</span> <span class="nx">textField</span><span class="p">.</span><span class="nx">text</span>
+        <span class="k">onInputWasFizzBuzz:</span> <span class="nx">lastFizzBuzz</span><span class="p">.</span><span class="nx">text</span> <span class="o">=</span> <span class="s2">"Last FizzBuzz: "</span> <span class="o">+</span> <span class="nx">textField</span><span class="p">.</span><span class="nx">text</span>
+    <span class="p">}</span>
+<span class="p">}</span>
+</pre></div>
+
+<p>You can omit arguments of <code>register_to_qml</code> if they are obvious:</p>
+
+<div class="highlight highlight-ruby"><pre><span class="k">module</span> <span class="nn">Example</span>
+  <span class="no">VERSION</span> <span class="o">=</span> <span class="s1">'1.0.0'</span>
+
+  <span class="k">class</span> <span class="nc">FizzBuzz</span>
+    <span class="kp">include</span> <span class="no">QML</span><span class="o">::</span><span class="no">Access</span>
+    <span class="n">register_to_qml</span>
+
+    <span class="o">.</span><span class="n">.</span><span class="o">.</span>
+  <span class="k">end</span>
+<span class="k">end</span>
+</pre></div>
+
+<p>If the Ruby object is singleton, you can use the root context to make it available to QML.
+In this case, you don't have to use <code>register_to_qml</code>.</p>
+
+<div class="highlight highlight-ruby"><pre><span class="k">class</span> <span class="nc">Foo</span>
+  <span class="kp">include</span> <span class="no">QML</span><span class="o">::</span><span class="no">Access</span>
+  <span class="k">def</span> <span class="nf">foo</span>
+    <span class="nb">puts</span> <span class="s2">"foo"</span>
+  <span class="k">end</span>
+<span class="k">end</span>
+
+<span class="no">QML</span><span class="o">.</span><span class="n">application</span> <span class="k">do</span> <span class="o">|</span><span class="n">app</span><span class="o">|</span>
+  <span class="n">app</span><span class="o">.</span><span class="n">context</span><span class="o">[</span><span class="ss">:foo</span><span class="o">]</span> <span class="o">=</span> <span class="no">Foo</span><span class="o">.</span><span class="n">new</span>
+  <span class="n">app</span><span class="o">.</span><span class="n">load_path</span> <span class="no">Pathname</span><span class="p">(</span><span class="bp">__FILE__</span><span class="p">)</span> <span class="o">+</span> <span class="s1">'../main.qml'</span>
+<span class="k">end</span>
+</pre></div>
+
+<h3>
+<a name="pass-data-to-qml-listmodels" class="anchor" href="#pass-data-to-qml-listmodels"><span class="octicon octicon-link"></span></a>Pass data to QML ListModels</h3>
+
+<p>To bind list data between QML ListView and Ruby, you can use ListModels.</p>
+
+<ul>
+<li><p><code>QML::Data::ListModel</code> - the base class for ruby-qml list models.</p></li>
+<li><p><code>QML::Data::ArrayModel</code> - provides a simple list model implementation using Array.</p></li>
+<li><p><code>QML::Data::QueryModel</code> - for databases (like ActiveRecord, Sequel or something)</p></li>
+</ul><p>This example uses <code>ArrayModel</code> to provide list data for a QML ListView.
+When the content of the ArrayModel is changed, the list view is also automatically updated.</p>
+
+<h4>
+<a name="examples" class="anchor" href="#examples"><span class="octicon octicon-link"></span></a>Examples</h4>
+
+<ul>
+<li><a href="https://github.com/seanchas116/ruby-qml/tree/master/examples/todo_sequel">Todo example</a></li>
+</ul><div class="highlight highlight-ruby"><pre><span class="c1"># Ruby</span>
+<span class="k">class</span> <span class="nc">TodoController</span>
+  <span class="kp">include</span> <span class="no">QML</span><span class="o">::</span><span class="no">Access</span>
+  <span class="n">register_to_qml</span> <span class="ss">under</span><span class="p">:</span> <span class="s2">"Example"</span><span class="p">,</span> <span class="ss">version</span><span class="p">:</span> <span class="s2">"1.0"</span>
+
+  <span class="n">property</span> <span class="ss">:model</span><span class="p">,</span> <span class="no">QML</span><span class="o">::</span><span class="no">Data</span><span class="o">::</span><span class="no">ArrayModel</span><span class="o">.</span><span class="n">new</span><span class="p">(</span><span class="ss">:title</span><span class="p">,</span> <span class="ss">:description</span><span class="p">,</span> <span class="ss">:due_date</span><span class="p">)</span>
+
+  <span class="k">def</span> <span class="nf">add</span><span class="p">(</span><span class="n">title</span><span class="p">,</span> <span class="n">description</span><span class="p">,</span> <span class="n">due_date</span><span class="p">)</span>
+    <span class="c1"># Items of list models must be "Hash-like" (have #[] method to get columns)</span>
+    <span class="n">item</span> <span class="o">=</span> <span class="p">{</span>
+      <span class="ss">title</span><span class="p">:</span> <span class="n">title</span><span class="p">,</span>
+      <span class="ss">description</span><span class="p">:</span> <span class="n">description</span><span class="p">,</span>
+      <span class="ss">due_date</span><span class="p">:</span> <span class="n">due_date</span>
+    <span class="p">}</span>
+    <span class="nb">p</span> <span class="n">item</span>
+    <span class="n">model</span> <span class="o">&lt;&lt;</span> <span class="n">item</span>
+  <span class="k">end</span>
+<span class="k">end</span>
+</pre></div>
+
+<div class="highlight highlight-qml"><pre><span class="c1">// QML</span>
+<span class="nx">ListView</span> <span class="p">{</span>
+    <span class="k">model:</span> <span class="nx">todo</span><span class="p">.</span><span class="nx">model</span>
+    <span class="k">delegate:</span> <span class="nx">Text</span> <span class="p">{</span>
+        <span class="k">text:</span> <span class="s2">"Title: "</span> <span class="o">+</span> <span class="nx">title</span> <span class="o">+</span> <span class="s2">",  Description: "</span> <span class="o">+</span> <span class="nx">description</span> <span class="o">+</span> <span class="s2">", Due date: "</span> <span class="o">+</span> <span class="nx">due_date</span>
+    <span class="p">}</span>
+<span class="p">}</span>
+<span class="nx">TodoController</span> <span class="p">{</span>
+  <span class="kd">id: todo</span>
+<span class="p">}</span>
+</pre></div>
+
+<h3>
+<a name="combile-asynchronous-operations" class="anchor" href="#combile-asynchronous-operations"><span class="octicon octicon-link"></span></a>Combile asynchronous operations</h3>
+
+<p>In QML, all UI-related operations are done synchronously in the event loop.
+To set result of asynchronous operations to the UI, use <code>QML.later</code> or <code>QML::Dispatchable#later</code>.</p>
+
+<h4>
+<a name="examples-1" class="anchor" href="#examples-1"><span class="octicon octicon-link"></span></a>Examples</h4>
+
+<ul>
+<li><a href="https://github.com/seanchas116/ruby-qml/tree/master/examples/twitter">Twitter Example</a></li>
+</ul><div class="highlight highlight-ruby"><pre><span class="c1"># Ruby</span>
+<span class="k">class</span> <span class="nc">HeavyTaskController</span>
+  <span class="c1"># QML::Access includes QML::Dispathable</span>
+  <span class="kp">include</span> <span class="no">QML</span><span class="o">::</span><span class="no">Access</span>
+  <span class="n">register_to_qml</span> <span class="ss">under</span><span class="p">:</span> <span class="s2">"Example"</span><span class="p">,</span> <span class="ss">version</span><span class="p">:</span> <span class="s2">"1.0"</span>
+
+  <span class="n">property</span> <span class="ss">:result</span><span class="p">,</span> <span class="s1">''</span>
+
+  <span class="k">def</span> <span class="nf">set_result</span><span class="p">(</span><span class="n">result</span><span class="p">)</span>
+    <span class="nb">self</span><span class="o">.</span><span class="n">result</span> <span class="o">=</span> <span class="n">result</span>
+  <span class="k">end</span>
+
+  <span class="k">def</span> <span class="nf">start_heavy_task</span>
+    <span class="no">Thread</span><span class="o">.</span><span class="n">new</span> <span class="k">do</span>
+      <span class="nb">self</span><span class="o">.</span><span class="n">later</span><span class="o">.</span><span class="n">set_result</span> <span class="n">do_heavy_task</span><span class="p">()</span> <span class="c1"># #set_result is called in the main thread in the next event loop</span>
+      <span class="c1"># or</span>
+      <span class="no">QML</span><span class="o">.</span><span class="n">later</span> <span class="k">do</span>
+        <span class="n">set_result</span> <span class="n">do_heavy_task</span><span class="p">()</span>
+      <span class="k">end</span>
+    <span class="k">end</span>
+  <span class="k">end</span>
+<span class="k">end</span>
+</pre></div>
+
+<div class="highlight highlight-qml"><pre><span class="c1">// QML</span>
+<span class="nx">Text</span> <span class="p">{</span>
+  <span class="k">text:</span> <span class="nx">controller</span><span class="p">.</span><span class="nx">result</span>
+<span class="p">}</span>
+<span class="nx">Button</span> <span class="p">{</span>
+  <span class="k">text:</span> <span class="s2">"Start!!"</span>
+  <span class="k">onClicked:</span> <span class="nx">controller</span><span class="p">.</span><span class="nx">start_heavy_task</span><span class="p">()</span>
+<span class="p">}</span>
+<span class="nx">HeavyTaskController</span> <span class="p">{</span>
+  <span class="kd">id: controller</span>
+<span class="p">}</span>
+</pre></div>
+
+<h3>
+<a name="use-qt-objects-in-ruby" class="anchor" href="#use-qt-objects-in-ruby"><span class="octicon octicon-link"></span></a>Use Qt objects in Ruby</h3>
+
+<p>In ruby-qml, Qt objects (QObject-derived C++ objects and QML objects) can be accessed from Ruby via the meta-object system of Qt.</p>
+
+<p>You can access:</p>
+
+<ul>
+<li>Properties</li>
+<li>Signals</li>
+<li>Slots (as methods), Q_INVOKAVLE methods, QML methods</li>
+</ul><p>You cannot access:</p>
+
+<ul>
+<li>Normal C++ member functions</li>
+</ul><p>If their names are camelCase in Qt, ruby-qml aliases them as underscore_case.</p>
+
+<div class="highlight highlight-ruby"><pre><span class="c1"># QML::Application is a wrapper for QApplication</span>
+<span class="n">app</span> <span class="o">=</span> <span class="no">QML</span><span class="o">.</span><span class="n">application</span>
+
+<span class="c1"># set property</span>
+<span class="n">app</span><span class="o">.</span><span class="n">applicationName</span> <span class="o">=</span> <span class="s2">"Test"</span>
+<span class="n">app</span><span class="o">.</span><span class="n">application_name</span> <span class="o">=</span> <span class="s2">"Test"</span> <span class="c1"># aliased version</span>
+
+<span class="c1"># connect to signal</span>
+<span class="n">app</span><span class="o">.</span><span class="n">aboutToQuit</span><span class="o">.</span><span class="n">connect</span> <span class="k">do</span> <span class="c1"># "about_to_quit" is also OK</span>
+  <span class="nb">puts</span> <span class="s2">"quitting..."</span>
+<span class="k">end</span>
+
+<span class="c1"># call method (slot)</span>
+<span class="n">app</span><span class="o">.</span><span class="n">quit</span>
+</pre></div>
+
+<h3>
+<a name="value-conversions" class="anchor" href="#value-conversions"><span class="octicon octicon-link"></span></a>Value conversions</h3>
+
+<p>The following types are automatically converted between Ruby and QML:</p>
+
+<ul>
+<li>Integer</li>
+<li>Double</li>
+<li>String</li>
+<li>Time</li>
+<li>Date</li>
+<li>DateTime</li>
+<li>Array</li>
+<li>Hash</li>
+<li>QML::Geometry::Point (QPoint, QPointF)</li>
+<li>QML::Geometry::Size (QSize, QSizeF)</li>
+<li>QML::Geometry::Rectangle (QRect, QRectF)</li>
+<li>QML::QtObjectBase (Qt objects)</li>
+<li>QML::Access</li>
+<li>QML::Data::ListModel</li>
+</ul><h3>
+<a name="load-and-use-qt-c-plugins" class="anchor" href="#load-and-use-qt-c-plugins"><span class="octicon octicon-link"></span></a>Load and use Qt C++ plugins</h3>
+
+<p><code>PluginLoader</code> loads Qt C++ plugins.
+It enables you to use your Qt C++ codes from Ruby easily.</p>
+
+<div class="highlight highlight-c++"><pre><span class="c1">// C++ - plugin example</span>
+<span class="k">class</span> <span class="nc">MyPlugin</span> <span class="o">:</span> <span class="k">public</span> <span class="n">QObject</span>
+<span class="p">{</span>
+    <span class="n">Q_OBJECT</span>
+    <span class="n">Q_PLUGIN_METADATA</span><span class="p">(</span><span class="n">IID</span> <span class="s">"org.myplugin.MyPlugin"</span><span class="p">)</span>
+<span class="nl">signals</span><span class="p">:</span>
+    <span class="kt">void</span> <span class="n">added</span><span class="p">(</span><span class="kt">int</span> <span class="n">value</span><span class="p">);</span>
+
+<span class="k">public</span> <span class="nl">slots</span><span class="p">:</span>
+    <span class="kt">int</span> <span class="n">add</span><span class="p">(</span><span class="kt">int</span> <span class="n">x</span><span class="p">,</span> <span class="kt">int</span> <span class="n">y</span><span class="p">)</span> <span class="p">{</span>
+        <span class="kt">int</span> <span class="n">result</span> <span class="o">=</span> <span class="n">x</span> <span class="o">+</span> <span class="n">y</span><span class="p">;</span>
+        <span class="n">emit</span> <span class="nf">added</span><span class="p">(</span><span class="n">result</span><span class="p">);</span>
+        <span class="k">return</span> <span class="n">result</span><span class="p">;</span>
+    <span class="p">}</span>
+<span class="p">};</span>
+</pre></div>
+
+<div class="highlight highlight-ruby"><pre><span class="c1"># Ruby</span>
+<span class="n">plugin</span> <span class="o">=</span> <span class="no">QML</span><span class="o">::</span><span class="no">PluginLoader</span><span class="o">.</span><span class="n">new</span><span class="p">(</span><span class="n">directory</span><span class="p">,</span> <span class="s2">"myplugin"</span><span class="p">)</span><span class="o">.</span><span class="n">instance</span>
+
+<span class="n">plugin</span><span class="o">.</span><span class="n">added</span><span class="o">.</span><span class="n">connect</span> <span class="k">do</span> <span class="o">|</span><span class="n">value</span><span class="o">|</span>
+  <span class="nb">puts</span> <span class="s2">"added value: </span><span class="si">#{</span><span class="n">value</span><span class="si">}</span><span class="s2">"</span>
+<span class="k">end</span>
+
+<span class="n">plugin</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span> <span class="c1">#=&gt; 3</span>
+</pre></div>
+
+<h3>
+<a name="garbage-collection" class="anchor" href="#garbage-collection"><span class="octicon octicon-link"></span></a>Garbage collection</h3>
+
+<p>To support garbage collection of Qt objects used in ruby-qml,
+<code>#managed?</code> attribute of each Qt object wrappr determines its memory management status.</p>
+
+<h4>
+<a name="managed-objects" class="anchor" href="#managed-objects"><span class="octicon octicon-link"></span></a>Managed objects</h4>
+
+<p><em>Manged objects</em> are managed by Ruby and QML and garbage collected when no longer reachable.
+All objects created inside QML and objects returned from C++ methods will be <em>managed</em> by default.</p>
+
+<h4>
+<a name="unmanaged-objects" class="anchor" href="#unmanaged-objects"><span class="octicon octicon-link"></span></a>Unmanaged objects</h4>
+
+<p><em>Unmanaged</em> objects are not managed and never garbage collected.
+Objects that have parents or that obtained from properties of other Qt objects will be <em>unmanaged</em> by default.</p>
+
+<h4>
+<a name="specify-management-status-explicitly" class="anchor" href="#specify-management-status-explicitly"><span class="octicon octicon-link"></span></a>Specify management status explicitly</h4>
+
+<p>The <code>#managed?</code> method returns whether the object is managed or not.
+The <code>#prefer_managed</code> methods sets management status safely
+(e.g., objects that are created by QML will remain managed and objects that have parents will remain unmanaged).</p>
+
+<div class="highlight highlight-ruby"><pre><span class="n">plugin</span> <span class="o">=</span> <span class="no">PluginLoader</span><span class="o">.</span><span class="n">new</span><span class="p">(</span><span class="n">path</span><span class="p">)</span><span class="o">.</span><span class="n">instance</span>
+<span class="n">obj</span> <span class="o">=</span> <span class="n">plugin</span><span class="o">.</span><span class="n">create_object</span>
+<span class="n">obj</span><span class="o">.</span><span class="n">prefer_managed</span> <span class="kp">false</span>
+</pre></div>
+
+<h2>
+<a name="contributing" class="anchor" href="#contributing"><span class="octicon octicon-link"></span></a>Contributing</h2>
+
+<p>Contributions are welcome. When you are contributing to ruby-qml:</p>
+
+<ol>
+<li>Fork it ( <a href="http://github.com/seanchas116/ruby-qml/fork">http://github.com/seanchas116/ruby-qml/fork</a> )</li>
+<li>Create your feature branch (<code>git checkout -b my-new-feature</code>)</li>
+<li>Commit your changes (<code>git commit -am 'Add some feature'</code>)</li>
+<li>Write some tests if possible</li>
+<li>Push to the branch (<code>git push origin my-new-feature</code>)</li>
+<li>Create new Pull Request</li>
+</ol>
+        </section>
+
+        <footer>
+          ruby-qml is maintained by <a href="https://github.com/seanchas116">seanchas116</a><br>
+          This page was generated by <a href="http://pages.github.com">GitHub Pages</a>. Tactile theme by <a href="https://twitter.com/jasonlong">Jason Long</a>.
+        </footer>
+
+        
+      </div>
+    </div>
+  </body>
+</html>

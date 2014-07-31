@@ -41,6 +41,7 @@ It provides bindings between QML and Ruby and enables you to use Qt Quick-based 
 <ul>
 <li><a href="http://rubydoc.info/github/seanchas116/ruby-qml/master/frames">Documentation</a></li>
 <li><a href="https://github.com/seanchas116/ruby-qml/tree/master/examples">Examples</a></li>
+<li><a href="https://github.com/seanchas116/ruby-qml/blob/master/changes.md">Changelog</a></li>
 </ul><p><a href="https://gemnasium.com/seanchas116/ruby-qml"><img src="https://gemnasium.com/seanchas116/ruby-qml.svg" alt="Dependency Status"></a>
 <a href="https://travis-ci.org/seanchas116/ruby-qml"><img src="https://travis-ci.org/seanchas116/ruby-qml.svg?branch=master" alt="Build Status"></a>
 <a href="https://coveralls.io/r/seanchas116/ruby-qml?branch=master"><img src="https://coveralls.io/repos/seanchas116/ruby-qml/badge.png?branch=master" alt="Coverage Status"></a>
@@ -62,35 +63,59 @@ It provides bindings between QML and Ruby and enables you to use Qt Quick-based 
 <h2>
 <a name="installation" class="anchor" href="#installation"><span class="octicon octicon-link"></span></a>Installation</h2>
 
-<p>ruby-qml requires <strong>Ruby 1.9 or later</strong> and currently supports <strong>OS X</strong> and <strong>Linux</strong>.</p>
-
 <h3>
+<a name="requirements" class="anchor" href="#requirements"><span class="octicon octicon-link"></span></a>Requirements</h3>
+
+<ul>
+<li><strong>Ruby 1.9 or later</strong></li>
+<li><strong>OS X or Linux</strong></li>
+<li>pkg-config</li>
+<li>libffi</li>
+<li>Qt 5.2 or later</li>
+</ul><h3>
 <a name="os-x-with-homebrew" class="anchor" href="#os-x-with-homebrew"><span class="octicon octicon-link"></span></a>OS X with Homebrew</h3>
 
-<p>Run the following commands to install ruby-qml on OS X with Homebrew:</p>
+<p>To install ruby-qml on OS X with Homebrew, run the following commands:</p>
 
-<pre><code>$ brew install pkg-config
-$ brew install libffi
-$ brew install qt5
+<pre><code>$ brew install pkg-config libffi qt5
 $ gem install qml -- --with-libffi-dir=$(brew --prefix libffi) --with-qt-dir=$(brew --prefix qt5)
 </code></pre>
+
+<p>Both libffi and Qt5 are keg-only in Homebrew, so you must specify their paths explicitly (or force linking).</p>
+
+<p>If you use <a href="http://qt-project.org/downloads">official Qt installation</a>, for example:</p>
+
+<pre><code>$ brew install pkg-config libffi
+$ gem install qml -- --with-libffi-dir=$(brew --prefix libffi) --with-qt-dir=$HOME/Qt/5.3/clang_64
+</code></pre>
+
+<p>The Qt installation path (<code>$HOME/Qt/5.3/clang_64</code> in this example) depends on your Qt installation configuration and Qt version.</p>
 
 <h3>
 <a name="general-osx-and-linux" class="anchor" href="#general-osx-and-linux"><span class="octicon octicon-link"></span></a>General (OSX and Linux)</h3>
 
-<h4>
-<a name="requirements" class="anchor" href="#requirements"><span class="octicon octicon-link"></span></a>Requirements</h4>
-
-<ul>
-<li>pkg-config</li>
-<li>libffi</li>
-<li>Qt 5.2 or later</li>
-</ul><p>To install, use this command after installing requirements:</p>
-
 <pre><code>$ gem install qml
 </code></pre>
 
-<h3>
+<h4>
+<a name="options" class="anchor" href="#options"><span class="octicon octicon-link"></span></a>Options</h4>
+
+<ul>
+<li>
+<code>--with-libffi-dir=[dir]</code>
+
+<ul>
+<li>libffi installation directory (optional).</li>
+</ul>
+</li>
+<li>
+<code>--with-qt-dir=[dir]</code>
+
+<ul>
+<li>Qt installation directory (optional).</li>
+</ul>
+</li>
+</ul><h3>
 <a name="use-gemfile" class="anchor" href="#use-gemfile"><span class="octicon octicon-link"></span></a>Use Gemfile</h3>
 
 <p>Add this line to your Gemfile:</p>

@@ -171,11 +171,6 @@ module QML
     attr_accessor :pointer
     private :pointer=
 
-    # @api private
-    def custom_data
-      @custom_data ||= {}
-    end
-
     # Evaluates a JavaScript expression on the QML context of the object.
     # Fails with {QMLError} when the object is not created by QML and does not belong to any context.
     # @param [String] str

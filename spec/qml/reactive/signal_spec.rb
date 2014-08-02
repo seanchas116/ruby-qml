@@ -4,7 +4,7 @@ describe QML::Reactive::Signal do
 
   before do
     @signal = QML::Reactive::Signal.new([:foo, :bar])
-    @variadic_signal = QML::Reactive::Signal.new([], variadic: true)
+    @variadic_signal = QML::Reactive::Signal.new(nil)
   end
 
   describe 'connection' do

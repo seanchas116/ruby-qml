@@ -29,7 +29,7 @@ module QML
 
   class QtSignal < Reactive::Signal
     def initialize(metaobj, objptr, name)
-      super([], variadic: true)
+      super(nil)
       @objptr = objptr
       @metaobj = metaobj
       @name = name

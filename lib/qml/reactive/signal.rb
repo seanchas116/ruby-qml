@@ -18,19 +18,15 @@ module QML
       attr_reader :arity
 
       # Initializes the Signal.
-      # The signal will be variadic if an empty array is given.
-      # @param [Array<#to_sym>, Array<()>] params The parameter names.
-      # @param [Hash] opts
-      # @option opts [Boolean] (false) :variadic
-      def initialize(params, opts = {})
-        opts = {variadic: false}.merge opts
+      # @param [Array<#to_sym>, nil] params the parameter names (the signal will be variadic if nil).
+      def initialize(params)
         @listeners = []
-        if opts[:variadic]
-          @params = nil
-          @arity = -1
-        else
+        if params
           @params = params.map(&:to_sym)
           @arity = params.size
+        else
+          @params = nil
+          @arity = -1
         end
       end
 

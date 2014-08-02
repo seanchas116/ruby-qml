@@ -31,7 +31,7 @@ module QML
       end
 
       def bind(obj)
-        return @factory.call(obj, self) if @factory
+        return obj.instance_eval(&@factory) if @factory
         Property.new.tap do |p|
           p.value = @initial_value if @initial_value
           p.bind { obj.instance_eval &@initial_binding } if @initial_binding

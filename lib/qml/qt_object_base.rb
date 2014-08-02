@@ -1,6 +1,49 @@
 require 'qml/dispatchable'
+require 'qml/name_helper'
 
 module QML
+
+  class QtPropertyBase
+    attr_reader :changed
+
+    def initialize(metaobj, objptr, name)
+      super()
+      @metaobj = metaobj
+      @objptr = objptr
+      @name = name
+      @changed = QtSignal.new(metaobj, objptr, @metaobj.notify_signal(@name))
+    end
+
+    def value=(newval)
+      @metaobj.set_property(@objptr, @name, newval)
+    end
+
+    def value
+      @metaobj.get_property(@objptr, @name)
+    end
+  end
+
+  class QtProperty < QtPropertyBase
+    include Reactive::Bindable
+  end
+
+  class QtSignal < Reactive::Signal
+    def initialize(metaobj, objptr, name)
+      super([], variadic: true)
+      @objptr = objptr
+      @metaobj = metaobj
+      @name = name
+      @initialized = false
+    end
+
+    private
+
+    def connected(block)
+      return if @initialized
+      @metaobj.connect_signal(@objptr, @name, method(:emit))
+      @initialized = true
+    end
+  end
 
   # {QtObjectBase} is the base class for Qt object wrappers.
   #
@@ -32,6 +75,97 @@ module QML
   class QtObjectBase
     include Dispatchable
     include Reactive::Object
+
+    # @api private
+    class SubclassBuilder
+
+      attr_reader :subclass
+
+      def initialize(metaobj, klass)
+        @metaobj = metaobj
+        @subclass = klass
+      end
+
+      def build
+        create unless @subclass
+        return if @subclass.meta_object == @metaobj
+
+        @metaobj.method_names.reject { |name| @metaobj.signal?(name) }.each do |name|
+          define_method(name)
+        end
+        @metaobj.method_names.select { |name| @metaobj.signal?(name) }.each do |name|
+          define_signal(name)
+        end
+        @metaobj.property_names.each do |name|
+          define_property(name)
+        end
+        @metaobj.enumerators.each do |k, v|
+          define_enum(k, v)
+        end
+        @subclass.__send__ :meta_object=, @metaobj
+
+        self
+      end
+
+      private
+
+      def create
+        super_metaobj = @metaobj.super_class
+        @subclass = Class.new(super_metaobj ? super_metaobj.build_class : QtObjectBase)
+      end
+
+      def define_method(name)
+        metaobj = @metaobj
+        return if metaobj.private?(name)
+        underscore = NameHelper.to_underscore(name)
+
+        @subclass.class_eval do
+          define_method name do |*args|
+            metaobj.invoke_method(@pointer, name, args)
+          end
+          private name if metaobj.protected?(name)
+          alias_method underscore, name unless underscore == name
+        end
+      end
+
+      def define_signal(name)
+        metaobj = @metaobj
+        underscore = NameHelper.to_underscore(name)
+        @subclass.class_eval do
+          variadic_signal name, factory: proc {
+            QtSignal.new(metaobj, @pointer, name)
+          }
+          alias_signal underscore, name unless underscore == name
+        end
+      end
+
+      def define_property(name)
+        metaobj = @metaobj
+        underscore = NameHelper.to_underscore(name)
+        @subclass.class_eval do
+          property name, nil, factory: proc {
+            QtProperty.new(metaobj, @pointer, name)
+          }
+          alias_property underscore, name unless underscore == name
+        end
+      end
+
+      def define_enum(name, hash)
+        define_const(name, hash.values.sort)
+        hash.each do |k, v|
+          define_const(k, v)
+        end
+      end
+
+      def define_const(name, value)
+        name = (name[0].capitalize + name[1..-1]).to_sym
+        underscore = NameHelper.to_upper_underscore(name)
+        @subclass.class_eval do
+          const_set name, value
+          const_set underscore, value unless underscore == name
+        end
+      end
+    end
 
     class << self
       attr_accessor :meta_object

@@ -1,5 +1,5 @@
 require 'qml/qml'
-require 'qml/class_builder'
+require 'qml/qt_object_base'
 
 module QML
   class MetaObject
@@ -12,9 +12,9 @@ module QML
     def build_class
       @@classes ||= {}
       klass = @@classes[name]
-      builder = ClassBuilder.new(self, klass)
+      builder = QtObjectBase::SubclassBuilder.new(self, klass)
       builder.build
-      @@classes[name] = builder.klass
+      @@classes[name] = builder.subclass
     end
   end
 end

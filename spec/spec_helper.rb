@@ -7,6 +7,6 @@ QML.init(offscreen: true)
 
 # QML::TestUtil.gc_debug_message_enabled = true
 
-Dir.glob(Pathname(__FILE__) +'../shared_examples/**/*.rb') do |f|
+Dir.glob(Pathname(__FILE__) +'../shared/**/*.rb') do |f|
   require f
 end

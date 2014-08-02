@@ -2,36 +2,7 @@ require 'spec_helper'
 
 describe QML::Reactive::Object do
 
-  class Button
-    include QML::Reactive::Object
-    signal :pressed, [:pos]
-    variadic_signal :message
-    property :name, 'button'
-    property :id, 0
-    property :name_double do
-      name + name
-    end
-    on :pressed do |pos|
-      self.name = pos
-    end
-    on_changed :id do
-      self.name = "ID: #{id}"
-    end
-    on_changed :id do
-    end
-    alias_property :title, :name
-    alias_signal :clicked, :pressed
-  end
-
-  class ToggleButton < Button
-    signal :pressed, [:x, :y]
-    signal :toggled, [:on]
-    property(:name) { 'toggle button' }
-    property(:info) { 'some info' }
-  end
-
-  let(:button) { Button.new }
-  let(:toggle_button) { ToggleButton.new }
+  include_context 'Reactive test objects'
 
   describe '.property' do
 
@@ -175,19 +146,24 @@ describe QML::Reactive::Object do
       button.id = 2
       expect(button.name).to eq "ID: 2"
     end
+    it 'calls all connections including superclass' do
+      toggle_button.id = 3
+      expect(toggle_button.name).to eq "ID: 3"
+      expect(toggle_button.info).to eq "ID changed"
+    end
   end
 
   describe '.instance_signals' do
     context 'when include_super is false' do
       it 'returns all signal definitions of the class' do
-        signals = ToggleButton.instance_signals(false)
+        signals = toggle_button_class.instance_signals(false)
         expect(signals).to match_array %w{pressed toggled name_changed info_changed}.map(&:to_sym)
       end
     end
 
     context 'when include_super is not specified' do
       it 'returns all signal definitions of the class and its superclasses' do
-        signals = ToggleButton.instance_signals
+        signals = toggle_button_class.instance_signals
         expect(signals).to match_array %w{pressed message toggled name_changed id_changed info_changed name_double_changed clicked title_changed}.map(&:to_sym)
       end
     end
@@ -196,14 +172,14 @@ describe QML::Reactive::Object do
   describe '.instance_properties' do
     context 'when include_super is false' do
       it 'returns all property definitions of the class' do
-        properties = ToggleButton.instance_properties(false)
+        properties = toggle_button_class.instance_properties(false)
         expect(properties).to match_array %w{name info}.map(&:to_sym)
       end
     end
 
     context 'when include_super is not specified' do
       it 'returns all property definitions of the class and its superclasses' do
-        properties = ToggleButton.instance_properties
+        properties = toggle_button_class.instance_properties
         expect(properties).to match_array %w{name id info name_double title}.map(&:to_sym)
       end
     end
@@ -211,28 +187,28 @@ describe QML::Reactive::Object do
 
   describe '.instance_signal' do
     it 'returns the UnboundSignal for name' do
-      s = ToggleButton.instance_signal(:pressed)
+      s = toggle_button_class.instance_signal(:pressed)
       expect(s).to be_a QML::Reactive::UnboundSignal
       expect(s.name).to eq :pressed
       expect(s.arity).to eq 2
     end
     context 'when signal does not exist' do
       it 'fails with NameError' do
-        expect { ToggleButton.instance_signal(:non_existent) }.to raise_error(NameError)
+        expect { toggle_button_class.instance_signal(:non_existent) }.to raise_error(NameError)
       end
     end
   end
 
   describe '.instance_property' do
     it 'returns the UnboundProperty for name' do
-      p = ToggleButton.instance_property(:name)
+      p = toggle_button_class.instance_property(:name)
       expect(p).to be_a QML::Reactive::UnboundProperty
       expect(p.name).to eq :name
       expect(p.initial_binding.call).to eq 'toggle button'
     end
     context 'when property does not exist' do
       it 'fails with NameError' do
-        expect { ToggleButton.instance_property(:non_existent) }.to raise_error(NameError)
+        expect { toggle_button_class.instance_property(:non_existent) }.to raise_error(NameError)
       end
     end
   end

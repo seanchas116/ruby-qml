@@ -43,7 +43,6 @@ module QML
 
   on_init do
     Kernel.event_loop_hook_timer.timeout.connect do
-      puts "======== run tasks"
       Dispatcher.instance.run_tasks
     end
   end

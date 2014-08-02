@@ -11,13 +11,11 @@ module QML
     include Dispatchable
     include Wrappable
     # @!parse include Reactive::Object
-    # @!parse include SignalInitialization
     # @!parse extend ClassMethods
 
     def self.included(derived)
       derived.class_eval do
         include Reactive::Object
-        include SignalInitialization
         extend ClassMethods
       end
     end
@@ -113,26 +111,20 @@ module QML
       end
     end
 
-    module SignalInitialization
-      def initialize(*args, &block)
-        super
-        signal_names = signals + properties.map { |name| :"#{name}_changed" }
-        signal_names.each do |name|
-          __send__(name).connect do |*args|
-            @access_wrappers.each do |obj|
-              obj.class.meta_object.invoke_method(obj.pointer, name, args)
-            end
-          end
-        end
-      end
-    end
-
     # @api private
     attr_reader :access_wrappers
 
     def initialize(*args, &block)
-      super
+      signal_names = signals + properties.map { |name| :"#{name}_changed" }
+      signal_names.each do |name|
+        __send__(name).connect do |*args|
+          @access_wrappers.each do |obj|
+            obj.class.meta_object.invoke_method(obj.pointer, name, args)
+          end
+        end
+      end
       @access_wrappers = []
+      super
     end
 
     def create_wrapper

@@ -12,31 +12,30 @@ module QML
 
       # When {Object} is included by a class, the class extends {ClassMethods} to add the common class methods.
       def self.included(derived)
-        fail Error, "SignalDef must be included in a class" unless derived.is_a? ::Class
+        fail Error, "#{Object} must be included in a class" unless derived.is_a? ::Class
         derived.extend(ClassMethods)
       end
 
       def initialize(*args, &block)
-        super
+        # prepare properties
         properties = self.class.instance_property_hash
           .values
           .map { |property| self.class.instance_property(property.original) }
           .uniq
-        notifier_signals = properties.map(&:notifier_signal)
+        properties.each do |property|
+          instance_variable_set("@_property_#{property.name}", property.bind(self))
+        end
+
+        # prepare signals
         signals = self.class.instance_signal_hash
           .values
           .map { |signal| self.class.instance_signal(signal.original) }
-          .uniq - notifier_signals
-
-        properties.each do |property|
-          p = property.bind(self)
-          instance_variable_set(:"@_property_#{property.name}", p)
-          instance_variable_set(:"@_signal_#{property.notifier_signal.name}", p.changed)
-        end
+          .uniq
         signals.each do |signal|
-          instance_variable_set(:"@_signal_#{signal.name}", signal.bind(self))
+          instance_variable_set("@_signal_#{signal.name}", signal.bind(self))
         end
 
+        # prepare signal connections
         self.class.send(:initial_connections_hash).each do |name, blocks|
           blocks.each do |block|
             signal(name).connect do |*args|
@@ -44,6 +43,8 @@ module QML
             end
           end
         end
+
+        super
       end
 
       # @!method signal(name)
@@ -126,7 +127,7 @@ module QML
         # @param name [#to_sym] The signal name
         # @param params [Array<#to_sym>, nil] The signal parameter names
         # @param opts [Hash]
-        # @option opts [Proc] :factory (nil)
+        # @option opts [Proc] :signal (nil)
         # @return [Symbol] The signal name
         # @example
         #   class Button
@@ -151,33 +152,37 @@ module QML
         def signal(name, params, opts = {})
           name.to_sym.tap do |name|
             params = params.map(&:to_sym)
-            add_signal(UnboundSignal.new(name, params, false, self, opts[:factory]))
+            add_signal(UnboundSignal.new(name, params, false, self, opts[:signal]))
           end
         end
 
         # Defines a variadic signal.
         # Variadic signals do not restrict the number of arguments.
         # @param opts [Hash]
-        # @option opts [Proc] :factory (nil)
+        # @option opts [Proc] :signal (nil)
         # @see #signal
         def variadic_signal(name, opts = {})
           name.to_sym.tap do |name|
-            add_signal(UnboundSignal.new(name, nil, true, self, opts[:factory]))
+            add_signal(UnboundSignal.new(name, nil, true, self, opts[:signal]))
           end
         end
 
         # Aliases a signal.
+        # @param name [#to_sym]
+        # @param original_name [#to_sym]
         # @return [Symbol] The new name
         def alias_signal(name, original_name)
-          add_signal(instance_signal(original_name).alias(name))
-          name
+          name.to_sym.tap do |name|
+            original_name = original_name.to_sym
+            add_signal(instance_signal(original_name).alias(name))
+          end
         end
 
         # Defines a property for the class.
         # @param name [#to_sym] The name of the property
         # @param init_value The initial value (optional)
         # @param opts [Hash]
-        # @option opts [Proc] :factory (nil)
+        # @option opts [Proc] :property (nil)
         # @yield The initial property binding (optional)
         # @return [Symbol] The name
         # @example
@@ -197,16 +202,22 @@ module QML
         #   end
         #   Bar.new.name #=> 'piyopiyo'
         def property(name, init_value = nil, opts = {}, &init_binding)
-          name = name.to_sym
-          add_property(UnboundProperty.new(name, init_value, init_binding, self, opts[:factory]))
-          name
+          name.to_sym.tap do |name|
+            add_property(UnboundProperty.new(name, init_value, init_binding, self, opts[:property]))
+            signal("#{name}_changed", [:new_value], signal: -> { property(name).changed })
+          end
         end
 
         # Aliases a property.
+        # @param name [#to_sym]
+        # @param original_name [#to_sym]
         # @return [Symbol] The new name
         def alias_property(name, original_name)
-          add_property(instance_property(original_name).alias(name))
-          name
+          name.to_sym.tap do |name|
+            original_name = original_name.to_sym
+            add_property(instance_property(original_name).alias(name))
+            alias_signal("#{name}_changed", "#{original_name}_changed")
+          end
         end
 
         # Adds a signal handler.
@@ -261,8 +272,6 @@ module QML
               @_property_#{property.original}.value = new_value
             end
           EOS
-
-          add_signal(property.notifier_signal)
         end
 
         def initial_connections_hash(include_super = true)

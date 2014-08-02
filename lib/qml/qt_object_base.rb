@@ -132,9 +132,7 @@ module QML
         metaobj = @metaobj
         underscore = NameHelper.to_underscore(name)
         @subclass.class_eval do
-          variadic_signal name, factory: proc {
-            QtSignal.new(metaobj, @pointer, name)
-          }
+          variadic_signal name, signal: -> { QtSignal.new(metaobj, @pointer, name) }
           alias_signal underscore, name unless underscore == name
         end
       end
@@ -143,9 +141,7 @@ module QML
         metaobj = @metaobj
         underscore = NameHelper.to_underscore(name)
         @subclass.class_eval do
-          property name, nil, factory: proc {
-            QtProperty.new(metaobj, @pointer, name)
-          }
+          property name, nil, property: -> { QtProperty.new(metaobj, @pointer, name) }
           alias_property underscore, name unless underscore == name
         end
       end

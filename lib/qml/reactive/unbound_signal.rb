@@ -39,7 +39,7 @@ module QML
       end
 
       def bind(obj)
-        return obj.instance_eval(&@factory) if @factory
+        return obj.instance_exec(&@factory) if @factory
         if @variadic
           Signal.new(nil)
         else

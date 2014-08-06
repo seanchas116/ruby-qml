@@ -16,31 +16,13 @@ void *rb_thread_call_without_gvl(void *(*func)(void *), void *data1, rb_unblock_
 
 namespace RubyQml {
 
-void protect(const std::function<void ()> &doAction)
+void convertCppErrors(const std::function<void ()> &doAction) noexcept
 {
-    auto callback = [](VALUE data) {
-        auto &doAction= *reinterpret_cast<const std::function<void ()> *>(data);
-        doAction();
-        return Qnil;
-    };
-    int state;
-    rb_protect(callback, reinterpret_cast<VALUE>(&doAction), &state);
-    if (state) {
-        throw RubyException(state);
-    }
-}
-
-void unprotect(const std::function<void ()> &doAction) noexcept
-{
-    int state = 0;
     bool cppErrorOccured= false;
     VALUE cppErrorClassName = Qnil;
     VALUE cppErrorMessage = Qnil;
     try {
         doAction();
-    }
-    catch (const RubyException &ex) {
-        state = ex.state();
     }
     catch (const std::exception &ex) {
         cppErrorOccured = true;
@@ -49,9 +31,6 @@ void unprotect(const std::function<void ()> &doAction) noexcept
         cppErrorClassName = rb_str_new_cstr(classname);
         free(classname);
         cppErrorMessage = rb_str_new_cstr(ex.what());
-    }
-    if (state) {
-        rb_jump_tag(state);
     }
     if (cppErrorOccured) {
         auto patterns = rb_funcall(rb_path2class("QML::ErrorConverter"), rb_intern("patterns"), 0);
@@ -127,9 +106,7 @@ void withGvl(const std::function<void ()> &doAction)
 void fail(const char *errorClassName, const QString &message)
 {
     auto msg = message.toUtf8();
-    protect([&] {
-        rb_raise(rb_path2class(errorClassName), "%s", msg.data());
-    });
+    rb_raise(rb_path2class(errorClassName), "%s", msg.data());
 }
 
 }

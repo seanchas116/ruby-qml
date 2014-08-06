@@ -8,11 +8,9 @@ namespace RubyQml {
 AccessClass::AccessClass(RubyValue className, RubyValue methodInfos, RubyValue signalInfos, RubyValue propertyInfos)
 {
     setClassName(className.to<QByteArray>());
-    protect([&] {
-        rb_check_array_type(methodInfos);
-        rb_check_array_type(signalInfos);
-        rb_check_array_type(propertyInfos);
-    });
+    rb_check_array_type(methodInfos);
+    rb_check_array_type(signalInfos);
+    rb_check_array_type(propertyInfos);
     for (int i = 0; i < RARRAY_LEN(VALUE(methodInfos)); ++i) {
         RubyValue info = RARRAY_AREF(VALUE(methodInfos), i);
         auto nameSym = info.send("name");
@@ -46,10 +44,8 @@ QVariant AccessClass::callMethod(ForeignObject *obj, size_t id, const QVariantLi
         std::vector<VALUE> values(args.size());
         std::transform(args.begin(), args.end(), values.begin(), &RubyValue::from<QVariant>);
         RubyValue retValue;
-        protect([&] {
-            rescueNotify([&] {
-                retValue = rb_funcall2(self, id, values.size(), values.data());
-            });
+        rescueNotify([&] {
+            retValue = rb_funcall2(self, id, values.size(), values.data());
         });
         ret = retValue.to<QVariant>();
     });

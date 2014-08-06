@@ -30,26 +30,24 @@ public:
         auto func = (VALUE (*)(...))wrapper::apply;
         auto argc = wrapper::argc - 1;
 
-        protect([&] {
-            switch (type) {
-            case MethodType::InstanceMethod:
-                switch (access) {
-                case MethodAccess::Public:
-                    rb_define_method(mValue , name, func, argc);
-                    break;
-                case MethodAccess::Protected:
-                    rb_define_protected_method(mValue, name, func, argc);
-                    break;
-                case MethodAccess::Private:
-                    rb_define_private_method(mValue, name, func, argc);
-                    break;
-                }
+        switch (type) {
+        case MethodType::InstanceMethod:
+            switch (access) {
+            case MethodAccess::Public:
+                rb_define_method(mValue , name, func, argc);
                 break;
-            case MethodType::ModuleFunction:
-                rb_define_module_function(mValue, name, func, argc);
+            case MethodAccess::Protected:
+                rb_define_protected_method(mValue, name, func, argc);
+                break;
+            case MethodAccess::Private:
+                rb_define_private_method(mValue, name, func, argc);
                 break;
             }
-        });
+            break;
+        case MethodType::ModuleFunction:
+            rb_define_module_function(mValue, name, func, argc);
+            break;
+        }
     }
 
     template <typename T>
@@ -92,7 +90,7 @@ private:
             RubyValue ret;
             // use tuple to avoid gcc 4.8's bug (https://gcc.gnu.org/bugzilla/show_bug.cgi?id=55914)
             auto tuple = std::make_tuple(args...);
-            unprotect([&] {
+            convertCppErrors([&] {
                 ret = applyWithTuple(function, tuple);
             });
             return ret;
@@ -133,19 +131,17 @@ public:
         }
         mInstance.reset(new WrapperRubyClass(*this));
 
-        protect([&] {
-            rb_define_alloc_func(toValue(), &alloc);
-        });
+        rb_define_alloc_func(toValue(), &alloc);
     }
 
     T *unwrap(RubyValue value)
     {
         auto klass = this->toValue();
-        protect([&] {
-            if (!RTEST(rb_obj_is_kind_of(value, klass))) {
-                rb_raise(rb_eTypeError, "expected %s, got %s", rb_class2name(klass), rb_obj_classname(value));
-            }
-        });
+
+        if (!RTEST(rb_obj_is_kind_of(value, klass))) {
+            rb_raise(rb_eTypeError, "expected %s, got %s", rb_class2name(klass), rb_obj_classname(value));
+        }
+
         T *ptr;
         Data_Get_Struct(VALUE(value), T, ptr);
         return ptr;

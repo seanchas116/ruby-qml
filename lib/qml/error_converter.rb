@@ -11,5 +11,6 @@ module QML
     end
 
     add_pattern 'RubyQml::QmlException', QMLError
+    add_pattern 'RubyQml::ConversionError', ConversionError
   end
 end

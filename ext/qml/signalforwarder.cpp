@@ -56,9 +56,7 @@ void SignalForwarder::callProc(const QVariantList &list)
     if (mProcRef.hasValue()) {
         withGvl([&] {
             auto args = RubyValue::from(list);
-            protect([&] {
-                rb_funcall2(mProcRef.value(), rb_intern("call"), RARRAY_LEN(VALUE(args)), RARRAY_PTR(VALUE(args)));
-            });
+            rb_funcall2(mProcRef.value(), rb_intern("call"), RARRAY_LEN(VALUE(args)), RARRAY_PTR(VALUE(args)));
         });
     }
 }

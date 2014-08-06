@@ -42,11 +42,7 @@ public:
     template <typename ... TArgs>
     RubyValue send(ID method, TArgs ... args) const
     {
-        constexpr int argc = sizeof...(args);
-        std::array<VALUE, argc> argv = {{ VALUE(args)... }};
-        return protect([&] {
-            return rb_funcall2(mValue, method, argc, argv.data());
-        });
+        return rb_funcall(mValue, method, sizeof...(args), args...);
     }
 
     template <typename ... TArgs>
@@ -59,7 +55,11 @@ public:
     bool operator!=(const RubyValue &other) const { return !operator==(other); }
     explicit operator bool() const { return RTEST(mValue); }
 
-    bool isKindOf(const RubyModule &module) const;
+    bool isKindOf(const RubyValue &module) const
+    {
+        return RTEST(rb_obj_is_kind_of(mValue, module));
+    }
+
     bool isConvertibleTo(int metaType) const;
     int defaultMetaType() const;
 
@@ -99,16 +99,8 @@ struct Conversion<bool>
 template <typename T>
 struct Conversion<T, typename std::enable_if<std::is_signed<T>::value && std::is_integral<T>::value>::type>
 {
-    static T from(RubyValue x)
-    {
-        return protect([&] {
-            return NUM2LL(x);
-        });
-    }
-    static RubyValue to(T x)
-    {
-        return LL2NUM(x);
-    }
+    static T from(RubyValue x) { return NUM2LL(x); }
+    static RubyValue to(T x) { return LL2NUM(x); }
 };
 
 // unsigned integers
@@ -116,16 +108,8 @@ struct Conversion<T, typename std::enable_if<std::is_signed<T>::value && std::is
 template <typename T>
 struct Conversion<T, typename std::enable_if<std::is_unsigned<T>::value && std::is_integral<T>::value>::type>
 {
-    static T from(RubyValue x)
-    {
-        return protect([&] {
-            return NUM2ULL(x);
-        });
-    }
-    static RubyValue to(T x)
-    {
-        return ULL2NUM(x);
-    }
+    static T from(RubyValue x) { return NUM2ULL(x); }
+    static RubyValue to(T x) { return ULL2NUM(x); }
 };
 
 // floating point values
@@ -135,14 +119,12 @@ struct Conversion<T, typename std::enable_if<std::is_floating_point<T>::value>::
 {
     static T from(RubyValue x)
     {
-        return protect([&] {
-            auto type = rb_type(x);
-            if (type == T_FIXNUM || type == T_BIGNUM) {
-                return double(NUM2LL(x));
-            } else {
-                return RFLOAT_VALUE(VALUE(x));
-            }
-        });
+        auto type = rb_type(x);
+        if (type == T_FIXNUM || type == T_BIGNUM) {
+            return double(NUM2LL(x));
+        } else {
+            return RFLOAT_VALUE(VALUE(x));
+        }
     }
     static RubyValue to(T x)
     {
@@ -161,9 +143,7 @@ struct Conversion<T<V>, typename std::enable_if<IsQListLike<T<V>>::value>::type>
 {
     static T<V> from(RubyValue x)
     {
-        protect([&] {
-            x = rb_convert_type(x, T_ARRAY, "Array", "to_ary");
-        });
+        x = rb_convert_type(x, T_ARRAY, "Array", "to_ary");
         int length = RARRAY_LEN(VALUE(x));
         T<V> list;
         list.reserve(length);
@@ -174,14 +154,10 @@ struct Conversion<T<V>, typename std::enable_if<IsQListLike<T<V>>::value>::type>
     }
     static RubyValue to(const T<V> &list)
     {
-        RubyValue ary = protect([&] {
-            return rb_ary_new();
-        });
+        auto ary = rb_ary_new();
         for (const auto &elem : list) {
             auto x = RubyValue::from(elem);
-            protect([&] {
-                rb_ary_push(ary, x);
-            });
+            rb_ary_push(ary, x);
         }
         return ary;
     }
@@ -198,34 +174,25 @@ struct Conversion<T<K, V>, typename std::enable_if<IsQHashLike<T<K, V>>::value>:
 {
     static T<K, V> from(RubyValue x)
     {
-        protect([&] {
-            x = rb_convert_type(x, T_HASH, "Hash", "to_hash");
-        });
+        x = rb_convert_type(x, T_HASH, "Hash", "to_hash");
+
         T<K, V> hash;
-        protect([&] {
-            auto each = [](VALUE key, VALUE value, VALUE arg) -> int {
-                auto &hash = *reinterpret_cast<T<K, V> *>(arg);
-                unprotect([&] {
-                    hash[RubyValue(key).to<K>()] = RubyValue(value).to<V>();
-                });
-                return ST_CONTINUE;
-            };
-            auto eachPtr = (int (*)(VALUE, VALUE, VALUE))each;
-            rb_hash_foreach(x, (int (*)(...))eachPtr, (VALUE)(&hash));
-        });
+        auto each = [](VALUE key, VALUE value, VALUE arg) -> int {
+            auto &hash = *reinterpret_cast<T<K, V> *>(arg);
+            hash[RubyValue(key).to<K>()] = RubyValue(value).to<V>();
+            return ST_CONTINUE;
+        };
+        auto eachPtr = (int (*)(VALUE, VALUE, VALUE))each;
+        rb_hash_foreach(x, (int (*)(...))eachPtr, (VALUE)(&hash));
         return hash;
     }
     static RubyValue to(const T<K, V> &hash)
     {
-        RubyValue rubyHash = protect([&] {
-            return rb_hash_new();
-        });
+        auto rubyHash = rb_hash_new();
         for (auto i = hash.begin(); i != hash.end(); ++i) {
             auto k = RubyValue::from(i.key());
             auto v = RubyValue::from(i.value());
-            protect([&] {
-                rb_hash_aset(rubyHash, k, v);
-            });
+            rb_hash_aset(rubyHash, k, v);
         }
         return rubyHash;
     }

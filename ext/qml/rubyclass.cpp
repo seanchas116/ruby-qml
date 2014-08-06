@@ -15,16 +15,12 @@ RubyModule::RubyModule(RubyValue moduleValue) :
 
 RubyModule::RubyModule(const char *name)
 {
-    protect([&] {
-        mValue = rb_define_module(name);
-    });
+    mValue = rb_define_module(name);
 }
 
 RubyModule::RubyModule(const RubyModule &under, const char *name)
 {
-    protect([&] {
-        mValue = rb_define_module_under(under.toValue(), name);
-    });
+    mValue = rb_define_module_under(under.toValue(), name);
 }
 
 RubyModule &RubyModule::operator=(const RubyModule &other)
@@ -36,23 +32,17 @@ RubyModule &RubyModule::operator=(const RubyModule &other)
 
 RubyModule RubyModule::fromPath(const char *path)
 {
-    RubyValue ret;
-    protect([&] {
-        ret = rb_path2class(path);
-    });
-    return ret;
+    return rb_path2class(path);
 }
 
 void RubyModule::aliasMethod(const char *newName, const char *originalName)
 {
-    protect([&] {
-        rb_alias(mValue, rb_intern(newName), rb_intern(originalName));
-    });
+    rb_alias(mValue, rb_intern(newName), rb_intern(originalName));
 }
 
 void RubyModule::checkType()
 {
-    if (!protect([&] { return rb_obj_is_kind_of(mValue, rb_cModule); })) {
+    if (!mValue.isKindOf(rb_cModule)) {
         throw std::logic_error("expected Module value");
     }
 }
@@ -67,9 +57,7 @@ namespace {
 
 RubyValue defineClass(const RubyModule &under, const char *name)
 {
-    return protect([&] {
-        return rb_define_class_under(under.toValue(), name, rb_cObject);
-    });
+    return rb_define_class_under(under.toValue(), name, rb_cObject);
 }
 
 }

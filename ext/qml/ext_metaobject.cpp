@@ -18,13 +18,11 @@ namespace {
 
 RubyValue idListToArray(const QList<ID> &xs)
 {
-    return protect([&] {
-        auto ary = rb_ary_new();
-        for (ID id : xs) {
-            rb_ary_push(ary, ID2SYM(id));
-        }
-        return ary;
-    });
+    auto ary = rb_ary_new();
+    for (ID id : xs) {
+        rb_ary_push(ary, ID2SYM(id));
+    }
+    return ary;
 }
 
 }
@@ -148,9 +146,8 @@ RubyValue Ext_MetaObject::invokeMethod(RubyValue object, RubyValue methodName, R
 
     auto methodIndexes = findMethods(methodName);
 
-    protect([&] {
-        args = rb_check_array_type(args);
-    });
+    args = rb_check_array_type(args);
+
     auto obj = wrapperRubyClass<Ext_Pointer>().unwrap(object)->fetchQObject();
     for (int i : methodIndexes) {
         MethodInvoker invoker(args, mMetaObject->method(i));
@@ -158,17 +155,17 @@ RubyValue Ext_MetaObject::invokeMethod(RubyValue object, RubyValue methodName, R
             return invoker.invoke(obj);
         }
     }
-    protect([&] {
-        auto to_class = rb_funcall(ID2SYM(rb_intern("class")), rb_intern("to_proc"), 0);
-        auto classes = rb_funcall_with_block(args, rb_intern("map"), 0, nullptr, to_class);
-        auto classes_str = rb_funcall(classes, rb_intern("to_s"), 0);
 
-        rb_raise(rb_path2class("QML::MethodError"),
-                 "method mismatch (%s with params %s in %s)",
-                 mMetaObject->method(methodIndexes.first()).name().data(),
-                 StringValueCStr(classes_str),
-                 mMetaObject->className());
-    });
+    auto to_class = rb_funcall(ID2SYM(rb_intern("class")), rb_intern("to_proc"), 0);
+    auto classes = rb_funcall_with_block(args, rb_intern("map"), 0, nullptr, to_class);
+    auto classes_str = rb_funcall(classes, rb_intern("to_s"), 0);
+
+    rb_raise(rb_path2class("QML::MethodError"),
+             "method mismatch (%s with params %s in %s)",
+             mMetaObject->method(methodIndexes.first()).name().data(),
+             StringValueCStr(classes_str),
+             mMetaObject->className());
+
     return Qnil;
 }
 
@@ -190,11 +187,9 @@ RubyValue Ext_MetaObject::connectSignal(RubyValue object, RubyValue signalName, 
         new SignalForwarder(obj, method, proc);
         return Qnil;
     }
-    protect([&] {
-        rb_raise(rb_path2class("QML::MethodError"),
-                 "signal not found (%s in %s)",
-                 rb_id2name(id), mMetaObject->className());
-    });
+    rb_raise(rb_path2class("QML::MethodError"),
+             "signal not found (%s in %s)",
+             rb_id2name(id), mMetaObject->className());
     return Qnil;
 }
 
@@ -223,11 +218,9 @@ RubyValue Ext_MetaObject::setProperty(RubyValue object, RubyValue name, RubyValu
 
     auto metaProperty = mMetaObject->property(findProperty(name));
     if (!newValue.isConvertibleTo(metaProperty.userType())) {
-        protect([&] {
-            rb_raise(rb_path2class("QML::PropertyError"),
-                     "type mismatch (%s for %s)",
-                     rb_obj_classname(newValue), metaProperty.typeName());
-        });
+        rb_raise(rb_path2class("QML::PropertyError"),
+                 "type mismatch (%s for %s)",
+                 rb_obj_classname(newValue), metaProperty.typeName());
     }
 
     auto qobj = wrapperRubyClass<Ext_Pointer>().unwrap(object)->fetchQObject();
@@ -264,12 +257,10 @@ QList<int> Ext_MetaObject::findMethods(RubyValue name) const
     auto id = name.toID();
     auto methodIndexes = mMethodHash.values(id);
     if (methodIndexes.size() == 0) {
-        protect([&] {
-            rb_raise(rb_path2class("QML::MethodError"),
-                     "method not found (%s in %s)",
-                     rb_id2name(id),
-                     mMetaObject->className());
-        });
+        rb_raise(rb_path2class("QML::MethodError"),
+                 "method not found (%s in %s)",
+                 rb_id2name(id),
+                 mMetaObject->className());
     }
     return methodIndexes;
 }
@@ -278,11 +269,9 @@ int Ext_MetaObject::findProperty(RubyValue name) const
 {
     auto id = name.toID();
     if (!mPropertyHash.contains(id)) {
-        protect([&] {
-            rb_raise(rb_path2class("QML::PropertyError"),
-                     "property not found (%s in %s)",
-                     rb_id2name(id), mMetaObject->className());
-        });
+        rb_raise(rb_path2class("QML::PropertyError"),
+                 "property not found (%s in %s)",
+                 rb_id2name(id), mMetaObject->className());
     }
     return mPropertyHash[id];
 }

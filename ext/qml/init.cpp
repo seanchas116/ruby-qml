@@ -48,7 +48,7 @@ void cleanup()
 
 void setupEndProc()
 {
-    rb_set_end_proc([](VALUE) { unprotect(cleanup); }, Qnil);
+    rb_set_end_proc([](VALUE) { cleanup(); }, Qnil);
 }
 
 }
@@ -60,10 +60,8 @@ void Init_qml()
     rb_require("qml/errors");
     rb_require("qml/error_converter");
 
-    unprotect([&] {
-        defineMetaTypes();
-        defineClasses();
-        setupGlobalGCMarking();
-        setupEndProc();
-    });
+    defineMetaTypes();
+    defineClasses();
+    setupGlobalGCMarking();
+    setupEndProc();
 }

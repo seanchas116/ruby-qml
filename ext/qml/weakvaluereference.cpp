@@ -32,11 +32,10 @@ WeakValueReference::WeakValueReference(RubyValue value) :
     d->mHasValue = true;
     d->mValue = value;
     static auto objspace = RubyModule::fromPath("ObjectSpace");
-    protect([&] {
-        auto proc = rb_proc_new((VALUE (*)(...))&Data::finalize, Ext_AnyWrapper::create(QVariant::fromValue(d)));
-        VALUE args[] = { value };
-        rb_funcall_with_block(objspace, RUBYQML_INTERN("define_finalizer"), 1, args, proc);
-    });
+
+    auto proc = rb_proc_new((VALUE (*)(...))&Data::finalize, Ext_AnyWrapper::create(QVariant::fromValue(d)));
+    VALUE args[] = { value };
+    rb_funcall_with_block(objspace, RUBYQML_INTERN("define_finalizer"), 1, args, proc);
 }
 
 bool WeakValueReference::hasValue() const

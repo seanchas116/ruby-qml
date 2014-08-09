@@ -8,7 +8,7 @@ namespace RubyQml {
 class ConversionError : public std::runtime_error
 {
 public:
-    ConversionError(const QString &str) : std::runtime_error(str.toUtf8()) {}
+    ConversionError(const QString &str) : std::runtime_error(str.toStdString()) {}
 };
 
 }

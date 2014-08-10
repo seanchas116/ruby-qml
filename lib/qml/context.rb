@@ -10,7 +10,7 @@ module QML
   # @see http://qt-project.org/doc/qt-5/qqmlcontext.html QQmlContext(C++)
   #
   # @example
-  #   QML.application do |app|
+  #   QML.run do |app|
   #     app.context[:foo] = 'foo'
   #     app.context[:bar] = 'bar'
   #     ...

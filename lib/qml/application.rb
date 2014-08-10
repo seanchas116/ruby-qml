@@ -106,29 +106,26 @@ module QML
     end
   end
 
-  # @overload application
-  #   Returns the instance of {Application}.
-  #   @return [Application]
-  # @overload application
-  #   Call {init} if ruby-qml is not initialized, then yields the application instance and then call {Application#exec}.
-  #   @return [Application]
-  #   @example
-  #     QML.application do |app|
-  #       app.context[:foo] = 'foo'
-  #       app.load_path Pathname(__FILE__) + '../main.qml'
-  #     end
-  # @see Application.instance
+  # Returns the instance of {Application}.
+  # @return [Application]
   def application
-    if block_given?
-      QML.init unless QML.initialized?
-      Application.instance.tap do |app|
-        yield app
-        app.exec
-      end
-    else
-      Application.instance
+    Application.instance
+  end
+
+  # Call {init} if ruby-qml is not initialized, then yields the application instance and then call {Application#exec}.
+  # @return [Application]
+  # @example
+  #   QML.run do |app|
+  #     app.context[:foo] = 'foo'
+  #     app.load_path Pathname(__FILE__) + '../main.qml'
+  #   end
+  def run
+    QML.init unless QML.initialized?
+    Application.instance.tap do |app|
+      yield app
+      app.exec
     end
   end
 
-  module_function :application
+  module_function :application, :run
 end

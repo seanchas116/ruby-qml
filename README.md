@@ -87,7 +87,7 @@ The following code loads a QML file and shows an application window titled "Hell
 ```ruby
 require 'qml'
 
-QML.application do |app|
+QML.run do |app|
   app.load_path Pathname(__FILE__) + '../main.qml'
 end
 ```
@@ -215,7 +215,7 @@ class Foo
   end
 end
 
-QML.application do |app|
+QML.run do |app|
   app.context[:foo] = Foo.new
   app.load_path Pathname(__FILE__) + '../main.qml'
 end

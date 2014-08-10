@@ -51,7 +51,7 @@ module Examples
   end
 end
 
-QML.application do |app|
+QML.run do |app|
   app.engine.add_image_provider 'example', Examples::ImageProvider::Provider.new
   app.load_path Pathname(__FILE__) + '../main.qml'
 end

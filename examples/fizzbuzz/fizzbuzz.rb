@@ -38,6 +38,6 @@ module Examples
   end
 end
 
-QML.application do |app|
+QML.run do |app|
   app.load_path Pathname(__FILE__) + '../main.qml'
 end

@@ -434,6 +434,59 @@ obj = plugin.create_object
 obj.prefer_managed false
 ```
 
+### Use with EventMachine
+
+You can use [EventMachine](https://github.com/eventmachine/eventmachine) with ruby-qml.
+It is more powerful than the default ruby-qml event loop.
+
+Instead of using `QML.run`, start an EventMachine event loop by `EM.run` and
+process QML events periodically by `QML::Application#process_events`.
+
+```ruby
+require 'qml'
+require 'eventmachine'
+
+EM.run do
+  QML.init
+  EM.add_periodic_timer(0.01) { QML.application.process_events }
+  QML.application.load_path(Pathname.pwd + 'main.qml')
+end
+```
+
+You can also use [em-synchrony](https://github.com/igrigorik/em-synchrony) to
+write callback-free asynchronous operation for ruby-qml.
+
+```
+require 'qml'
+require 'eventmachine'
+require 'em-synchrony'
+require 'em-http-request'
+
+class Controller
+  include QML::Access
+  property :result, ''
+
+  def get
+    EM.synchrony do
+      content = EM::Synchrony.sync EM::HttpRequest.new('http://www.example.com/').get
+      self.result = content.response
+    end
+  end
+
+  def quit
+    EM.stop
+  end
+
+  register_to_qml under: 'Example', version: '0.1'
+end
+
+EM.run do
+  QML.init
+  EM.add_periodic_timer(0.01) { QML.application.process_events }
+  QML.application.load_path(Pathname.pwd + 'main.qml')
+end
+```
+
 ## Contributing
 
 Contributions are welcome. When you are contributing to ruby-qml:

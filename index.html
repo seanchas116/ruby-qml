@@ -146,7 +146,7 @@ For example:</p>
 
 <div class="highlight highlight-ruby"><pre><span class="nb">require</span> <span class="s1">'qml'</span>
 
-<span class="no">QML</span><span class="o">.</span><span class="n">application</span> <span class="k">do</span> <span class="o">|</span><span class="n">app</span><span class="o">|</span>
+<span class="no">QML</span><span class="o">.</span><span class="n">run</span> <span class="k">do</span> <span class="o">|</span><span class="n">app</span><span class="o">|</span>
   <span class="n">app</span><span class="o">.</span><span class="n">load_path</span> <span class="no">Pathname</span><span class="p">(</span><span class="bp">__FILE__</span><span class="p">)</span> <span class="o">+</span> <span class="s1">'../main.qml'</span>
 <span class="k">end</span>
 </pre></div>
@@ -270,7 +270,7 @@ In this case, you don't have to use <code>register_to_qml</code>.</p>
   <span class="k">end</span>
 <span class="k">end</span>
 
-<span class="no">QML</span><span class="o">.</span><span class="n">application</span> <span class="k">do</span> <span class="o">|</span><span class="n">app</span><span class="o">|</span>
+<span class="no">QML</span><span class="o">.</span><span class="n">run</span> <span class="k">do</span> <span class="o">|</span><span class="n">app</span><span class="o">|</span>
   <span class="n">app</span><span class="o">.</span><span class="n">context</span><span class="o">[</span><span class="ss">:foo</span><span class="o">]</span> <span class="o">=</span> <span class="no">Foo</span><span class="o">.</span><span class="n">new</span>
   <span class="n">app</span><span class="o">.</span><span class="n">load_path</span> <span class="no">Pathname</span><span class="p">(</span><span class="bp">__FILE__</span><span class="p">)</span> <span class="o">+</span> <span class="s1">'../main.qml'</span>
 <span class="k">end</span>
@@ -488,6 +488,58 @@ The <code>#prefer_managed</code> methods sets management status safely
 <span class="n">obj</span> <span class="o">=</span> <span class="n">plugin</span><span class="o">.</span><span class="n">create_object</span>
 <span class="n">obj</span><span class="o">.</span><span class="n">prefer_managed</span> <span class="kp">false</span>
 </pre></div>
+
+<h3>
+<a name="use-with-eventmachine" class="anchor" href="#use-with-eventmachine"><span class="octicon octicon-link"></span></a>Use with EventMachine</h3>
+
+<p>You can use <a href="https://github.com/eventmachine/eventmachine">EventMachine</a> with ruby-qml.
+It is more powerful than the default ruby-qml event loop.</p>
+
+<p>Instead of using <code>QML.run</code>, start an EventMachine event loop by <code>EM.run</code> and
+process QML events periodically by <code>QML::Application#process_events</code>.</p>
+
+<div class="highlight highlight-ruby"><pre><span class="nb">require</span> <span class="s1">'qml'</span>
+<span class="nb">require</span> <span class="s1">'eventmachine'</span>
+
+<span class="no">EM</span><span class="o">.</span><span class="n">run</span> <span class="k">do</span>
+  <span class="no">QML</span><span class="o">.</span><span class="n">init</span>
+  <span class="no">EM</span><span class="o">.</span><span class="n">add_periodic_timer</span><span class="p">(</span><span class="mi">0</span><span class="o">.</span><span class="mo">01</span><span class="p">)</span> <span class="p">{</span> <span class="no">QML</span><span class="o">.</span><span class="n">application</span><span class="o">.</span><span class="n">process_events</span> <span class="p">}</span>
+  <span class="no">QML</span><span class="o">.</span><span class="n">application</span><span class="o">.</span><span class="n">load_path</span><span class="p">(</span><span class="no">Pathname</span><span class="o">.</span><span class="n">pwd</span> <span class="o">+</span> <span class="s1">'main.qml'</span><span class="p">)</span>
+<span class="k">end</span>
+</pre></div>
+
+<p>You can also use <a href="https://github.com/igrigorik/em-synchrony">em-synchrony</a> to
+write callback-free asynchronous operation for ruby-qml.</p>
+
+<pre><code>require 'qml'
+require 'eventmachine'
+require 'em-synchrony'
+require 'em-http-request'
+
+class Controller
+  include QML::Access
+  property :result, ''
+
+  def get
+    EM.synchrony do
+      content = EM::Synchrony.sync EM::HttpRequest.new('http://www.example.com/').get
+      self.result = content.response
+    end
+  end
+
+  def quit
+    EM.stop
+  end
+
+  register_to_qml under: 'Example', version: '0.1'
+end
+
+EM.run do
+  QML.init
+  EM.add_periodic_timer(0.01) { QML.application.process_events }
+  QML.application.load_path(Pathname.pwd + 'main.qml')
+end
+</code></pre>
 
 <h2>
 <a name="contributing" class="anchor" href="#contributing"><span class="octicon octicon-link"></span></a>Contributing</h2>

@@ -1,3 +1,11 @@
+## 0.0.6 (2014-08-19)
+
+* Fix problems when using Fiber with ruby-qml
+
+* Rename block-receiving `QML.application` to `QML.run`
+
+  * `QML.application` without block is still the same name
+
 ## 0.0.5 (2014-07-31)
 
 * Support official Qt installation on Mac

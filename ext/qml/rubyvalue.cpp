@@ -24,7 +24,7 @@ namespace {
 RubyValue convertToString(RubyValue x)
 {
     if (rb_type(x) == T_SYMBOL) {
-        x = rb_sym_to_s(x);
+        x = rb_obj_as_string(x);
     }
     return rb_convert_type(x, T_STRING, "String", "to_str");
 }
@@ -148,7 +148,7 @@ template <> QDateTime Conversion<QDateTime>::from(RubyValue time)
         offset = time.send(RUBYQML_INTERN("gmt_offset")).to<int>();
     } else { // DateTime
         VALUE dayOffset = time.send(RUBYQML_INTERN("offset"));
-        offset = RubyValue(RRATIONAL(dayOffset)->num).to<int>() * 24 * 60 * 60 / RubyValue(RRATIONAL(dayOffset)->den).to<int>();
+        offset = RubyValue(rb_rational_num(dayOffset)).to<int>() * 24 * 60 * 60 / RubyValue(rb_rational_den(dayOffset)).to<int>();
         time = time.send(RUBYQML_INTERN("to_time"));
     }
     timeval at = rb_time_timeval(time);

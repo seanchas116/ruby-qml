@@ -19,6 +19,11 @@ void EngineExtension::addImageProvider(const QString &id, ImageProvider *provide
     mEngine->addImageProvider(id, provider);
 }
 
+void EngineExtension::addImportPath(const QString &path)
+{
+    mEngine->addImportPath(path);
+}
+
 void EngineExtension::collectGarbage()
 {
     mEngine->collectGarbage();

@@ -19,6 +19,7 @@ public:
 
 public slots:
     void addImageProvider(const QString &id, RubyQml::ImageProvider *provider);
+    void addImportPath(const QString &path);
     void collectGarbage();
 
 private:

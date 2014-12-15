@@ -43,6 +43,14 @@ module QML
       @extension.add_image_provider(id, provider.qt_image_provider)
       provider
     end
+
+    # Adds a QML import path to the {Engine}.
+    # @param path [String]
+    # @see http://doc.qt.io/qt-5/qtqml-syntax-imports.html#qml-import-path
+    def add_import_path(path)
+      @extension.add_import_path(path)
+    end
+
   end
 
   # @return [Engine] the instance of {Engine}.

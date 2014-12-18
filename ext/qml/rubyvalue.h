@@ -4,6 +4,7 @@
 #include <array>
 
 class QVariant;
+class QJSValue;
 
 namespace RubyQml {
 

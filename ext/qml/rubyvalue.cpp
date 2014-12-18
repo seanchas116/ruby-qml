@@ -7,6 +7,7 @@
 #include "accessobject.h"
 #include "listmodel.h"
 #include "ext_accesswrapperfactory.h"
+#include "kernel.h"
 #include <ruby/intern.h>
 #define ONIG_ESCAPE_UCHAR_COLLISION
 #include <ruby/encoding.h>
@@ -14,6 +15,7 @@
 #include <QDateTime>
 #include <QRect>
 #include <QSet>
+#include <QJSValue>
 
 namespace RubyQml {
 
@@ -70,6 +72,8 @@ struct ConverterHash
         add<QSizeF>();
         add<QRect>();
         add<QRectF>();
+
+        add<QJSValue>();
 
         add<QObject *>();
         add<const QMetaObject *>();
@@ -290,6 +294,16 @@ template <> RubyValue Conversion<const QMetaObject *>::to(const QMetaObject *met
         return Qnil;
     }
     return Ext_MetaObject::fromMetaObject(metaobj);
+}
+
+template <> QJSValue Conversion<QJSValue>::from(RubyValue x)
+{
+    return Kernel::instance()->engine()->toScriptValue(x.to<QVariant>());
+}
+
+template <> RubyValue Conversion<QJSValue>::to(const QJSValue &jsValue)
+{
+    return RubyValue::from(jsValue.toVariant());
 }
 
 } // namespace detail

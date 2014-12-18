@@ -51,6 +51,13 @@ module QML
       @extension.add_import_path(path)
     end
 
+    # Adds a QML import path to the {Engine}.
+    # @param path [String]
+    # @see http://doc.qt.io/qt-5/qtqml-syntax-imports.html#qml-import-path
+    def import_paths()
+      @extension.import_paths()
+    end
+
   end
 
   # @return [Engine] the instance of {Engine}.

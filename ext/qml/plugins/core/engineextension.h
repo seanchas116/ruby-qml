@@ -1,6 +1,7 @@
 #pragma once
 
 #include <QObject>
+#include <QVariantList>
 
 class QQmlEngine;
 class QQmlContext;
@@ -20,6 +21,7 @@ public:
 public slots:
     void addImageProvider(const QString &id, RubyQml::ImageProvider *provider);
     void addImportPath(const QString &path);
+    QVariantList importPaths() const;
     void collectGarbage();
 
 private:

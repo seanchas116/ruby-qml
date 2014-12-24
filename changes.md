@@ -1,3 +1,8 @@
+## 0.0.7 (2014-12-25)
+
+* Support Ruby 2.2 (rc1) and Qt 5.4
+* Add `Engine#add_import_path` and `Engine#import_paths` by @tokoro10g
+
 ## 0.0.6 (2014-08-19)
 
 * Fix problems when using Fiber with ruby-qml
@@ -21,7 +26,7 @@
 ## 0.0.2 (2014-07-21)
 
 * Improve list models
-  
+
   * Add ArrayModel#replace
   * Add QueryModel for ORMs
   * Specify column names in ListModel#initialize

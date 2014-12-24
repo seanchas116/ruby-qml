@@ -64,7 +64,6 @@ describe QML do
         finished = true
       end
       QML.application.process_events # wait for event loop hook to be enabled
-      expect(finished).to eq false
       QML.application.process_events
       expect(finished).to eq true
     end

@@ -489,11 +489,42 @@ end
 
 ## Contributing
 
-Contributions are welcome. When you are contributing to ruby-qml:
+### Install dependencies
+
+```
+$ bundle install
+```
+
+### Build native extension
+
+Before running ruby-qml in development, the native extension of ruby-qml needs to have been built.
+To build it, run the following commands:
+
+```
+$ cd ext/qml
+$ bundle exec ruby extconf.rb --with-qt-dir=/path/to/qt --with-libffi-dir=/path/to/libffi
+$ make -j4
+```
+
+### Run tests
+
+Tests for ruby-qml is written in RSpec. To run tests, do:
+
+```
+$ bundle exec rspec
+```
+
+### Run examples
+
+```
+$ bundle exec ruby examples/fizzbuzz/fizzbuzz.rb
+```
+
+### Send pull requests
 
 1. Fork it ( http://github.com/seanchas116/ruby-qml/fork )
 2. Create your feature branch (`git checkout -b my-new-feature`)
 3. Commit your changes (`git commit -am 'Add some feature'`)
-4. Write some tests if possible
+4. Write some tests
 5. Push to the branch (`git push origin my-new-feature`)
 6. Create new Pull Request

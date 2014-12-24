@@ -17,6 +17,24 @@
 #include <QSet>
 #include <QJSValue>
 
+#ifndef HAVE_RB_RATIONAL_NUM
+
+VALUE rb_rational_num(VALUE rat)
+{
+  return RRATIONAL(rat)->num;
+}
+
+#endif
+
+#ifndef HAVE_RB_RATIONAL_DEN
+
+VALUE rb_rational_den(VALUE rat)
+{
+  return RRATIONAL(rat)->den;
+}
+
+#endif
+
 namespace RubyQml {
 
 namespace detail {
@@ -152,7 +170,7 @@ template <> QDateTime Conversion<QDateTime>::from(RubyValue time)
         offset = time.send(RUBYQML_INTERN("gmt_offset")).to<int>();
     } else { // DateTime
         VALUE dayOffset = time.send(RUBYQML_INTERN("offset"));
-        offset = RubyValue(RRATIONAL(dayOffset)->num).to<int>() * 24 * 60 * 60 / RubyValue(RRATIONAL(dayOffset)->den).to<int>();
+        offset = RubyValue(rb_rational_num(dayOffset)).to<int>() * 24 * 60 * 60 / RubyValue(rb_rational_den(dayOffset)).to<int>();
         time = time.send(RUBYQML_INTERN("to_time"));
     }
     timeval at = rb_time_timeval(time);

@@ -91,7 +91,7 @@ class Configurator
     end
     $CPPFLAGS += " -DHAVE_RUBY_THREAD_H" if have_header('ruby/thread.h')
 
-    $CPPFLAGS += " -std=c++11 -Wall -Wextra -pipe"
+    $CPPFLAGS += " -std=c++11 -Wall -Wextra -pipe -Wno-reserved-user-defined-literal"
     if @debug_enabled
       $CPPFLAGS += " -O0 -ggdb3"
     else

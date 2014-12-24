@@ -456,7 +456,7 @@ end
 You can also use [em-synchrony](https://github.com/igrigorik/em-synchrony) to
 write callback-free asynchronous operation for ruby-qml.
 
-```
+```ruby
 require 'qml'
 require 'eventmachine'
 require 'em-synchrony'

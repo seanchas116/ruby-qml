@@ -1,4 +1,4 @@
-Copyright (c) 2014 Ryohei Ikegami
+Copyright (c) 2014-2015 Ryohei Ikegami
 
 MIT License
 

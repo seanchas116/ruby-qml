@@ -1,0 +1,3 @@
+[submodule "ext/qml/lib/libqmlbind"]
+	path = ext/qml/lib/libqmlbind
+	url = https://github.com/seanchas116/libqmlbind.git

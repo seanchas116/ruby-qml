@@ -86,9 +86,6 @@ class Configurator
       abort "header not found: #{h}" unless have_header(h)
     end
 
-    unless have_func('rb_thread_call_with_gvl') && have_func('rb_thread_call_without_gvl')
-      abort "rb_thread_call_with_gvl and rb_thread_call_without_gvl not found"
-    end
     $CPPFLAGS += " -DHAVE_RUBY_THREAD_H" if have_header('ruby/thread.h')
 
     have_func('rb_rational_num')

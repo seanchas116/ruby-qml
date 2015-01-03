@@ -44,7 +44,7 @@ namespace {
 RubyValue convertToString(RubyValue x)
 {
     if (rb_type(x) == T_SYMBOL) {
-        x = rb_sym_to_s(x);
+        x = rb_obj_as_string(x);
     }
     return rb_convert_type(x, T_STRING, "String", "to_str");
 }

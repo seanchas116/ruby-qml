@@ -3,14 +3,16 @@
 #include "ext_pointer.h"
 #include "rubyclass.h"
 #include "signalforwarder.h"
-#include <QtCore/QMetaObject>
-#include <QtCore/QMetaMethod>
-#include <QtCore/QMetaProperty>
-#include <QtCore/QMetaEnum>
-#include <QtCore/QVariant>
+#include <QMetaObject>
+#include <QMetaMethod>
+#include <QMetaProperty>
+#include <QMetaEnum>
+#include <QVariant>
+#include <QDebug>
+#include <QQmlEngine>
+#include <QThread>
+#include <QCoreApplication>
 #include <array>
-#include <QtCore/QDebug>
-#include <QtQml/QQmlEngine>
 
 namespace RubyQml {
 
@@ -247,7 +249,7 @@ RubyValue Ext_MetaObject::notifySignal(RubyValue name) const
 
 void Ext_MetaObject::checkThread() const
 {
-    if (rb_thread_current() != rb_thread_main()) {
+    if (rb_funcall(rb_cThread, rb_intern("current"), 0) != rb_funcall(rb_cThread, rb_intern("main"), 0)) {
         fail("QML::InvalidThreadError", "Qt object accessed from non-main thread");
     }
 }

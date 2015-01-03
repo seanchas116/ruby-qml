@@ -35,20 +35,11 @@ void defineClasses()
 
 void setupGlobalGCMarking()
 {
-    auto marker = Ext_AnyWrapper::create(QVariant(), [](const QVariant &) {
+    static VALUE marker = Ext_AnyWrapper::create(QVariant(), [](const QVariant &) {
         ValueReference::markAllReferences();
         ObjectGC::instance()->markNonOwnedObjects();
     });
-    rb_gc_register_mark_object(marker);
-}
-
-void cleanup()
-{
-}
-
-void setupEndProc()
-{
-    rb_set_end_proc([](VALUE) { cleanup(); }, Qnil);
+    rb_gc_register_address(&marker);
 }
 
 }
@@ -63,5 +54,4 @@ void Init_qml()
     defineMetaTypes();
     defineClasses();
     setupGlobalGCMarking();
-    setupEndProc();
 }

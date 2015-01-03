@@ -2,6 +2,7 @@
 #include "util.h"
 #include <ruby.h>
 #include <array>
+#include <ruby/st.h>
 
 class QVariant;
 class QJSValue;

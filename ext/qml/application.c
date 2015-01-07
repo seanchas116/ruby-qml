@@ -19,4 +19,6 @@ void rubyqml_init_application(void)
     }
 
     application = qmlbind_application_new(len, strs);
+
+    free(strs);
 }

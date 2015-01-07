@@ -1,5 +1,6 @@
 #include "js_function.h"
 #include "conversion.h"
+#include "engine.h"
 
 static VALUE js_function_class;
 

@@ -52,6 +52,6 @@ void rubyqml_init_js_array(void)
     js_array_class = rb_define_class_under(rb_path2class("QML"), "JSArray", rubyqml_js_object_class());
     rb_define_alloc_func(js_array_class, &rubyqml_js_object_alloc);
 
-    rb_define_method(js_array_class, "_init_array", &js_array_init, 1);
+    rb_define_private_method(js_array_class, "init_data", &js_array_init, 1);
     rb_define_method(js_array_class, "each", &js_array_each, 0);
 }

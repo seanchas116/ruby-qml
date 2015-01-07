@@ -145,7 +145,7 @@ void rubyqml_init_js_object(void)
     js_object_class = rb_define_class_under(rb_path2class("QML"), "JSObject", rb_cObject);
     rb_define_alloc_func(js_object_class, &rubyqml_js_object_alloc);
 
-    rb_define_method(js_object_class, "_init_object", &js_object_init, 0);
+    rb_define_private_method(js_object_class, "init_data", &js_object_init, 0);
     rb_define_method(js_object_class, "[]", &js_object_aref, 1);
     rb_define_method(js_object_class, "[]=", &js_object_aset, 2);
     rb_define_method(js_object_class, "each", &js_object_each, 0);

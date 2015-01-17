@@ -3,7 +3,7 @@
 #include "js_array.h"
 #include "js_function.h"
 
-VALUE rubyqml_to_ruby(qmlbind_value value)
+VALUE rbqml_to_ruby(qmlbind_value value, VALUE engine)
 {
     if (qmlbind_value_is_undefined(value) || qmlbind_value_is_null(value)) {
         return Qnil;
@@ -23,21 +23,19 @@ VALUE rubyqml_to_ruby(qmlbind_value value)
     VALUE klass;
 
     if (qmlbind_value_is_array(value)) {
-        klass = rubyqml_js_array_class();
+        klass = rbqml_cJSArray;
     }
     else if (qmlbind_value_is_function(value)) {
-        klass = rubyqml_js_function_class();
+        klass = rbqml_cJSFunction;
     }
     else {
-        klass = rubyqml_js_object_class();
+        klass = rbqml_cJSObject;
     }
 
-    VALUE obj = rubyqml_js_object_alloc(klass);
-    rubyqml_js_object_set(obj, value);
-    return obj;
+    return rbqml_js_object_new(klass, value, engine);
 }
 
-qmlbind_value rubyqml_to_qml(VALUE value)
+qmlbind_value rbqml_to_qml(VALUE value, VALUE engine)
 {
     switch (rb_type(value)) {
     case T_NIL:
@@ -54,16 +52,16 @@ qmlbind_value rubyqml_to_qml(VALUE value)
     case T_STRING:
         return qmlbind_value_new_string(RSTRING_LEN(value), RSTRING_PTR(value));
     case T_ARRAY: {
-        VALUE array = rb_funcall(rubyqml_js_array_class(), rb_intern("new"), 1, value);
-        return qmlbind_value_clone(rubyqml_js_object_get(array));
+        VALUE array = rb_funcall(engine, rb_intern("new_array"), 1, value);
+        return qmlbind_value_clone(rbqml_js_object_get(array));
     }
     case T_HASH: {
-        VALUE obj = rb_funcall(rubyqml_js_object_class(), rb_intern("new"), 1, value);
-        return qmlbind_value_clone(rubyqml_js_object_get(obj));
+        VALUE obj = rb_funcall(engine, rb_intern("new_object"), 1, value);
+        return qmlbind_value_clone(rbqml_js_object_get(obj));
     }
     default:
-        if (rubyqml_is_js_object(value)) {
-            return qmlbind_value_clone(rubyqml_js_object_get(value));
+        if (rbqml_js_object_p(value)) {
+            return qmlbind_value_clone(rbqml_js_object_get(value));
         }
         // TODO: support Proc
         // if (RTEST(rb_obj_is_proc(value))) {

@@ -4,5 +4,5 @@
 #include <qmlbind.h>
 #include <stdbool.h>
 
-VALUE rubyqml_to_ruby(qmlbind_value value);
-qmlbind_value rubyqml_to_qml(VALUE value);
+VALUE rbqml_to_ruby(qmlbind_value value, VALUE engine);
+qmlbind_value rbqml_to_qml(VALUE value, VALUE engine);

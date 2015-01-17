@@ -2,6 +2,6 @@
 
 #include "js_object.h"
 
-VALUE rubyqml_js_function_class(void);
+extern VALUE rbqml_cJSFunction;
 
-void rubyqml_init_js_function(void);
+void rbqml_init_js_function(void);

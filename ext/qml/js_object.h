@@ -4,16 +4,12 @@
 #include <qmlbind.h>
 #include <stdbool.h>
 
-typedef struct {
-    qmlbind_value value;
-} rubyqml_js_object_t;
+VALUE rbqml_js_object_new(VALUE klass, qmlbind_value value, VALUE engine);
 
-VALUE rubyqml_js_object_alloc(VALUE klass);
+bool rbqml_js_object_p(VALUE value);
+qmlbind_value rbqml_js_object_get(VALUE jsobject);
+VALUE rbqml_js_object_get_engine(VALUE jsobject);
 
-bool rubyqml_is_js_object(VALUE value);
-qmlbind_value rubyqml_js_object_get(VALUE jsobject);
-void rubyqml_js_object_set(VALUE jsobject, qmlbind_value value);
+extern VALUE rbqml_cJSObject;
 
-VALUE rubyqml_js_object_class(void);
-
-void rubyqml_init_js_object(void);
+void rbqml_init_js_object(void);

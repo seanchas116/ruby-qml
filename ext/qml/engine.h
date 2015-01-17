@@ -3,7 +3,8 @@
 #include <ruby/ruby.h>
 #include <qmlbind.h>
 
-qmlbind_engine rubyqml_global_engine(void);
-VALUE rubyqml_global_engine_value(void);
+extern VALUE rbqml_cEngine;
 
-void rubyqml_init_engine(void);
+qmlbind_engine rbqml_get_engine(VALUE value);
+
+void rbqml_init_engine(void);

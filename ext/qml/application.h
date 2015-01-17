@@ -3,5 +3,7 @@
 #include <ruby/ruby.h>
 #include <qmlbind.h>
 
-qmlbind_application rubyqml_application(void);
-void rubyqml_init_application(void);
+extern VALUE rbqml_cApplication;
+extern VALUE rbqml_application_instance;
+
+void rbqml_init_application(void);

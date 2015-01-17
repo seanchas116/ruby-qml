@@ -2,6 +2,6 @@
 
 #include "js_object.h"
 
-VALUE rubyqml_js_array_class(void);
+extern VALUE rbqml_cJSArray;
 
-void rubyqml_init_js_array(void);
+void rbqml_init_js_array(void);

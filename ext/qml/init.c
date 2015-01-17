@@ -8,9 +8,9 @@
 
 void Init_qml(void)
 {
-    rubyqml_init_application();
-    rubyqml_init_engine();
-    rubyqml_init_js_object();
-    rubyqml_init_js_array();
-    rubyqml_init_js_function();
+    rbqml_init_application();
+    rbqml_init_engine();
+    rbqml_init_js_object();
+    rbqml_init_js_array();
+    rbqml_init_js_function();
 }

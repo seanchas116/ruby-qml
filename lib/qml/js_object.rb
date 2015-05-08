@@ -15,15 +15,25 @@ module QML
     alias_method :respond_to?, :has_key?
 
     def method_missing(method, *args)
-      unless has_key?(method)
-        fail NoMethodError, "property `#{method}` not found in #{self}"
-      end
+      if /=$/ =~ method
+        # setter
+        key = method.slice(0...-1).to_sym
 
-      prop = self[method]
-      if prop.is_a? JSFunction
-        prop.call_with_instance(self, *args)
+        unless has_key?(key)
+          fail NoMethodError, "property `#{method}` not found in #{self}"
+        end
+        self[key] = args[0]
       else
-        prop
+        unless has_key?(method)
+          fail NoMethodError, "property `#{method}` not found in #{self}"
+        end
+
+        prop = self[method]
+        if prop.is_a? JSFunction
+          prop.call_with_instance(self, *args)
+        else
+          prop
+        end
       end
     end
   end

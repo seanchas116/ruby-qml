@@ -83,5 +83,11 @@ describe QML::JSObject do
         expect { obj.hoge }.to raise_error(NoMethodError)
       end
     end
+    context 'as setter' do
+      it 'assigns value' do
+        obj.one = 2
+        expect(obj.one).to eq 2
+      end
+    end
   end
 end

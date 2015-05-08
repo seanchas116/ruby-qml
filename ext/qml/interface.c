@@ -75,7 +75,7 @@ static void set_property(
     VALUE ruby_value = rbqml_to_ruby(value, engine_value);
 
     rb_funcall(rbqml_mInterface, rb_intern("call_method"), 3,
-               obj, method, rb_ary_new_from_args(1, &ruby_value));
+               obj, method, rb_ary_new_from_args(1, ruby_value));
 }
 
 qmlbind_interface_handlers handlers = {

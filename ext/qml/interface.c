@@ -25,11 +25,11 @@ static void delete_object(qmlbind_backref handle) {
 
 static qmlbind_value call_method(
     qmlbind_engine engine,
-    qmlbind_backref object_backref, qmlbind_backref method_backref,
+    qmlbind_backref object_backref, const char *name,
     int argc, qmlbind_value *argv) {
 
     VALUE obj = (VALUE)object_backref;
-    VALUE method = (VALUE)method_backref;
+    VALUE method = rb_intern(name);
 
     VALUE engine_value = rbqml_value_for_engine(engine);
 
@@ -47,10 +47,10 @@ static qmlbind_value call_method(
 
 static qmlbind_value get_property(
     qmlbind_engine engine,
-    qmlbind_backref object_backref, qmlbind_backref getter_backref) {
+    qmlbind_backref object_backref, const char *name) {
 
     VALUE obj = (VALUE)object_backref;
-    VALUE method = (VALUE)getter_backref;
+    VALUE method = rb_intern(name);
 
     VALUE engine_value = rbqml_value_for_engine(engine);
 
@@ -62,10 +62,10 @@ static qmlbind_value get_property(
 
 static void set_property(
     qmlbind_engine engine,
-    qmlbind_backref object_backref, qmlbind_backref setter_backref, qmlbind_value value) {
+    qmlbind_backref object_backref, const char *name, qmlbind_value value) {
 
     VALUE obj = (VALUE)object_backref;
-    VALUE method = (VALUE)setter_backref;
+    VALUE method = rb_str_intern(rb_sprintf("%s=", name));
 
     VALUE engine_value = rbqml_value_for_engine(engine);
 

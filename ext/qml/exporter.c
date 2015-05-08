@@ -48,7 +48,7 @@ static VALUE exporter_initialize(VALUE self, VALUE klass, VALUE name) {
 static VALUE exporter_add_method(VALUE self, VALUE name, VALUE arity) {
     qmlbind_exporter exporter = rbqml_get_exporter(self);
 
-    int method_id = qmlbind_exporter_add_method(exporter, (qmlbind_backref)name, rb_string_value_cstr(&name), NUM2INT(arity));
+    int method_id = qmlbind_exporter_add_method(exporter, rb_string_value_cstr(&name), NUM2INT(arity));
     return INT2NUM(method_id);
 }
 
@@ -77,11 +77,8 @@ static VALUE exporter_add_property(VALUE self, VALUE name, VALUE notifier_id) {
     qmlbind_exporter exporter = rbqml_get_exporter(self);
 
     const char *nameStr = rb_id2name(rb_sym2id(name));
-    VALUE setter = rb_str_intern(rb_sprintf("%s=", nameStr));
 
-    int property_id = qmlbind_exporter_add_property(exporter,
-                                                    (qmlbind_backref)name, (qmlbind_backref)setter,
-                                                    nameStr, NUM2INT(notifier_id));
+    int property_id = qmlbind_exporter_add_property(exporter, nameStr, NUM2INT(notifier_id));
 
     VALUE notifierName = rb_sprintf("%s_changed", nameStr);
     const char *notifierArg = "";

@@ -71,5 +71,10 @@ describe QML::JSObject do
         expect(obj.add(1, 2)).to eq 3
       end
     end
+    context 'for non-existing key' do
+      it 'fails with NoMethodError' do
+        expect { obj.hoge }.to raise_error(NoMethodError)
+      end
+    end
   end
 end

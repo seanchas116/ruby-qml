@@ -13,6 +13,10 @@ module QML
     end
 
     def method_missing(method, *args)
+      unless has_key?(method)
+        fail NoMethodError, "property `#{method}` not found in #{self}"
+      end
+
       prop = self[method]
       if prop.is_a? JSFunction
         prop.call(*args)

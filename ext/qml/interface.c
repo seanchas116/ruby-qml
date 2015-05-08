@@ -1,5 +1,6 @@
 #include "engine.h"
 #include "conversion.h"
+#include "signal_emitter.h"
 #include "interface.h"
 
 VALUE rbqml_mInterface;
@@ -13,6 +14,8 @@ qmlbind_interface rbqml_get_interface(void) {
 static qmlbind_backref new_object(qmlbind_backref class_handle, qmlbind_signal_emitter emitter) {
     VALUE klass = (VALUE)class_handle;
     VALUE obj = rb_funcall(klass, rb_intern("new"), 0);
+    VALUE emitterValue = rbqml_signal_emitter_new(emitter);
+    rb_funcall(obj, rb_intern("set_signal_emitter"), 1, emitterValue);
 
     rb_hash_aset(referenced_objects, obj, Qnil);
     return (qmlbind_backref)obj;

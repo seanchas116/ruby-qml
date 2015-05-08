@@ -67,7 +67,7 @@ describe QML::Access do
       describe 'Hoge some_signal signal' do
         it 'can be connected' do
           hoge.unwrap.some_signal.emit('foo')
-          expect(hoge.signalArg).to eq ['foo']
+          expect(hoge.signalArg).to eq 'foo'
         end
       end
     end

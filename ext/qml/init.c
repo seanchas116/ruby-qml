@@ -7,6 +7,7 @@
 #include "js_array.h"
 #include "js_function.h"
 #include "js_wrapper.h"
+#include "signal_emitter.h"
 
 void Init_qml(void)
 {
@@ -21,4 +22,5 @@ void Init_qml(void)
     rbqml_init_js_array();
     rbqml_init_js_function();
     rbqml_init_js_wrapper();
+    rbqml_init_signal_emitter();
 }

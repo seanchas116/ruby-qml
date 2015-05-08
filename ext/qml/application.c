@@ -75,7 +75,7 @@ static void call_callback(qmlbind_backref proc_data) {
  *    end
  *  end
  */
-static VALUE application_next_tick(VALUE self, int argc, VALUE *argv) {
+static VALUE application_next_tick(int argc, VALUE *argv, VALUE self) {
     VALUE block;
     rb_scan_args(argc, argv, "&", &block);
     qmlbind_next_tick(rbqml_get_interface(), &call_callback, (qmlbind_backref)block);

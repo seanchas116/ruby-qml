@@ -52,7 +52,7 @@ static VALUE engine_initialize(VALUE self) {
     return self;
 }
 
-static VALUE engine_evaluate(VALUE self, int argc, VALUE *argv) {
+static VALUE engine_evaluate(int argc, VALUE *argv, VALUE self) {
     qmlbind_engine engine = rbqml_get_engine(self);
 
     VALUE str, file, lineNum;

@@ -1,6 +1,7 @@
 #pragma once
 
 #include <ruby/ruby.h>
+#include <ruby/encoding.h>
 #include <qmlbind.h>
 #include <stdbool.h>
 

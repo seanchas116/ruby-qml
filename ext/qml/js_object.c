@@ -49,7 +49,7 @@ qmlbind_value rbqml_js_object_get(VALUE jsobject)
 {
     js_object_t *obj;
     TypedData_Get_Struct(jsobject, js_object_t, &data_type, obj);
-    return obj->value;
+    return qmlbind_value_clone(obj->value);
 }
 
 VALUE rbqml_js_object_get_engine(VALUE jsobject)

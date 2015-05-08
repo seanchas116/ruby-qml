@@ -17,7 +17,7 @@ VALUE rbqml_to_ruby(qmlbind_value value, VALUE engine)
     }
     if (qmlbind_value_is_string(value)) {
         qmlbind_string str = qmlbind_value_get_string(value);
-        return rb_str_new(qmlbind_string_get_chars(str), qmlbind_string_get_length(str));
+        return rb_enc_str_new(qmlbind_string_get_chars(str), qmlbind_string_get_length(str), rb_utf8_encoding());
     }
 
     VALUE klass;
@@ -53,15 +53,15 @@ qmlbind_value rbqml_to_qml(VALUE value, VALUE engine)
         return qmlbind_value_new_string(RSTRING_LEN(value), RSTRING_PTR(value));
     case T_ARRAY: {
         VALUE array = rb_funcall(engine, rb_intern("new_array"), 1, value);
-        return qmlbind_value_clone(rbqml_js_object_get(array));
+        return rbqml_js_object_get(array);
     }
     case T_HASH: {
         VALUE obj = rb_funcall(engine, rb_intern("new_object"), 1, value);
-        return qmlbind_value_clone(rbqml_js_object_get(obj));
+        return rbqml_js_object_get(obj);
     }
     default:
         if (rbqml_js_object_p(value)) {
-            return qmlbind_value_clone(rbqml_js_object_get(value));
+            return rbqml_js_object_get(value);
         }
         // TODO: support Proc
         // if (RTEST(rb_obj_is_proc(value))) {

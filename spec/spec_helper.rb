@@ -3,7 +3,7 @@ Coveralls.wear!
 
 $LOAD_PATH.unshift File.expand_path('../../lib', __FILE__)
 require 'qml'
-QML.init(offscreen: true)
+$application = QML::Application.new(%w{platform offscreen})
 
 # QML::TestUtil.gc_debug_message_enabled = true
 

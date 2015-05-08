@@ -13,14 +13,4 @@ module QML
   class InvalidThreadError < StandardError; end
   class UninitializedError < StandardError; end
   class AlreadyInitializedError < StandardError; end
-
-  class CppError < StandardError
-    attr_reader :class_name, :raw_message
-
-    def initialize(classname, message)
-      super("<#{classname}> #{message}")
-      @class_name = classname
-      @raw_message = message
-    end
-  end
 end

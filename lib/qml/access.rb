@@ -1,15 +1,11 @@
 require 'ostruct'
 require 'qml/qml'
-require 'qml/dispatchable'
-require 'qml/wrappable'
 
 module QML
 
   # {Access} enables classes to be exposed to QML.
   #
   module Access
-    include Dispatchable
-    include Wrappable
     # @!parse include Reactive::Object
     # @!parse extend ClassMethods
 

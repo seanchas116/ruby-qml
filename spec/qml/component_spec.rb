@@ -2,6 +2,8 @@ require 'spec_helper'
 
 describe QML::Component do
 
+  let(:engine) { QML::Engine.new }
+
   describe '#create' do
 
     context 'with string' do
@@ -13,7 +15,7 @@ describe QML::Component do
           }
         EOS
       end
-      let(:component) { QML::Component.new data: data }
+      let(:component) { QML::Component.new(engine:engine, data: data) }
 
       it 'instantiates a object' do
         expect(component.create.name).to eq 'foo'
@@ -28,7 +30,7 @@ describe QML::Component do
 
     context 'with file path' do
       let(:path) { QML::ROOT_PATH + 'spec/assets/testobj.qml' }
-      let(:component) { QML::Component.new path: path }
+      let(:component) { QML::Component.new(engine: engine, path: path) }
 
       it 'instantiates a object' do
         expect(component.create.name).to eq 'foo'
@@ -44,8 +46,8 @@ describe QML::Component do
 
   describe '#initialize' do
     context 'when neither string nor path specified' do
-      it 'fails with QMLError' do
-        expect { QML::Component.new({}) }.to raise_error(QML::QMLError)
+      it 'fails with TypeError' do
+        expect { QML::Component.new(engine: engine) }.to raise_error(TypeError)
       end
     end
   end

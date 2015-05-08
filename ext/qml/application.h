@@ -4,6 +4,7 @@
 #include <qmlbind.h>
 
 extern VALUE rbqml_cApplication;
-extern VALUE rbqml_application_instance;
+
+qmlbind_application rbqml_get_application(VALUE self);
 
 void rbqml_init_application(void);

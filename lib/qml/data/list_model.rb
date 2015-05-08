@@ -1,6 +1,4 @@
 require 'qml/data/error'
-require 'qml/wrappable'
-require 'qml/dispatchable'
 
 module QML
   module Data
@@ -9,8 +7,6 @@ module QML
     # @see http://qt-project.org/doc/qt-5/qabstractlistmodel.html QAbstractListModel (C++)
     class ListModel
       include ::Enumerable
-      include Wrappable
-      include Dispatchable
 
       # @api private
       # @return [Array<QtObjectBase>]

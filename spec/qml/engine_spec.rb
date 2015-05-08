@@ -1,15 +1,12 @@
 require 'spec_helper'
 
 describe QML::Engine do
-  describe '.new' do
-    it 'fails with QML::EngineError' do
-      expect { QML::Engine.new }.to raise_error(QML::EngineError)
-    end
-  end
+
+  let(:engine) { QML::Engine.new }
 
   describe '#import_paths' do
     it 'returns array' do
-      expect(QML.engine.import_paths()).to be_a(Array)
+      expect(engine.import_paths()).to be_a(Array)
     end
   end
 
@@ -18,8 +15,8 @@ describe QML::Engine do
       let(:path) { (QML::ROOT_PATH + 'spec/assets').to_s }
 
       it 'adds QML import path' do
-        QML.engine.add_import_path(path)
-        paths = QML.engine.import_paths()
+        engine.add_import_path(path)
+        paths = engine.import_paths()
         expect(paths[0]).to eq path
       end
 
@@ -30,19 +27,11 @@ describe QML::Engine do
           Test {}
         EOS
       end
-      let(:component) { QML::Component.new data: data }
+      let(:component) { QML::Component.new(engine: engine, data: data) }
 
       it 'loads a module' do
         expect(component.create.name).to eq 'poyo'
       end
-    end
-  end
-end
-
-describe QML do
-  describe '.engine' do
-    it 'returns the instance of QML::Engine' do
-      expect(QML.engine).to be_a(QML::Engine)
     end
   end
 end

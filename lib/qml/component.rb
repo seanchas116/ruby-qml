@@ -1,57 +1,66 @@
 require 'qml/engine'
 
 module QML
-  # @!parse class Component < QtObjectBase; end
-
   # The Component class is used to instantiate objects like Window / ApplicationWindow objects from QML files.
   #
   # You usually do not need to use this class because Application#load, #load_path, #load_data do same
   # for the application top-level objects such as main windows.
   # @example
-  #   component = Component.new(path: path_to_qml_file)
+  #   component = Component.new(engine: engine, path: path_to_qml_file)
   #   root_object = component.create
   # @see http://qt-project.org/doc/qt-5/qqmlcomponent.html QQmlComponent (C++)
   class Component
-    attr_reader :data, :path, :context
+    attr_reader :data, :path
 
     # Creates an component. Either data or path must be specified.
-    # @param opts [Hash]
-    # @option opts [QML::Context] :context the context that the created objects will depend on (default to the root context of the application engine).
-    # @option opts [String] :data the QML file data.
-    # @option opts [#to_s] :path the QML file path.
+    # @param [QML::Engine] engine
+    # @param [String] data the QML file data.
+    # @param [#to_s] path the QML file path.
     # @return QML::Component
-    def self.new(opts)
-      context = opts[:context]
-      data = opts[:data]
-      path = opts[:path]
-      context ||= Engine.instance.context
-      Plugins.core.createComponent(Engine.instance).instance_eval do
-        @data = data
-        @path = path
-        @context = context
+    def initialize(engine: nil, data: nil, path: nil)
+      fail TypeError, "engine not provided" unless engine
+      fail TypeError, "engine is not a #{Engine}" unless engine.is_a? Engine
+      fail TypeError, "neither data nor path privided" unless data || path
 
-        if data
-          @extension.loadString(data, (path && path.to_s) || '')
-        elsif path
-          @extension.loadFile(path.to_s)
-        else
-          fail QMLError, 'neither data nor path specified'
-        end
+      initialize_impl(engine)
 
-        self
+      case
+      when data
+        load_data(data)
+      when path
+        load_path(path)
       end
     end
 
-    def initialize
-      super()
-      Access.register_classes
-      @extension = Plugins.core.createComponentExtension(self)
+    def load_path(path)
+      path = path.to_s
+      check_error_string do
+        @path = Pathname.new(path)
+        load_path_impl(path)
+      end
+      self
+    end
+
+    def load_data(data)
+      check_error_string do
+        @data = data
+        load_data_impl(data, "<<STRING>>")
+      end
+      self
     end
 
     # Instantiates a object from the QML file.
     # @return [QtObjectBase] The created Qt object
     def create
-      @extension.create(@context)
+      check_error_string do
+        create_impl
+      end
+    end
+
+    def check_error_string
+      yield.tap do
+        fail QMLError, error_string if error_string
+      end
     end
   end
 end

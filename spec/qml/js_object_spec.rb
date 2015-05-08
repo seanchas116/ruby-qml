@@ -54,8 +54,8 @@ describe QML::JSObject do
       <<-JS
         ({
           one: 1,
-          add: function(a, b) {
-            return a + b;
+          addOne: function(x) {
+            return x + this.one;
           }
         })
       JS
@@ -67,8 +67,8 @@ describe QML::JSObject do
       end
     end
     context 'for function' do
-      it 'call it' do
-        expect(obj.add(1, 2)).to eq 3
+      it 'call it as method' do
+        expect(obj.addOne(2)).to eq 3
       end
     end
     context 'for non-existing key' do

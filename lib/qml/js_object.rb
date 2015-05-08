@@ -19,7 +19,7 @@ module QML
 
       prop = self[method]
       if prop.is_a? JSFunction
-        prop.call(*args)
+        prop.call_with_instance(self, *args)
       else
         prop
       end

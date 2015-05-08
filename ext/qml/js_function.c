@@ -27,6 +27,7 @@ static VALUE function_call(VALUE self, VALUE thisValue, VALUE args) {
     bool is_error = qmlbind_value_is_error(result);
     VALUE resultValue = rbqml_to_ruby(result, engine);
     qmlbind_value_release(result);
+    qmlbind_value_release(func);
 
     if (is_error) {
         rb_exc_raise(rb_funcall(resultValue, rb_intern("to_error"), 0));

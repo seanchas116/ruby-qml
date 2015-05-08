@@ -7,7 +7,11 @@ module QML
     def values
       each.map { |k, v| v }
     end
-    
+
+    def to_error
+      QMLError.new(self['message'])
+    end
+
     alias_method :respond_to?, :has_key?
 
     def method_missing(method, *args)

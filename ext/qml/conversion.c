@@ -2,6 +2,7 @@
 #include "js_object.h"
 #include "js_array.h"
 #include "js_function.h"
+#include "js_wrapper.h"
 
 VALUE rbqml_to_ruby(qmlbind_value value, VALUE engine)
 {
@@ -24,11 +25,11 @@ VALUE rbqml_to_ruby(qmlbind_value value, VALUE engine)
 
     if (qmlbind_value_is_array(value)) {
         klass = rbqml_cJSArray;
-    }
-    else if (qmlbind_value_is_function(value)) {
+    } else if (qmlbind_value_is_function(value)) {
         klass = rbqml_cJSFunction;
-    }
-    else {
+    } else if (qmlbind_value_is_wrapper(value)) {
+        klass = rbqml_cJSWrapper;
+    } else {
         klass = rbqml_cJSObject;
     }
 

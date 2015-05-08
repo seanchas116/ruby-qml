@@ -47,44 +47,28 @@ static VALUE exporter_initialize(VALUE self, VALUE klass, VALUE name) {
 
 static VALUE exporter_add_method(VALUE self, VALUE name, VALUE arity) {
     qmlbind_exporter exporter = rbqml_get_exporter(self);
-
-    int method_id = qmlbind_exporter_add_method(exporter, rb_string_value_cstr(&name), NUM2INT(arity));
-    return INT2NUM(method_id);
+    qmlbind_exporter_add_method(exporter, rb_id2name(rb_sym2id(name)), NUM2INT(arity));
+    return Qnil;
 }
 
 static VALUE exporter_add_signal(VALUE self, VALUE name, VALUE params) {
     qmlbind_exporter exporter = rbqml_get_exporter(self);
 
-    if (rb_type(params) != T_ARRAY) {
-        rb_raise(rb_eTypeError, "args is not an Array");
-    }
-
     int arity = RARRAY_LEN(params);
 
     const char **paramStrs = alloca(arity * sizeof(char *));
-    VALUE *paramValues = alloca(arity * sizeof(VALUE));
-
     for (int i = 0; i < arity; ++i) {
-        paramValues[i] = RARRAY_AREF(params, i);
-        paramStrs[i] = rb_string_value_cstr(paramValues + i);
+        paramStrs[i] =  rb_id2name(rb_sym2id(RARRAY_AREF(params, i)));
     }
 
-    int signal_id = qmlbind_exporter_add_signal(exporter, rb_string_value_cstr(&name), arity, paramStrs);
-    return INT2NUM(signal_id);
+    qmlbind_exporter_add_signal(exporter, rb_id2name(rb_sym2id(name)), arity, paramStrs);
+    return Qnil;
 }
 
-static VALUE exporter_add_property(VALUE self, VALUE name, VALUE notifier_id) {
+static VALUE exporter_add_property(VALUE self, VALUE name, VALUE notifier) {
     qmlbind_exporter exporter = rbqml_get_exporter(self);
-
-    const char *nameStr = rb_id2name(rb_sym2id(name));
-
-    int property_id = qmlbind_exporter_add_property(exporter, nameStr, NUM2INT(notifier_id));
-
-    VALUE notifierName = rb_sprintf("%s_changed", nameStr);
-    const char *notifierArg = "";
-    qmlbind_exporter_add_signal(exporter, rb_string_value_cstr(&notifierName), 1, &notifierArg);
-
-    return INT2NUM(property_id);
+    qmlbind_exporter_add_property(exporter, rb_id2name(rb_sym2id(name)), rb_id2name(rb_sym2id(notifier)));
+    return Qnil;
 }
 
 static VALUE exporter_register(VALUE self, VALUE uri, VALUE versionMajor, VALUE versionMinor, VALUE qmlName) {
@@ -108,6 +92,6 @@ void rbqml_init_exporter() {
     rb_define_private_method(rbqml_cExporter, "initialize", &exporter_initialize, 2);
     rb_define_method(rbqml_cExporter, "add_method", &exporter_add_method, 2);
     rb_define_method(rbqml_cExporter, "add_signal", &exporter_add_signal, 2);
-    rb_define_method(rbqml_cExporter, "add_property", &exporter_add_property, 3);
+    rb_define_method(rbqml_cExporter, "add_property", &exporter_add_property, 2);
     rb_define_method(rbqml_cExporter, "register", &exporter_register, 4);
 }

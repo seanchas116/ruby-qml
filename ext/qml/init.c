@@ -6,6 +6,7 @@
 #include "js_object.h"
 #include "js_array.h"
 #include "js_function.h"
+#include "js_wrapper.h"
 
 void Init_qml(void)
 {
@@ -19,4 +20,5 @@ void Init_qml(void)
     rbqml_init_js_object();
     rbqml_init_js_array();
     rbqml_init_js_function();
+    rbqml_init_js_wrapper();
 }

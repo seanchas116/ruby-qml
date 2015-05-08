@@ -29,7 +29,7 @@ static qmlbind_value call_method(
     int argc, qmlbind_value *argv) {
 
     VALUE obj = (VALUE)object_backref;
-    VALUE method = rb_intern(name);
+    VALUE method = ID2SYM(rb_intern(name));
 
     VALUE engine_value = rbqml_value_for_engine(engine);
 
@@ -50,7 +50,7 @@ static qmlbind_value get_property(
     qmlbind_backref object_backref, const char *name) {
 
     VALUE obj = (VALUE)object_backref;
-    VALUE method = rb_intern(name);
+    VALUE method = ID2SYM(rb_intern(name));
 
     VALUE engine_value = rbqml_value_for_engine(engine);
 

@@ -7,10 +7,8 @@ module QML
     def values
       each.map { |k, v| v }
     end
-
-    def respond_to?(method)
-      # TODO
-    end
+    
+    alias_method :respond_to?, :has_key?
 
     def method_missing(method, *args)
       unless has_key?(method)

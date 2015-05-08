@@ -1,5 +1,13 @@
 module QML
   class JSObject
+    def keys
+      each.map { |k, v| k }
+    end
+
+    def values
+      each.map { |k, v| v }
+    end
+
     def respond_to?(method)
       # TODO
     end

@@ -5,6 +5,7 @@ require '../../lib/qml/platform'
 # find qmake
 
 qmake = with_config('qmake') || find_executable('qmake')
+debug_enabled = enable_config('debug')
 
 # build libqmlbind
 
@@ -26,6 +27,8 @@ end
 
 $LDFLAGS << " -L#{qmlbind_dir} -lqmlbind"
 $CPPFLAGS << " -I#{qmlbind_dir + 'include'}"
+
+$CPPFLAGS << " -g" if debug_enabled
 
 # create makefile
 

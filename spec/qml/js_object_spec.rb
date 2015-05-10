@@ -29,6 +29,12 @@ describe QML::JSObject do
     end
   end
 
+  describe '#to_hash' do
+    it 'converts it to a Hash' do
+      expect(obj.to_hash).to eq({"one" => 1, "two" => 2})
+    end
+  end
+
   describe '#keys' do
     it 'returns all keys' do
       expect(obj.keys).to eq %w{one two}

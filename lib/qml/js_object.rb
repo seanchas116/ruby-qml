@@ -8,6 +8,14 @@ module QML
       each.map { |k, v| v }
     end
 
+    def to_hash
+      {}.tap do |hash|
+        each do |k, v|
+          hash[k] =v
+        end
+      end
+    end
+
     def to_error
       QMLError.new(self['message'])
     end

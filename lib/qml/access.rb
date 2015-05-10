@@ -119,9 +119,6 @@ module QML
         signals = self.signals.grep(ALLOWED_PATTERN)
         properties = self.properties.grep(ALLOWED_PATTERN)
 
-        puts "signals: #{signals}"
-        puts "properties: #{properties}"
-
         signals.each do |signal|
           exporter.add_signal(signal, signal_infos[signal].params)
         end
@@ -142,9 +139,6 @@ module QML
             exporter.add_method(method, instance_method.arity)
           end
         end
-
-
-        puts "methods: #{methods}"
 
         exporter.register(
           metadata[:under],

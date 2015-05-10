@@ -16,6 +16,12 @@ describe QML::JSArray do
     end
   end
 
+  describe '#to_a' do
+    it 'converts it to an array' do
+      expect(array.to_a).to eq [1,2,3]
+    end
+  end
+
   describe '#length' do
     it 'returns length' do
       expect(array.length).to eq 3

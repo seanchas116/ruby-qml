@@ -1,4 +1,28 @@
 
+class Numeric
+  def to_qml
+    self
+  end
+end
+
+class String
+  def to_qml
+    self
+  end
+end
+
+class TrueClass
+  def to_qml
+    self
+  end
+end
+
+class FalseClass
+  def to_qml
+    self
+  end
+end
+
 class Array
   def to_qml
     QML.engine.new_array(self.size).tap do |jsarray|

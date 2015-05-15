@@ -1,5 +1,6 @@
 module QML
   class JSObject
+
     def keys
       each.map { |k, v| k }
     end

@@ -5,22 +5,30 @@ describe QML::Access do
   let(:component) { QML::Component.new data: data }
   let(:root) { component.create }
 
+  class Hoge
+    include QML::Access
+
+    property :text
+    signal :some_signal, [:arg]
+
+    def some_method(a, b)
+      a + b
+    end
+
+    register_to_qml under: 'HogeNS', version: '1.2', name: 'Hoge'
+  end
+
+  describe 'property' do
+    it 'is converted to JS objects through #to_qml' do
+      hoge = Hoge.new
+      hoge.text = {foo: "bar"}
+      expect(hoge.text).to be_a(QML::JSObject)
+    end
+  end
+
   describe '.register_to_qml' do
 
     context 'when namespace, version, name are given' do
-
-      class Hoge
-        include QML::Access
-
-        property :text
-        signal :some_signal, [:arg]
-
-        def some_method(a, b)
-          a + b
-        end
-
-        register_to_qml under: 'HogeNS', version: '1.2', name: 'Hoge'
-      end
 
       let(:data) do
         <<-EOS

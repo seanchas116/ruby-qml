@@ -49,6 +49,8 @@ qmlbind_value rbqml_to_qml(VALUE value)
     case T_FIXNUM:
     case T_BIGNUM:
         return qmlbind_value_new_number(NUM2LL(value));
+    case T_RATIONAL:
+        return qmlbind_value_new_number(rb_float_value(rb_funcall(value, rb_intern("to_f"), 0)));
     case T_FLOAT:
         return qmlbind_value_new_number(rb_float_value(value));
     case T_STRING:

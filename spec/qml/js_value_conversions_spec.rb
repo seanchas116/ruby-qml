@@ -7,6 +7,7 @@ describe 'JS value conversions' do
   primitives = {
     integer: 10,
     float: 1.5,
+    rational: 5/2r,
     true: true,
     false: false,
     string: 'ほげ'

@@ -34,18 +34,16 @@ static qmlbind_value call_method(
     VALUE obj = (VALUE)object_backref;
     VALUE method = ID2SYM(rb_intern(name));
 
-    VALUE engine_value = rbqml_value_for_engine(engine);
-
     VALUE *args = alloca(argc * sizeof(VALUE));
     for (int i = 0; i < argc; ++i) {
-        args[i] = rbqml_to_ruby(argv[i], engine_value);
+        args[i] = rbqml_to_ruby(argv[i]);
     }
 
     VALUE result = rb_funcall(rbqml_mInterface, rb_intern("call_method"), 3,
                               obj, method,
                               rb_ary_new_from_values(argc, args));
 
-    return rbqml_to_qml(result, engine_value);
+    return rbqml_to_qml(result);
 }
 
 static qmlbind_value get_property(
@@ -55,12 +53,10 @@ static qmlbind_value get_property(
     VALUE obj = (VALUE)object_backref;
     VALUE method = ID2SYM(rb_intern(name));
 
-    VALUE engine_value = rbqml_value_for_engine(engine);
-
     VALUE result = rb_funcall(rbqml_mInterface, rb_intern("call_method"), 3,
                               obj, method, rb_ary_new());
 
-    return rbqml_to_qml(result, engine_value);
+    return rbqml_to_qml(result);
 }
 
 static void set_property(
@@ -70,9 +66,7 @@ static void set_property(
     VALUE obj = (VALUE)object_backref;
     VALUE method = rb_str_intern(rb_sprintf("%s=", name));
 
-    VALUE engine_value = rbqml_value_for_engine(engine);
-
-    VALUE ruby_value = rbqml_to_ruby(value, engine_value);
+    VALUE ruby_value = rbqml_to_ruby(value);
 
     rb_funcall(rbqml_mInterface, rb_intern("call_method"), 3,
                obj, method, rb_ary_new_from_args(1, ruby_value));

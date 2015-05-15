@@ -2,7 +2,6 @@ require 'spec_helper'
 
 describe QML::JSArray do
 
-  let(:engine) { QML::Engine.new }
   let(:array_script) do
     <<-JS
       [1, 2, 3]

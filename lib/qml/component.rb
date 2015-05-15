@@ -17,12 +17,10 @@ module QML
     # @param [String] data the QML file data.
     # @param [#to_s] path the QML file path.
     # @return QML::Component
-    def initialize(engine: nil, data: nil, path: nil)
-      fail TypeError, "engine not provided" unless engine
-      fail TypeError, "engine is not a #{Engine}" unless engine.is_a? Engine
+    def initialize(data: nil, path: nil)
       fail TypeError, "neither data nor path privided" unless data || path
 
-      initialize_impl(engine)
+      initialize_impl
 
       case
       when data

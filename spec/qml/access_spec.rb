@@ -2,8 +2,7 @@ require 'spec_helper'
 
 describe QML::Access do
 
-  let(:engine) { QML::Engine.new }
-  let(:component) { QML::Component.new engine: engine, data: data }
+  let(:component) { QML::Component.new data: data }
   let(:root) { component.create }
 
   describe '.register_to_qml' do

@@ -2,8 +2,7 @@ require 'spec_helper'
 
 describe 'JS value conversions' do
 
-  let(:engine) { QML::Engine.new }
-  let(:through) { engine.evaluate("(function(x) { return x; })") }
+  let(:through) { QML.engine.evaluate("(function(x) { return x; })") }
 
   primitives = {
     integer: 10,

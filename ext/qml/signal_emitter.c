@@ -32,14 +32,12 @@ static VALUE emitter_alloc(VALUE klass) {
 static VALUE emitter_emit(VALUE self, VALUE name, VALUE args) {
     emitter_t *data;
     TypedData_Get_Struct(self, emitter_t, &data_type, data);
-    qmlbind_signal_emitter emitter = data->emitter;
-    qmlbind_engine engine = qmlbind_signal_emitter_get_engine(emitter);
 
     int argc = RARRAY_LEN(args);
     qmlbind_value *qmlArgs = malloc(argc * sizeof(qmlbind_value));
 
     for (int i = 0; i < argc; ++i) {
-        qmlbind_value value = rbqml_to_qml(RARRAY_AREF(args, i), rbqml_value_for_engine(engine));
+        qmlbind_value value = rbqml_to_qml(RARRAY_AREF(args, i));
         qmlArgs[i] = value;
     }
 

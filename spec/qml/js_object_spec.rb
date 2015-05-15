@@ -2,13 +2,12 @@ require 'spec_helper'
 
 describe QML::JSObject do
 
-  let(:engine) { QML::Engine.new }
   let(:obj_script) do
     <<-JS
       ({one: 1, two: 2})
     JS
   end
-  let(:obj) { engine.evaluate(obj_script) }
+  let(:obj) { QML.engine.evaluate(obj_script) }
 
   describe '#[]' do
     it 'get property' do

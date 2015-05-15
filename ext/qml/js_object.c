@@ -4,16 +4,9 @@
 
 typedef struct {
     qmlbind_value value;
-    VALUE engine;
 } js_object_t;
 
 VALUE rbqml_cJSObject;
-
-void mark_js_object(void *ptr)
-{
-    js_object_t *obj = ptr;
-    rb_gc_mark(obj->engine);
-}
 
 void free_js_object(void *ptr)
 {
@@ -29,14 +22,13 @@ static const rb_data_type_t data_type = {
 
 static VALUE js_object_alloc(VALUE klass)
 {
-    return rbqml_js_object_new(klass, qmlbind_value_new_null(), Qnil);
+    return rbqml_js_object_new(klass, qmlbind_value_new_null());
 }
 
-VALUE rbqml_js_object_new(VALUE klass, qmlbind_value value, VALUE engine)
+VALUE rbqml_js_object_new(VALUE klass, qmlbind_value value)
 {
     js_object_t *obj = ALLOC(js_object_t);
     obj->value = qmlbind_value_clone(value);
-    obj->engine = engine;
     return TypedData_Wrap_Struct(klass, &data_type, obj);
 }
 
@@ -50,13 +42,6 @@ qmlbind_value rbqml_js_object_get(VALUE jsobject)
     js_object_t *obj;
     TypedData_Get_Struct(jsobject, js_object_t, &data_type, obj);
     return qmlbind_value_clone(obj->value);
-}
-
-VALUE rbqml_js_object_get_engine(VALUE jsobject)
-{
-    js_object_t *obj;
-    TypedData_Get_Struct(jsobject, js_object_t, &data_type, obj);
-    return obj->engine;
 }
 
 static void get_property_key(VALUE key, int *index, const char **keyStr)
@@ -101,9 +86,8 @@ static VALUE js_object_aref(VALUE self, VALUE key)
 static VALUE js_object_aset(VALUE self, VALUE key, VALUE value)
 {
     qmlbind_value obj = rbqml_js_object_get(self);
-    VALUE engine = rbqml_js_object_get_engine(self);
 
-    qmlbind_value qmlValue = rbqml_to_qml(value, engine);
+    qmlbind_value qmlValue = rbqml_to_qml(value);
 
     int index = -1;
     const char *keyStr;

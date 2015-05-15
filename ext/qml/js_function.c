@@ -6,13 +6,12 @@ VALUE rbqml_cJSFunction;
 
 static VALUE function_call(VALUE self, VALUE thisValue, VALUE args) {
     qmlbind_value func = rbqml_js_object_get(self);
-    VALUE engine = rbqml_js_object_get_engine(self);
 
     int argc = RARRAY_LEN(args);
     qmlbind_value *qmlArgs = malloc(argc * sizeof(qmlbind_value));
 
     for (int i = 0; i < argc; ++i) {
-        qmlbind_value value = rbqml_to_qml(RARRAY_AREF(args, i) , engine);
+        qmlbind_value value = rbqml_to_qml(RARRAY_AREF(args, i));
         qmlArgs[i] = value;
     }
 
@@ -25,7 +24,7 @@ static VALUE function_call(VALUE self, VALUE thisValue, VALUE args) {
         qmlbind_value_release(qmlThis);
     }
     bool is_error = qmlbind_value_is_error(result);
-    VALUE resultValue = rbqml_to_ruby(result, engine);
+    VALUE resultValue = rbqml_to_ruby(result);
     qmlbind_value_release(result);
     qmlbind_value_release(func);
 

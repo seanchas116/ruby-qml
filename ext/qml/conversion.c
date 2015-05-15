@@ -1,10 +1,11 @@
+#include "qml.h"
 #include "conversion.h"
 #include "js_object.h"
 #include "js_array.h"
 #include "js_function.h"
 #include "js_wrapper.h"
 
-VALUE rbqml_to_ruby(qmlbind_value value, VALUE engine)
+VALUE rbqml_to_ruby(qmlbind_value value)
 {
     if (qmlbind_value_is_undefined(value) || qmlbind_value_is_null(value)) {
         return Qnil;
@@ -33,10 +34,10 @@ VALUE rbqml_to_ruby(qmlbind_value value, VALUE engine)
         klass = rbqml_cJSObject;
     }
 
-    return rbqml_js_object_new(klass, value, engine);
+    return rbqml_js_object_new(klass, value);
 }
 
-qmlbind_value rbqml_to_qml(VALUE value, VALUE engine)
+qmlbind_value rbqml_to_qml(VALUE value)
 {
     switch (rb_type(value)) {
     case T_NIL:
@@ -53,11 +54,11 @@ qmlbind_value rbqml_to_qml(VALUE value, VALUE engine)
     case T_STRING:
         return qmlbind_value_new_string(RSTRING_LEN(value), RSTRING_PTR(value));
     case T_ARRAY: {
-        VALUE array = rb_funcall(engine, rb_intern("new_array"), 1, value);
+        VALUE array = rb_funcall(rbqml_engine, rb_intern("new_array"), 1, value);
         return rbqml_js_object_get(array);
     }
     case T_HASH: {
-        VALUE obj = rb_funcall(engine, rb_intern("new_object"), 1, value);
+        VALUE obj = rb_funcall(rbqml_engine, rb_intern("new_object"), 1, value);
         return rbqml_js_object_get(obj);
     }
     default:

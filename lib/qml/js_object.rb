@@ -17,6 +17,10 @@ module QML
       end
     end
 
+    def to_time
+      Time.at(getTime.to_i / 1000r).getlocal(-getTimezoneOffset * 60)
+    end
+
     def to_error
       QMLError.new(self['message'])
     end

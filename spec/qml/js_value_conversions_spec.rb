@@ -39,4 +39,14 @@ describe 'JS value conversions' do
       expect(jsarray.each.to_a).to eq array
     end
   end
+
+  describe 'Time#to_qml' do
+    it 'converts time to JS Date' do
+      time = Time.now
+      # millisecond precision
+      time -= (time.nsec % 1000000) / 1000000000r
+      jsarray = through.call(time.to_qml)
+      expect(jsarray.to_time).to eq time
+    end
+  end
 end

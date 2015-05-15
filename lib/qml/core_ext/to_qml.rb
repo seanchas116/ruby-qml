@@ -42,3 +42,11 @@ class Hash
     end
   end
 end
+
+class Time
+  def to_qml
+    QML::JSUtil.classes['Date'].new(year, month, day, hour, min, sec, nsec / 1000000).tap do |date|
+      date.setTime((to_r * 1000).floor)
+    end
+  end
+end

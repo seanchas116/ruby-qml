@@ -7,7 +7,7 @@ describe QML::JSArray do
       [1, 2, 3]
     JS
   end
-  let(:array) { engine.evaluate(array_script) }
+  let(:array) { QML.engine.evaluate(array_script) }
 
   describe '#each' do
     it 'enumerates each values' do

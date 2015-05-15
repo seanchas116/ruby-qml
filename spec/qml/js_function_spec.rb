@@ -1,6 +1,6 @@
 require 'spec_helper'
 
-describe QML::JSArray do
+describe QML::JSFunction do
 
   let(:function_script) do
     <<-JS
@@ -9,7 +9,7 @@ describe QML::JSArray do
       });
     JS
   end
-  let(:function) { engine.evaluate(function_script) }
+  let(:function) { QML.engine.evaluate(function_script) }
 
   describe '#call' do
     it 'calls function' do

@@ -11,11 +11,5 @@ module QML
       fail 'TODO'
     end
 
-    # Adds a QML import path to the {Engine}.
-    # @param path [String]
-    # @see http://doc.qt.io/qt-5/qtqml-syntax-imports.html#qml-import-path
-    def add_import_path(path)
-      fail 'TODO'
-    end
   end
 end

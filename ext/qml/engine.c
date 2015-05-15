@@ -42,6 +42,18 @@ static VALUE engine_initialize(VALUE self) {
     return self;
 }
 
+/*
+ * Adds a QML import path to the {Engine}.
+ * @param path [String]
+ * @see http://doc.qt.io/qt-5/qtqml-syntax-imports.html#qml-import-path
+ */
+static VALUE engine_add_import_path(VALUE self, VALUE path) {
+    qmlbind_engine engine = rbqml_get_engine(self);
+    path = rb_funcall(path, rb_intern("to_s"), 0);
+    qmlbind_engine_add_import_path(engine, rb_string_value_cstr(&path));
+    return self;
+}
+
 static VALUE engine_evaluate(int argc, VALUE *argv, VALUE self) {
     qmlbind_engine engine = rbqml_get_engine(self);
 
@@ -96,6 +108,7 @@ void rbqml_init_engine() {
     rb_define_alloc_func(rbqml_cEngine, &engine_alloc);
 
     rb_define_private_method(rbqml_cEngine, "initialize", &engine_initialize, 0);
+    rb_define_method(rbqml_cEngine, "add_import_path", &engine_add_import_path, 1);
     rb_define_method(rbqml_cEngine, "evaluate", &engine_evaluate, -1);
     rb_define_method(rbqml_cEngine, "new_array", &engine_new_array, 1);
     rb_define_method(rbqml_cEngine, "new_object", &engine_new_object, 0);

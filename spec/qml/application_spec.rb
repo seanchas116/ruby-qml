@@ -39,4 +39,15 @@ describe QML do
       expect(QML.application).to be_a(QML::Application)
     end
   end
+
+  describe '.next_tick' do
+    it 'do a task later in event loop' do
+      finished = false
+      QML.next_tick do
+        finished = true
+      end
+      QML.application.process_events
+      expect(finished).to eq true
+    end
+  end
 end

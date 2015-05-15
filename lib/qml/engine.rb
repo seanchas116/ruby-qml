@@ -17,21 +17,5 @@ module QML
     def add_import_path(path)
       fail 'TODO'
     end
-
-    def new_array(array)
-      build_array(array.size).tap do |jsarray|
-        array.each_with_index do |x, i|
-          jsarray[i] = x
-        end
-      end
-    end
-
-    def new_object(hash)
-      build_object.tap do |jsobj|
-        hash.each do |key, value|
-          jsobj[key] = value
-        end
-      end
-    end
   end
 end

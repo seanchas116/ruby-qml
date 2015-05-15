@@ -44,5 +44,9 @@ module QML
         end
       end
     end
+
+    def to_qml
+      self
+    end
   end
 end

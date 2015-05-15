@@ -68,7 +68,7 @@ static VALUE engine_evaluate(int argc, VALUE *argv, VALUE self) {
     return result;
 }
 
-static VALUE engine_build_array(VALUE self, VALUE len) {
+static VALUE engine_new_array(VALUE self, VALUE len) {
     qmlbind_engine engine = rbqml_get_engine(self);
 
     qmlbind_value array = qmlbind_engine_new_array(engine, NUM2INT(len));
@@ -78,7 +78,7 @@ static VALUE engine_build_array(VALUE self, VALUE len) {
     return value;
 }
 
-static VALUE engine_build_object(VALUE self) {
+static VALUE engine_new_object(VALUE self) {
     qmlbind_engine engine = rbqml_get_engine(self);
 
     qmlbind_value obj = qmlbind_engine_new_object(engine);
@@ -97,6 +97,6 @@ void rbqml_init_engine() {
 
     rb_define_private_method(rbqml_cEngine, "initialize", &engine_initialize, 0);
     rb_define_method(rbqml_cEngine, "evaluate", &engine_evaluate, -1);
-    rb_define_private_method(rbqml_cEngine, "build_array", &engine_build_array, 1);
-    rb_define_private_method(rbqml_cEngine, "build_object", &engine_build_object, 0);
+    rb_define_method(rbqml_cEngine, "new_array", &engine_new_array, 1);
+    rb_define_method(rbqml_cEngine, "new_object", &engine_new_object, 0);
 }

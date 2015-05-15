@@ -2,6 +2,7 @@ require 'qml/version'
 require 'qml/errors'
 require 'qml/qml'
 
+require 'qml/core_ext'
 require 'qml/reactive'
 
 require 'qml/plugin_loader'

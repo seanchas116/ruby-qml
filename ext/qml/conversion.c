@@ -53,24 +53,9 @@ qmlbind_value rbqml_to_qml(VALUE value)
         return qmlbind_value_new_number(rb_float_value(value));
     case T_STRING:
         return qmlbind_value_new_string(RSTRING_LEN(value), RSTRING_PTR(value));
-    case T_ARRAY: {
-        VALUE array = rb_funcall(rbqml_engine, rb_intern("new_array"), 1, value);
-        return rbqml_js_object_get(array);
-    }
-    case T_HASH: {
-        VALUE obj = rb_funcall(rbqml_engine, rb_intern("new_object"), 1, value);
-        return rbqml_js_object_get(obj);
-    }
     default:
-        if (rbqml_js_object_p(value)) {
-            return rbqml_js_object_get(value);
-        }
-        // TODO: support Proc
-        // if (RTEST(rb_obj_is_proc(value))) {
-        // }
         break;
     }
 
-    rb_raise(rb_eTypeError, "Cannot convert %s to QML value", rb_class2name(rb_obj_class(value)));
-    return qmlbind_value_new_undefined();
+    return rbqml_js_object_get(value);
 }

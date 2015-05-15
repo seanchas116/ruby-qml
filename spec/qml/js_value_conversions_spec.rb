@@ -20,10 +20,10 @@ describe 'JS value conversions' do
     end
   end
 
-  describe 'hash' do
-    it 'is converted to JS objects' do
+  describe 'Hash#to_qml' do
+    it 'converts hash to JS object' do
       hash = {a: 1, b: 2}
-      obj = through.call(hash);
+      obj = through.call(hash.to_qml);
       expect(obj).to be_a QML::JSObject
       hash.each do |k, v|
         expect(obj[k]).to eq v
@@ -31,10 +31,10 @@ describe 'JS value conversions' do
     end
   end
 
-  describe 'array' do
-    it 'is converted to JS arrays' do
+  describe 'Array#to_qml' do
+    it 'converts array to JS array' do
       array = [1,2,3]
-      jsarray = through.call(array)
+      jsarray = through.call(array.to_qml)
       expect(jsarray).to be_a QML::JSArray
       expect(jsarray.each.to_a).to eq array
     end

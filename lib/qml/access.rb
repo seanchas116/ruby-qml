@@ -38,7 +38,7 @@ module QML
 
     module ClassMethods
 
-      def signal(name, params)
+      def signal(name, params = [])
         name = name.to_sym
         signal_infos(false)[name] = SignalInfo.new.tap do |info|
           info.params = params.map(&:to_sym)

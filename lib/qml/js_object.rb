@@ -25,7 +25,9 @@ module QML
       QMLError.new(self['message'])
     end
 
-    alias_method :respond_to?, :has_key?
+    def respond_to?(method)
+      has_key?(method) || super
+    end
 
     def method_missing(method, *args)
       if /=$/ =~ method

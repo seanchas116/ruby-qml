@@ -54,9 +54,10 @@ describe QML::JSObject do
   end
 
   describe '#respond_to?' do
-    it 'returns whether it has the key' do
-      expect(obj.has_key?(:one)).to eq true
-      expect(obj.has_key?(:hoge)).to eq false
+    it 'returns whether it has the key method' do
+      expect(obj.respond_to?(:one)).to eq true
+      expect(obj.respond_to?(:hoge)).to eq false
+      expect(obj.respond_to?(:respond_to?)).to eq true
     end
   end
 

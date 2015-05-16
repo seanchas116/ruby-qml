@@ -20,20 +20,15 @@ module QML
     # @param [Array<#to_sym>, nil] params the parameter names (the signal will be variadic if nil).
     def initialize(params)
       @listeners = []
-      if params
-        @params = params.map(&:to_sym)
-        @arity = params.size
-      else
-        @params = nil
-        @arity = -1
-      end
+      @params = params.map(&:to_sym)
+      @arity = params.size
     end
 
     # Calls every connected procedure with given arguments.
     # Raises an ArgumentError when the arity is wrong.
     # @param args the arguments.
     def emit(*args)
-      if @arity >= 0 && args.size != @arity
+      if args.size != @arity
         fail ::ArgumentError ,"wrong number of arguments for signal (#{args.size} for #{@arity})"
       end
       @listeners.each do |listener|

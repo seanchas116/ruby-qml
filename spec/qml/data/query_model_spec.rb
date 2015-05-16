@@ -1,9 +1,9 @@
 require 'spec_helper'
 
-describe QML::Data::QueryModel do
+describe QML::QueryModel do
 
   let(:klass) do
-    Class.new(QML::Data::QueryModel) do
+    Class.new(QML::QueryModel) do
       attr_accessor :data
 
       def initialize(count)
@@ -45,13 +45,13 @@ describe QML::Data::QueryModel do
 
   describe '#query_count' do
     it 'fails with NotImplementedError by default' do
-      expect { QML::Data::QueryModel.allocate.query_count }.to raise_error(NotImplementedError)
+      expect { QML::QueryModel.allocate.query_count }.to raise_error(NotImplementedError)
     end
   end
 
   describe '#query' do
     it 'fails with NotImplementedError by default' do
-      expect { QML::Data::QueryModel.allocate.query(0, 100) }.to raise_error(NotImplementedError)
+      expect { QML::QueryModel.allocate.query(0, 100) }.to raise_error(NotImplementedError)
     end
   end
 

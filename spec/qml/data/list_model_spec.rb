@@ -1,7 +1,7 @@
 require 'spec_helper'
 
-describe QML::Data::ListModel do
-  let(:model) { QML::Data::ListModel.allocate }
+describe QML::ListModel do
+  let(:model) { QML::ListModel.allocate }
 
   describe '#count' do
     it 'fails with NotImplementedError by default' do

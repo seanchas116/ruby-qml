@@ -1,8 +1,8 @@
 require 'spec_helper'
 
-describe QML::Data::ArrayModel do
+describe QML::ArrayModel do
 
-  class TestArrayModel < QML::Data::ArrayModel
+  class TestArrayModel < QML::ArrayModel
     def initialize
       super(:title, :number)
     end

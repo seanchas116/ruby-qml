@@ -67,7 +67,7 @@ static VALUE engine_evaluate(int argc, VALUE *argv, VALUE self) {
 
     if (qmlbind_value_is_error(value)) {
         qmlbind_string error = qmlbind_value_get_string(value);
-        VALUE errorStr = rb_str_new(qmlbind_string_get_chars(error), qmlbind_string_get_length(error));
+        VALUE errorStr = rb_enc_str_new(qmlbind_string_get_chars(error), qmlbind_string_get_length(error), rb_utf8_encoding());
         qmlbind_string_release(error);
 
         qmlbind_value_release(value);

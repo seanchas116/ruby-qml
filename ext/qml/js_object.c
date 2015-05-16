@@ -115,7 +115,7 @@ static VALUE js_object_each_iterator(VALUE data)
         VALUE rubyValue = rb_ensure(&rbqml_to_ruby, (VALUE)value, (VALUE (*)())&qmlbind_value_release, (VALUE)value);
 
         qmlbind_string str = qmlbind_iterator_get_key(it);
-        VALUE rubyKey = rb_str_new(qmlbind_string_get_chars(str), qmlbind_string_get_length(str));
+        VALUE rubyKey = rb_enc_str_new(qmlbind_string_get_chars(str), qmlbind_string_get_length(str), rb_utf8_encoding());
         qmlbind_string_release(str);
 
         VALUE pair[] = { rubyKey, rubyValue };

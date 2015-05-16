@@ -58,7 +58,7 @@ static VALUE component_error_string(VALUE self) {
     qmlbind_component component = rbqml_get_component(self);
     qmlbind_string error = qmlbind_component_get_error_string(component);
     if (error) {
-        VALUE str = rb_str_new(qmlbind_string_get_chars(error), qmlbind_string_get_length(error));
+        VALUE str = rb_enc_str_new(qmlbind_string_get_chars(error), qmlbind_string_get_length(error), rb_utf8_encoding());
         qmlbind_string_release(error);
         return str;
     } else {

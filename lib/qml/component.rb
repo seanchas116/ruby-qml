@@ -13,7 +13,6 @@ module QML
     attr_reader :data, :path
 
     # Creates an component. Either data or path must be specified.
-    # @param [QML::Engine] engine
     # @param [String] data the QML file data.
     # @param [#to_s] path the QML file path.
     # @return QML::Component

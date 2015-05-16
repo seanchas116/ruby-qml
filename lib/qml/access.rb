@@ -1,17 +1,19 @@
 module QML
 
-  class PropertyInfo
-    attr_accessor :initializer
-  end
-
-  class SignalInfo
-    attr_accessor :params
-  end
-
   # {Access} enables classes to be exposed to QML.
   #
   module Access
     # @!parse extend ClassMethods
+
+    # @api private
+    class PropertyInfo
+      attr_accessor :initializer
+    end
+
+    # @api private
+    class SignalInfo
+      attr_accessor :params
+    end
 
     def initialize(*args, &block)
       self.class.property_infos.each_value.map(&:initializer).compact.each(&:call)

@@ -182,7 +182,6 @@ void rbqml_init_js_object(void)
     rb_define_method(rbqml_cJSObject, "[]", &js_object_aref, 1);
     rb_define_method(rbqml_cJSObject, "[]=", &js_object_aset, 2);
     rb_define_method(rbqml_cJSObject, "each_pair", &js_object_each_pair, 0);
-    rb_define_alias(rbqml_cJSObject, "each", "each_pair");
     rb_define_method(rbqml_cJSObject, "has_key?", &js_object_has_key_p, 1);
     rb_define_method(rbqml_cJSObject, "error?", &js_object_error_p, 0);
 }

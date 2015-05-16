@@ -50,7 +50,7 @@ module QML
 
     # Connects a procedure.
     # @yield called when #emit is called.
-    # @return [QML::Reactive::Signal::Connection]
+    # @return [QML::Signal::Connection]
     def connect(&listener)
       @listeners << listener
       Connection.new(self, listener)

@@ -1,6 +1,7 @@
 require 'pathname'
 
 module QML
+  # @api private
   module Plugins
     class << self
       def rubyqml

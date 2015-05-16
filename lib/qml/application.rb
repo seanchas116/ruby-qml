@@ -19,7 +19,6 @@ module QML
     end
 
     # Loads a QML file. The loaded component can be accessed by {#root_component}
-    # @param [Hash] opts
     # @param [String] data
     # @param [String] path
     # @see Component
@@ -53,7 +52,7 @@ module QML
     end
   end
 
-  # Creates an {Application}, yields it and then call {Application#exec}.
+  # Creates an {Application}, yields it and then call {QML::Application#exec}.
   # @return [Application]
   # @example
   #   QML.run do |app|

@@ -1,6 +1,8 @@
 module QML
   class JSObject
 
+    alias_method :each, :each_pair
+
     def keys
       each.map { |k, v| k }
     end

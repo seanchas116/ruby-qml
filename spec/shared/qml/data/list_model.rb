@@ -18,7 +18,7 @@ shared_examples 'ListView data source' do
   it 'updates ListView correctly' do
     list_view.model = model
 
-    count = list_view['count'].to_i
+    count = list_view.count.to_i
 
     expect(count).to eq expected_array.size
 

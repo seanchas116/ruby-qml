@@ -168,7 +168,6 @@ static VALUE js_object_has_key_p(VALUE self, VALUE key)
 void rbqml_init_js_object(void)
 {
     rbqml_cJSObject = rb_define_class_under(rb_path2class("QML"), "JSObject", rb_cObject);
-    rb_include_module(rbqml_cJSObject, rb_mEnumerable);
 
     rb_define_method(rbqml_cJSObject, "[]", &js_object_aref, 1);
     rb_define_method(rbqml_cJSObject, "[]=", &js_object_aset, 2);

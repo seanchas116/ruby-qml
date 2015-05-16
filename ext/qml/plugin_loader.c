@@ -39,7 +39,7 @@ static VALUE plugin_loader_init(VALUE self, VALUE path) {
     return self;
 }
 
-static VALUE plugin_loader_load(VALUE self) {
+static VALUE plugin_loader_instance(VALUE self) {
     qmlbind_plugin plugin = rbqml_get_plugin(self);
 
     qmlbind_string qmlerror = qmlbind_plugin_get_error_string(plugin);
@@ -62,5 +62,5 @@ void rbqml_init_plugin_loader(void) {
     rb_define_alloc_func(rbqml_cPluginLoader, &plugin_loader_alloc);
 
     rb_define_private_method(rbqml_cPluginLoader, "initialize_impl", &plugin_loader_init, 1);
-    rb_define_method(rbqml_cPluginLoader, "load", &plugin_loader_load, 0);
+    rb_define_method(rbqml_cPluginLoader, "instance", &plugin_loader_instance, 0);
 }

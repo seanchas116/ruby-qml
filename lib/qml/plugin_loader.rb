@@ -20,8 +20,6 @@ module QML
       initialize_impl(path.to_s)
     end
 
-    alias_method :instance, :load
-
     def self.lib_filename(libname)
       case
       when Platform::windows?

@@ -35,12 +35,12 @@ module QML
         key = method.slice(0...-1).to_sym
 
         unless has_key?(key)
-          fail NoMethodError, "property `#{method}` not found in #{self}"
+          super
         end
         self[key] = args[0]
       else
         unless has_key?(method)
-          fail NoMethodError, "property `#{method}` not found in #{self}"
+          super
         end
 
         prop = self[method]

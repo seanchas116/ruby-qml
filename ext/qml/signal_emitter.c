@@ -41,7 +41,7 @@ static VALUE emitter_emit(VALUE self, VALUE name, VALUE args) {
         qmlArgs[i] = value;
     }
 
-    qmlbind_signal_emitter_emit(data->emitter, rb_id2name(rb_sym2id(name)), argc, qmlArgs);
+    qmlbind_signal_emitter_emit(data->emitter, rb_id2name(SYM2ID(name)), argc, qmlArgs);
     return self;
 }
 

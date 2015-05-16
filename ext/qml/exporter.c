@@ -47,7 +47,7 @@ static VALUE exporter_initialize(VALUE self, VALUE klass, VALUE name) {
 
 static VALUE exporter_add_method(VALUE self, VALUE name, VALUE arity) {
     qmlbind_exporter exporter = rbqml_get_exporter(self);
-    qmlbind_exporter_add_method(exporter, rb_id2name(rb_sym2id(name)), NUM2INT(arity));
+    qmlbind_exporter_add_method(exporter, rb_id2name(SYM2ID(name)), NUM2INT(arity));
     return Qnil;
 }
 
@@ -58,16 +58,16 @@ static VALUE exporter_add_signal(VALUE self, VALUE name, VALUE params) {
 
     const char **paramStrs = alloca(arity * sizeof(char *));
     for (int i = 0; i < arity; ++i) {
-        paramStrs[i] =  rb_id2name(rb_sym2id(RARRAY_AREF(params, i)));
+        paramStrs[i] =  rb_id2name(SYM2ID(RARRAY_AREF(params, i)));
     }
 
-    qmlbind_exporter_add_signal(exporter, rb_id2name(rb_sym2id(name)), arity, paramStrs);
+    qmlbind_exporter_add_signal(exporter, rb_id2name(SYM2ID(name)), arity, paramStrs);
     return Qnil;
 }
 
 static VALUE exporter_add_property(VALUE self, VALUE name, VALUE notifier) {
     qmlbind_exporter exporter = rbqml_get_exporter(self);
-    qmlbind_exporter_add_property(exporter, rb_id2name(rb_sym2id(name)), rb_id2name(rb_sym2id(notifier)));
+    qmlbind_exporter_add_property(exporter, rb_id2name(SYM2ID(name)), rb_id2name(SYM2ID(notifier)));
     return Qnil;
 }
 

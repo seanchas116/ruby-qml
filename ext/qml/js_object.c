@@ -54,7 +54,7 @@ static void get_property_key(VALUE key, int *index, const char **keyStr)
         *keyStr = rb_string_value_cstr(&key);
         break;
     case T_SYMBOL:
-        *keyStr = rb_id2name(rb_sym2id(key));
+        *keyStr = rb_id2name(SYM2ID(key));
         break;
     default:
         rb_raise(rb_eTypeError, "expected Fixnum, String or Symbol for index, got %s", rb_class2name(rb_obj_class(key)));

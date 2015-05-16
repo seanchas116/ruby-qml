@@ -5,24 +5,11 @@ describe QML::Access do
   let(:component) { QML::Component.new data: data }
   let(:root) { component.create }
 
-  class Hoge
-    include QML::Access
-
-    property :text
-    signal :some_signal, [:arg]
-
-    def some_method(a, b)
-      a + b
-    end
-
-    register_to_qml under: 'HogeNS', version: '1.2', name: 'Hoge'
-  end
-
   describe 'property' do
     it 'is converted to JS objects through #to_qml' do
-      hoge = Hoge.new
-      hoge.text = {foo: "bar"}
-      expect(hoge.text).to be_a(QML::JSObject)
+      example = AccessExample.new
+      example.text = {foo: "bar"}
+      expect(example.text).to be_a(QML::JSObject)
     end
   end
 
@@ -33,18 +20,18 @@ describe QML::Access do
       let(:data) do
         <<-EOS
           import QtQuick 2.2
-          import HogeNS 1.2
+          import AccessExampleNS 1.2
           Item {
             id: root
-            property var bound: hoge.text + hoge.text
-            function getHoge() {
-              return hoge;
+            property var bound: example.text + example.text
+            function getExample() {
+              return example;
             }
             function callSomeMethod() {
-              return hoge.some_method(100, 200);
+              return example.some_method(100, 200);
             }
-            Hoge {
-              id: hoge
+            AccessExample {
+              id: example
               property var signalArg
               onSome_signal: {
                 signalArg = arg;
@@ -53,46 +40,38 @@ describe QML::Access do
           }
         EOS
       end
-      let(:hoge) { root.getHoge }
+      let(:example) { root.getExample }
 
       it 'registers the class as a QML type' do
         expect { component.create }.not_to raise_error
       end
-      describe 'Hoge#some_method' do
+      describe 'AccessExamle#some_method' do
         it 'returns value' do
           expect(root.callSomeMethod()).to eq 300
         end
       end
-      describe 'Hoge text property' do
+      describe 'AccessExamle text property' do
         it 'can be used to property binding' do
-          hoge.text = "foo"
+          example.text = "foo"
           expect(root.bound).to eq 'foofoo'
-          hoge.text = "bar"
+          example.text = "bar"
           expect(root.bound).to eq 'barbar'
         end
       end
-      describe 'Hoge some_signal signal' do
+      describe 'AccessExamle some_signal signal' do
         it 'can be connected' do
-          hoge.unwrap.some_signal.emit('foo')
-          expect(hoge.signalArg).to eq 'foo'
+          example.unwrap.some_signal.emit('foo')
+          expect(example.signalArg).to eq 'foo'
         end
       end
     end
 
     context 'when arguments are omitted' do
 
-      module HogeModule
-        VERSION = '0.1.0'
-        class Hoge
-          include QML::Access
-          register_to_qml
-        end
-      end
-
       let(:data) do
         <<-EOS
-          import HogeModule 0.1
-          Hoge {}
+          import AccessExampleModule 0.1
+          AccessExample {}
         EOS
       end
 

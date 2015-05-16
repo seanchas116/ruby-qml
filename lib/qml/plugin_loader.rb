@@ -6,9 +6,6 @@ module QML
   # @see http://qt-project.org/doc/qt-5/qpluginloader.html QPluginLoader (C++)
   class PluginLoader
 
-    alias_method :initialize_orig, :initialize
-    private :initialize_orig
-
     # @overload initialize(path)
     #   @param [String|Pathname] path the library path (may be platform-dependent).
     #   @example
@@ -20,18 +17,11 @@ module QML
     #      loader = QML::PluginLoader.new('path/to', 'hoge')
     def initialize(path, libname = nil)
       path = Pathname(path) + self.class.lib_filename(libname) if libname
-      initialize_orig(path.to_s)
+      initialize_impl(path.to_s)
     end
 
-    # @!method instance
-    #   Loads the plugin and returns the instance of the plugin.
-    #   @return [QtObjectBase]
+    alias_method :instance, :load
 
-    # @param [String] libname
-    # @return [String] platform-dependent library file name.
-    # @example
-    #   # on Mac
-    #   QML::PluginLoader.lib_filename("hoge") #=> "libhoge.dylib"
     def self.lib_filename(libname)
       case
       when Platform::windows?

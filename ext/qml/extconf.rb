@@ -25,6 +25,17 @@ else
   $LDFLAGS << " -Wl,-rpath #{qmlbind_dir}"
 end
 
+# build plugin
+
+Dir.chdir "rubyqml-plugin" do
+  qmake_opts = debug_enabled ? 'CONFIG+=debug' : ''
+  system "#{qmake} #{qmake_opts}" or fail "failed to configurate plugin"
+  system "make clean" if enable_config('clean-plugin', false)
+  system "make" or fail "failed to build plugin"
+end
+
+# create makefile
+
 $LDFLAGS << " -L#{qmlbind_dir} -lqmlbind"
 $CPPFLAGS << " -I#{qmlbind_dir + 'include'}"
 

@@ -2,7 +2,6 @@ language: ruby
 rvm:
   - 2.2.2
   - 2.1.6
-  - 2.0.0
 before_install:
   - sudo apt-add-repository -y ppa:beineri/opt-qt541
   - sudo apt-get update

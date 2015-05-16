@@ -24,4 +24,27 @@ describe QML::Engine do
       end
     end
   end
+
+  describe '#evaluate' do
+    it 'evaluates JS scripts' do
+      result = QML.engine.evaluate <<-JS
+        (function() {
+          return "foo";
+        })();
+      JS
+      expect(result).to eq('foo')
+    end
+    context 'with error' do
+      it 'fails with QMLError' do
+        block = proc do
+          QML.engine.evaluate <<-JS
+            (function() {
+              throw new Error("hoge");
+            })();
+          JS
+        end
+        expect(&block).to raise_error(/hoge/)
+      end
+    end
+  end
 end

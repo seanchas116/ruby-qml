@@ -165,6 +165,16 @@ static VALUE js_object_has_key_p(VALUE self, VALUE key)
     }
 }
 
+static VALUE js_object_error_p(VALUE self)
+{
+    qmlbind_value obj = rbqml_js_object_get(self);
+    if (qmlbind_value_is_error(obj)) {
+        return Qtrue;
+    } else {
+        return Qfalse;
+    }
+}
+
 void rbqml_init_js_object(void)
 {
     rbqml_cJSObject = rb_define_class_under(rb_path2class("QML"), "JSObject", rb_cObject);
@@ -174,4 +184,5 @@ void rbqml_init_js_object(void)
     rb_define_method(rbqml_cJSObject, "each_pair", &js_object_each_pair, 0);
     rb_define_alias(rbqml_cJSObject, "each", "each_pair");
     rb_define_method(rbqml_cJSObject, "has_key?", &js_object_has_key_p, 1);
+    rb_define_method(rbqml_cJSObject, "error?", &js_object_error_p, 0);
 }

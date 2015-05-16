@@ -5,7 +5,6 @@
 #include "js_array.h"
 
 VALUE rbqml_cEngine;
-static VALUE cQMLError;
 
 typedef struct {
     qmlbind_engine engine;
@@ -54,29 +53,13 @@ static VALUE engine_add_import_path(VALUE self, VALUE path) {
     return self;
 }
 
-static VALUE engine_evaluate(int argc, VALUE *argv, VALUE self) {
+static VALUE engine_evaluate(VALUE self, VALUE str, VALUE file, VALUE lineNum) {
     qmlbind_engine engine = rbqml_get_engine(self);
 
-    VALUE str, file, lineNum;
-
-    rb_scan_args(argc, argv, "12", &str, &file, &lineNum);
-
-    qmlbind_value value =  qmlbind_engine_eval(engine, rb_string_value_cstr(&str),
-                                               RTEST(file) ? rb_string_value_cstr(&file) : "",
-                                               RTEST(lineNum) ? rb_num2int(lineNum) : 1);
-
-    if (qmlbind_value_is_error(value)) {
-        qmlbind_string error = qmlbind_value_get_string(value);
-        VALUE errorStr = rb_enc_str_new(qmlbind_string_get_chars(error), qmlbind_string_get_length(error), rb_utf8_encoding());
-        qmlbind_string_release(error);
-
-        qmlbind_value_release(value);
-
-        rb_exc_raise(rb_funcall(cQMLError, rb_intern("new"), 1, errorStr));
-    }
-
+    qmlbind_value value =  qmlbind_engine_eval(engine, rb_string_value_cstr(&str), rb_string_value_cstr(&file), rb_num2int(lineNum));
     VALUE result = rbqml_to_ruby(value);
     qmlbind_value_release(value);
+
     return result;
 }
 
@@ -102,14 +85,13 @@ static VALUE engine_new_object(VALUE self) {
 
 void rbqml_init_engine() {
     rb_require("qml/errors");
-    cQMLError = rb_path2class("QML::QMLError");
 
     rbqml_cEngine = rb_define_class_under(rb_path2class("QML"), "Engine", rb_cObject);
     rb_define_alloc_func(rbqml_cEngine, &engine_alloc);
 
     rb_define_private_method(rbqml_cEngine, "initialize", &engine_initialize, 0);
     rb_define_method(rbqml_cEngine, "add_import_path", &engine_add_import_path, 1);
-    rb_define_method(rbqml_cEngine, "evaluate", &engine_evaluate, -1);
+    rb_define_method(rbqml_cEngine, "evaluate_impl", &engine_evaluate, 3);
     rb_define_method(rbqml_cEngine, "new_array", &engine_new_array, 1);
     rb_define_method(rbqml_cEngine, "new_object", &engine_new_object, 0);
 }

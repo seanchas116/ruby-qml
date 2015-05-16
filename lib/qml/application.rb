@@ -43,6 +43,11 @@ module QML
     def root
       @root or fail "QML data or file has not been loaded"
     end
+
+    # Quits the application.
+    def quit
+      QML.qt.quit
+    end
   end
 
   def init(args = [])

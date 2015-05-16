@@ -9,7 +9,8 @@ typedef struct {
 
 static void application_free(void *p) {
     application_t *data = (application_t*)p;
-    qmlbind_application_release(data->application);
+    // application is never released
+    // qmlbind_application_release(data->application);
     xfree(data);
 }
 

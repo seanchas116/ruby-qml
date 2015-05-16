@@ -61,6 +61,20 @@ describe QML::JSObject do
     end
   end
 
+  describe '#==' do
+    let(:obj_script) do
+      <<-JS
+        ({
+          obj: {}
+        })
+      JS
+    end
+
+    it 'returns identity' do
+      expect(obj.obj).to eq(obj.obj)
+    end
+  end
+
   describe 'method call' do
 
     let(:obj_script) do

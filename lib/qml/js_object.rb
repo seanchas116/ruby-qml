@@ -30,7 +30,7 @@ module QML
     end
 
     def method_missing(method, *args)
-      if /=$/ =~ method
+      if method[-1] == '='
         # setter
         key = method.slice(0...-1).to_sym
 

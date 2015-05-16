@@ -42,15 +42,17 @@ static VALUE application_initialize(VALUE self, VALUE args) {
         rb_raise(rb_eTypeError, "Expected Array");
     }
 
-    int len = RARRAY_LEN(args);
-    char **strs = malloc(len * sizeof(char *));
+    args = rb_ary_concat(rb_ary_new_from_args(1, rb_argv0), args);
 
-    for (int i = 0; i < len; ++i) {
+    int argc = RARRAY_LEN(args);
+    char **argv = malloc(argc * sizeof(char *));
+
+    for (int i = 0; i < argc; ++i) {
         VALUE arg = RARRAY_AREF(args, i);
-        strs[i] = rb_string_value_cstr(&arg);
+        argv[i] = rb_string_value_cstr(&arg);
     }
 
-    data->application = qmlbind_application_new(len, strs);
+    data->application = qmlbind_application_new(argc, argv);
 
     return self;
 }

@@ -39,6 +39,8 @@ VALUE rbqml_to_ruby(qmlbind_value value)
 
 qmlbind_value rbqml_to_qml(VALUE value)
 {
+    value = rb_funcall(value, rb_intern("to_qml"), 0);
+
     switch (rb_type(value)) {
     case T_NIL:
         return qmlbind_value_new_null();
@@ -46,11 +48,6 @@ qmlbind_value rbqml_to_qml(VALUE value)
         return qmlbind_value_new_boolean(true);
     case T_FALSE:
         return qmlbind_value_new_boolean(false);
-    case T_FIXNUM:
-    case T_BIGNUM:
-        return qmlbind_value_new_number(NUM2LL(value));
-    case T_RATIONAL:
-        return qmlbind_value_new_number(rb_float_value(rb_funcall(value, rb_intern("to_f"), 0)));
     case T_FLOAT:
         return qmlbind_value_new_number(rb_float_value(value));
     case T_STRING:

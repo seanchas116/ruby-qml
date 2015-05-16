@@ -1,13 +1,19 @@
 
 class Numeric
   def to_qml
-    self
+    to_f
   end
 end
 
 class String
   def to_qml
     self
+  end
+end
+
+class Symbol
+  def to_qml
+    to_s
   end
 end
 
@@ -18,6 +24,12 @@ class TrueClass
 end
 
 class FalseClass
+  def to_qml
+    self
+  end
+end
+
+class NilClass
   def to_qml
     self
   end

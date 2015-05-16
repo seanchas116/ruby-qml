@@ -83,6 +83,15 @@ static VALUE engine_new_object(VALUE self) {
     return value;
 }
 
+/*
+ * Starts garbage collection on the {Engine}.
+ */
+static VALUE engine_collect_garbage(VALUE self) {
+    qmlbind_engine engine = rbqml_get_engine(self);
+    qmlbind_engine_collect_garbage(engine);
+    return self;
+}
+
 void rbqml_init_engine() {
     rb_require("qml/errors");
 
@@ -94,4 +103,5 @@ void rbqml_init_engine() {
     rb_define_method(rbqml_cEngine, "evaluate_impl", &engine_evaluate, 3);
     rb_define_method(rbqml_cEngine, "new_array", &engine_new_array, 1);
     rb_define_method(rbqml_cEngine, "new_object", &engine_new_object, 0);
+    rb_define_method(rbqml_cEngine, "collect_garbage", &engine_collect_garbage, 0);
 }

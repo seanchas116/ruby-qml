@@ -12,10 +12,5 @@ module QML
       end
     end
 
-    # Starts garbage collection on the {Engine}.
-    def collect_garbage
-      fail 'TODO'
-    end
-
   end
 end

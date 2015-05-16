@@ -24,10 +24,6 @@ static VALUE qml_init(VALUE module, VALUE args) {
         rb_raise(rb_eRuntimeError, "QML already initialized");
     }
 
-    if (NIL_P(args)) {
-        args = rb_ary_new();
-    }
-
     rbqml_application = rb_funcall(rbqml_cApplication, rb_intern("new"), 1, args);
     rbqml_engine = rb_funcall(rbqml_cEngine, rb_intern("new"), 0);
 
@@ -76,7 +72,7 @@ void Init_qml(void)
     rbqml_init_signal_emitter();
     rbqml_init_plugin_loader();
 
-    rb_define_module_function(rbqml_mQML, "init", &qml_init, 1);
+    rb_define_module_function(rbqml_mQML, "init_impl", &qml_init, 1);
     rb_define_module_function(rbqml_mQML, "application", &qml_application, 0);
     rb_define_module_function(rbqml_mQML, "engine", &qml_engine, 0);
 }

@@ -45,6 +45,11 @@ module QML
     end
   end
 
+  def init(args = [])
+    init_impl(args)
+  end
+  module_function :init
+
   # Creates an {Application}, yields it and then call {QML::Application#exec}.
   # @return [Application]
   # @example
@@ -52,7 +57,8 @@ module QML
   #     app.load_path Pathname(__FILE__) + '../main.qml'
   #   end
   def run
-    Application.new.tap do |app|
+    QML.init
+    QML.application.tap do |app|
       yield app
       app.exec
     end

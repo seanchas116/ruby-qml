@@ -5,6 +5,7 @@ require 'qml/qml'
 require 'qml/core_ext'
 
 require 'qml/plugin_loader'
+require 'qml/plugins'
 require 'qml/component'
 require 'qml/engine'
 require 'qml/application'

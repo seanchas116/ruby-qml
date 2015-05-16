@@ -3,6 +3,8 @@
 #include <QObject>
 #include <QJSValue>
 
+namespace RubyQml {
+
 class RubyQmlPlugin : public QObject
 {
     Q_OBJECT
@@ -11,5 +13,7 @@ class RubyQmlPlugin : public QObject
 public:
     RubyQmlPlugin(QObject *parent = 0);
 
-    Q_INVOKABLE QJSValue createListModel(const QJSValue &rubyListModel);
+    Q_INVOKABLE QJSValue createListModel(const QJSValue &rubyModelAccess);
 };
+
+}

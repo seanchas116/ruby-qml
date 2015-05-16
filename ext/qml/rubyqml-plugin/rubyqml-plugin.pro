@@ -11,7 +11,9 @@ TEMPLATE = lib
 CONFIG += plugin
 
 SOURCES += \
-    rubyqmlplugin.cpp
+    rubyqmlplugin.cpp \
+    listmodel.cpp
 
 HEADERS += \
-    rubyqmlplugin.h
+    rubyqmlplugin.h \
+    listmodel.h

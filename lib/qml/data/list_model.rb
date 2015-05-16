@@ -1,4 +1,4 @@
-require 'qml/data/error'
+require 'event_emitter'
 
 module QML
   module Data
@@ -6,11 +6,8 @@ module QML
     # @see http://qt-project.org/doc/qt-5/qabstractitemmodel.html QAbstractItemModel (C++)
     # @see http://qt-project.org/doc/qt-5/qabstractlistmodel.html QAbstractListModel (C++)
     class ListModel
-      include ::Enumerable
-
-      # @api private
-      # @return [Array<QtObjectBase>]
-      attr_reader :qt_models
+      include Enumerable
+      include EventEmitter
 
       # @return [Array<Symbol|String>]
       attr_reader :columns
@@ -18,7 +15,7 @@ module QML
       # @param [Array<Symbol|String>] columns the column names of the model.
       def initialize(*columns)
         @columns = columns
-        @qt_models = []
+        @access = ListModelAccess.create(self)
       end
 
       # Iterates each item.
@@ -49,14 +46,17 @@ module QML
         fail ::NotImplementedError
       end
 
+      # @return [QML::JSValue]
+      def to_qml
+        QML::Plugins.rubyqml.createListModel(@access)
+      end
+
       protected
 
       # Notifies the list views that the data of the items was changed.
       # @param [Range<Integer>] range the index range of changed items.
       def update(range)
-        @qt_models.each do |qt_model|
-          qt_model.update(range.min, range.max)
-        end
+        @access.update(range.min, range.max)
       end
 
       # Notifies the list views that items are about to be and were moved.
@@ -71,13 +71,9 @@ module QML
       def moving(range, destination)
         return if range.count == 0
 
-        @qt_models.each do |qt_model|
-          qt_model.begin_move(range.min, range.max, destination)
-        end
+        @access.begin_move(range.min, range.max, destination)
         ret = yield
-        @qt_models.each do |qt_model|
-          qt_model.end_move
-        end
+        @access.end_move
         ret
       end
 
@@ -96,13 +92,9 @@ module QML
       def inserting(range, &block)
         return if range.count == 0
 
-        @qt_models.each do |qt_model|
-          qt_model.begin_insert(range.min, range.max)
-        end
+        @access.begin_insert(range.min, range.max)
         ret = yield
-        @qt_models.each do |qt_model|
-          qt_model.end_insert
-        end
+        @access.end_insert
         ret
       end
 
@@ -117,24 +109,16 @@ module QML
       def removing(range, &block)
         return if range.count == 0
 
-        @qt_models.each do |qt_model|
-          qt_model.begin_remove(range.min, range.max)
-        end
+        @access.begin_remove(range.min, range.max)
         ret = yield
-        @qt_models.each do |qt_model|
-          qt_model.end_remove
-        end
+        @access.end_remove
         ret
       end
 
       def resetting(&block)
-        @qt_models.each do |qt_model|
-          qt_model.begin_reset
-        end
+        @access.begin_reset
         ret = yield
-        @qt_models.each do |qt_model|
-          qt_model.end_reset
-        end
+        @access.end_reset
         ret
       end
     end

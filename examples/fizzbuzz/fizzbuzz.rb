@@ -9,8 +9,8 @@ module Examples
     class FizzBuzz
       include QML::Access
 
-      property :input, '0'
-      property :result , ''
+      property(:input) { '0' }
+      property(:result) { '' }
       signal :inputWasFizzBuzz, []
 
       on_changed :input do

@@ -13,10 +13,29 @@ module QML
     # @api private
     class SignalInfo
       attr_accessor :params
+      attr_accessor :listeners
+
+      def initialize
+        @listeners = []
+      end
     end
 
     def initialize(*args, &block)
-      self.class.property_infos.each_value.map(&:initializer).compact.each(&:call)
+
+      self.class.property_infos.each do |name, info|
+        if info.initializer
+          self.__send__ :"#{name}=", instance_eval(&info.initializer)
+        end
+      end
+
+      self.class.signal_infos.each do |name, info|
+        __send__(name).connect do |*args|
+          info.listeners.each do |listener|
+            instance_eval(&listener)
+          end
+        end
+      end
+
       super
     end
 
@@ -107,6 +126,18 @@ module QML
           @property_infos ||= {}
         end
       end
+
+      def on(signal, &block)
+        info = signal_infos(false)[signal.to_sym] or fail AccessError, "no signal `#{signal}` found"
+        info.listeners << block
+        block
+      end
+
+      def on_changed(property, &block)
+        on(:"#{property}_changed", &block)
+      end
+
+      private :on, :on_changed
 
       # Registers the class as a QML type.
       # @param opts [Hash]

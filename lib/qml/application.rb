@@ -43,13 +43,6 @@ module QML
     def root
       @root or fail "QML data or file has not been loaded"
     end
-
-    # Runs garbage collection of Ruby and QML and deletes unused objects.
-    def collect_garbage
-      ::GC.start
-      engine.collect_garbage
-      process_events
-    end
   end
 
   # Creates an {Application}, yields it and then call {QML::Application#exec}.

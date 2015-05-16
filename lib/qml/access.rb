@@ -31,7 +31,7 @@ module QML
       self.class.signal_infos.each do |name, info|
         __send__(name).connect do |*args|
           info.listeners.each do |listener|
-            instance_eval(&listener)
+            instance_exec(*args, &listener)
           end
         end
       end

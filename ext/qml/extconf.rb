@@ -30,6 +30,8 @@ $CPPFLAGS << " -I#{qmlbind_dir + 'include'}"
 
 $CPPFLAGS << " -g" if debug_enabled
 
+$CPPFLAGS << " -std=c99"
+
 # create makefile
 
 create_makefile 'qml/qml'

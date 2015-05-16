@@ -15,6 +15,10 @@ VALUE rbqml_mQML;
 VALUE rbqml_application = Qnil;
 VALUE rbqml_engine = Qnil;
 
+/*
+ * Initializes ruby-qml.
+ * @param [Array<String>] args Arguments to pass to the application
+ */
 static VALUE qml_init(VALUE module, VALUE args) {
     if (!NIL_P(rbqml_application)) {
         rb_raise(rb_eRuntimeError, "QML already initialized");
@@ -33,6 +37,10 @@ static VALUE qml_init(VALUE module, VALUE args) {
     return module;
 }
 
+/*
+ * Returns the instance of {Application}.
+ * @return [Application]
+ */
 static VALUE qml_application(VALUE module) {
     if (NIL_P(rbqml_application)) {
         rb_raise(rb_eRuntimeError, "QML not yet initialized");
@@ -40,6 +48,10 @@ static VALUE qml_application(VALUE module) {
     return rbqml_application;
 }
 
+/*
+ * Returns the instance of {Engine}.
+ * @return [Engine]
+ */
 static VALUE qml_engine(VALUE module) {
     if (NIL_P(rbqml_engine)) {
         rb_raise(rb_eRuntimeError, "QML not yet initialized");

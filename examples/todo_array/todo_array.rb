@@ -8,12 +8,11 @@ module Examples
 
     class TodoController
       include QML::Access
-      register_to_qml
 
-      property :title, ''
-      property :description, ''
-      property :due_date, ''
-      property :model, QML::Data::ArrayModel.new(:title, :description, :due_date)
+      property(:title) { '' }
+      property(:description) { '' }
+      property(:due_date) { '' }
+      property(:model) { QML::ArrayModel.new(:title, :description, :due_date) }
 
       def add
         item = {
@@ -24,6 +23,8 @@ module Examples
         p item
         model << item
       end
+
+      register_to_qml
     end
   end
 end

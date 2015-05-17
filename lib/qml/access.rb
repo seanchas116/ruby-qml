@@ -102,7 +102,7 @@ module QML
         class_eval <<-EOS, __FILE__, __LINE__ + 1
           attr_reader :#{name}
           def #{name}=(new_value)
-            new_value = new_value.to_qml
+            new_value = new_value
             if @#{name} != new_value
               @#{name} = new_value
               #{name}_changed.emit(new_value)

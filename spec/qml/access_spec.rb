@@ -41,14 +41,6 @@ describe QML::Access do
     end
   end
 
-  describe 'property' do
-    it 'is converted to JS objects through #to_qml' do
-      example = AccessExample.new
-      example.text = {foo: "bar"}
-      expect(example.text).to be_a(QML::JSObject)
-    end
-  end
-
   describe '.register_to_qml' do
 
     context 'when namespace, version, name are given' do

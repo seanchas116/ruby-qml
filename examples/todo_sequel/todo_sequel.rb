@@ -12,10 +12,10 @@ module Examples
       primary_key :id
       String :title
       String :description
-      Date :due_date
+      Time :due_date
     end
 
-    class SequelModel < QML::Data::QueryModel
+    class SequelModel < QML::QueryModel
       attr_accessor :dataset
 
       def initialize(dataset)
@@ -34,7 +34,6 @@ module Examples
 
     class TodoController
       include QML::Access
-      register_to_qml
 
       def initialize
         super
@@ -42,14 +41,14 @@ module Examples
         self.model = SequelModel.new(@todo_dataset)
       end
 
-      property :title, ''
-      property :description, ''
-      property :due_date, ''
-      property :order_by, ''
+      property(:title) { '' }
+      property(:description) { '' }
+      property(:due_date) { '' }
+      property(:order_by) { '' }
       property :model
 
       def add
-        @todo_dataset.insert(title: title, description: description, due_date: due_date)
+        @todo_dataset.insert(title: title, description: description, due_date: due_date.to_time)
         model.update
       end
 
@@ -57,6 +56,8 @@ module Examples
         model.dataset = @todo_dataset.order(order_by.to_sym)
         model.update
       end
+
+      register_to_qml
     end
   end
 end

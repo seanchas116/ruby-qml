@@ -10,6 +10,7 @@
 #include "js_wrapper.h"
 #include "signal_emitter.h"
 #include "plugin_loader.h"
+#include "dispatcher.h"
 
 VALUE rbqml_mQML;
 VALUE rbqml_application = Qnil;
@@ -71,6 +72,7 @@ void Init_qml(void)
     rbqml_init_js_wrapper();
     rbqml_init_signal_emitter();
     rbqml_init_plugin_loader();
+    rbqml_init_dispatcher();
 
     rb_define_module_function(rbqml_mQML, "init_impl", &qml_init, 1);
     rb_define_module_function(rbqml_mQML, "application", &qml_application, 0);

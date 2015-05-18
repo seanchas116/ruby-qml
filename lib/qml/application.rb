@@ -69,10 +69,4 @@ module QML
     end
   end
   module_function :run
-
-  def next_tick(&block)
-    application.next_tick(&block)
-  end
-  module_function :next_tick
-
 end

@@ -58,38 +58,6 @@ static VALUE application_initialize(VALUE self, VALUE args) {
     return self;
 }
 
-static void *call_callback_impl(void *data) {
-    VALUE proc = (VALUE)data;
-    rb_proc_call(proc, rb_ary_new());
-    return NULL;
-}
-
-static void call_callback(qmlbind_backref proc_data) {
-    rb_thread_call_with_gvl(&call_callback_impl, proc_data);
-}
-
-/*
- * Runs a block asynchronously within the event loop.
- *
- * QML UI is not thread-safe and can only be accessed from the main thread.
- * Use this method to set results of asynchronous tasks to UI.
- * @example
- *  def on_button_clicked
- *    Thread.new do
- *      result = do_task
- *      QML.next_tick do
- *        set_result_to_ui(result)
- *      end
- *    end
- *  end
- */
-static VALUE application_next_tick(int argc, VALUE *argv, VALUE self) {
-    VALUE block;
-    rb_scan_args(argc, argv, "&", &block);
-    qmlbind_next_tick(rbqml_get_interface(), &call_callback, (qmlbind_backref)block);
-    return Qnil;
-}
-
 /*
  * Starts the event loop of the application.
  * This method never returns until the application quits.
@@ -114,7 +82,6 @@ void rbqml_init_application(void) {
     rb_define_alloc_func(rbqml_cApplication, &application_alloc);
 
     rb_define_private_method(rbqml_cApplication, "initialize", &application_initialize, 1);
-    rb_define_method(rbqml_cApplication, "next_tick", &application_next_tick, -1);
     rb_define_method(rbqml_cApplication, "exec", &application_exec, 0);
     rb_define_method(rbqml_cApplication, "process_events", &application_process_events, 0);
 }

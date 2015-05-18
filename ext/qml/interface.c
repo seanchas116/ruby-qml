@@ -11,19 +11,62 @@ qmlbind_interface rbqml_get_interface(void) {
     return interface;
 }
 
-static qmlbind_backref new_object(qmlbind_backref class_handle, qmlbind_signal_emitter emitter) {
-    VALUE klass = (VALUE)class_handle;
+typedef struct {
+    qmlbind_backref class_handle;
+    qmlbind_signal_emitter emitter;
+} new_object_data;
+
+static void *new_object_impl(void *p) {
+    new_object_data *data = p;
+
+    VALUE klass = (VALUE)data->class_handle;
     VALUE obj = rb_funcall(klass, rb_intern("new"), 0);
-    VALUE emitterValue = rbqml_signal_emitter_new(emitter);
+    VALUE emitterValue = rbqml_signal_emitter_new(data->emitter);
     rb_funcall(obj, rb_intern("set_signal_emitter"), 1, emitterValue);
 
     rb_hash_aset(referenced_objects, obj, Qnil);
-    return (qmlbind_backref)obj;
+    return (void *)obj;
+}
+
+static qmlbind_backref new_object(qmlbind_backref class_handle, qmlbind_signal_emitter emitter) {
+    new_object_data data;
+    data.class_handle = class_handle;
+    data.emitter = emitter;
+
+    return rb_thread_call_with_gvl(&new_object_impl, &data);
+}
+
+static void *delete_object_impl(void *data) {
+    rb_hash_delete(referenced_objects, (VALUE)data);
+    return NULL;
 }
 
 static void delete_object(qmlbind_backref handle) {
-    VALUE obj = (VALUE)handle;
-    rb_hash_delete(referenced_objects, obj);
+    rb_thread_call_with_gvl(&delete_object_impl, handle);
+}
+
+typedef struct {
+    qmlbind_backref backref;
+    const char *name;
+    int argc;
+    qmlbind_value *argv;
+} call_method_data;
+
+static void *call_method_impl(void *p) {
+    call_method_data *data = p;
+
+    VALUE obj = (VALUE)data->backref;
+    VALUE method = ID2SYM(rb_intern(data->name));
+
+    VALUE *args = alloca(data->argc * sizeof(VALUE));
+    for (int i = 0; i < data->argc; ++i) {
+        args[i] = rbqml_to_ruby(data->argv[i]);
+    }
+
+    VALUE result = rb_funcall(rbqml_mInterface, rb_intern("call_method"), 3,
+                              obj, method, rb_ary_new_from_values(data->argc, args));
+
+    return rbqml_to_qml(result);
 }
 
 static qmlbind_value call_method(
@@ -31,17 +74,28 @@ static qmlbind_value call_method(
     qmlbind_backref object_backref, const char *name,
     int argc, qmlbind_value *argv) {
 
-    VALUE obj = (VALUE)object_backref;
-    VALUE method = ID2SYM(rb_intern(name));
+    call_method_data data;
+    data.backref = object_backref;
+    data.name = name;
+    data.argc = argc;
+    data.argv = argv;
 
-    VALUE *args = alloca(argc * sizeof(VALUE));
-    for (int i = 0; i < argc; ++i) {
-        args[i] = rbqml_to_ruby(argv[i]);
-    }
+    return rb_thread_call_with_gvl(&call_method_impl, &data);
+}
+
+typedef struct {
+    qmlbind_backref backref;
+    const char *name;
+} get_property_data;
+
+static void *get_property_impl(void *p) {
+    get_property_data *data = p;
+
+    VALUE obj = (VALUE)data->backref;
+    VALUE method = ID2SYM(rb_intern(data->name));
 
     VALUE result = rb_funcall(rbqml_mInterface, rb_intern("call_method"), 3,
-                              obj, method,
-                              rb_ary_new_from_values(argc, args));
+                              obj, method, rb_ary_new());
 
     return rbqml_to_qml(result);
 }
@@ -50,26 +104,43 @@ static qmlbind_value get_property(
     qmlbind_engine engine,
     qmlbind_backref object_backref, const char *name) {
 
-    VALUE obj = (VALUE)object_backref;
-    VALUE method = ID2SYM(rb_intern(name));
+    get_property_data data;
+    data.backref = object_backref;
+    data.name = name;
 
-    VALUE result = rb_funcall(rbqml_mInterface, rb_intern("call_method"), 3,
-                              obj, method, rb_ary_new());
+    return rb_thread_call_with_gvl(&get_property_impl, &data);
+}
 
-    return rbqml_to_qml(result);
+typedef struct {
+    qmlbind_backref backref;
+    const char *name;
+    qmlbind_value value;
+} set_property_data;
+
+static void *set_property_impl(void *p) {
+    set_property_data* data = p;
+
+    VALUE obj = (VALUE)data->backref;
+    VALUE method = rb_str_intern(rb_sprintf("%s=", data->name));
+
+    VALUE ruby_value = rbqml_to_ruby(data->value);
+
+    rb_funcall(rbqml_mInterface, rb_intern("call_method"), 3,
+                              obj, method, rb_ary_new_from_args(1, ruby_value));
+
+    return NULL;
 }
 
 static void set_property(
     qmlbind_engine engine,
     qmlbind_backref object_backref, const char *name, qmlbind_value value) {
 
-    VALUE obj = (VALUE)object_backref;
-    VALUE method = rb_str_intern(rb_sprintf("%s=", name));
+    set_property_data data;
+    data.backref = object_backref;
+    data.name = name;
+    data.value = value;
 
-    VALUE ruby_value = rbqml_to_ruby(value);
-
-    rb_funcall(rbqml_mInterface, rb_intern("call_method"), 3,
-               obj, method, rb_ary_new_from_args(1, ruby_value));
+    rb_thread_call_with_gvl(&set_property_impl, &data);
 }
 
 qmlbind_interface_handlers handlers = {

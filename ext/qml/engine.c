@@ -13,7 +13,7 @@ typedef struct {
 static void engine_free(void *p) {
     engine_t *data = (engine_t *)p;
 
-    qmlbind_engine_release(data->engine);
+    rb_thread_call_without_gvl((void *(*)(void *))&qmlbind_engine_release, data->engine, RUBY_UBF_IO, NULL);
     xfree(data);
 }
 
@@ -53,10 +53,29 @@ static VALUE engine_add_import_path(VALUE self, VALUE path) {
     return self;
 }
 
+typedef struct {
+    qmlbind_engine engine;
+    const char *str;
+    const char *file;
+    int lineNum;
+} evaluate_data;
+
+static void *evaluate_impl(void *p) {
+    evaluate_data *data = p;
+    return qmlbind_engine_eval(data->engine, data->str, data->file, data->lineNum);
+}
+
 static VALUE engine_evaluate(VALUE self, VALUE str, VALUE file, VALUE lineNum) {
     qmlbind_engine engine = rbqml_get_engine(self);
 
-    qmlbind_value value =  qmlbind_engine_eval(engine, rb_string_value_cstr(&str), rb_string_value_cstr(&file), rb_num2int(lineNum));
+    evaluate_data data;
+    data.engine = engine;
+    data.str = rb_string_value_cstr(&str);
+    data.file = rb_string_value_cstr(&file);
+    data.lineNum = NUM2INT(lineNum);
+
+    qmlbind_value value = rb_thread_call_without_gvl(&evaluate_impl, &data, RUBY_UBF_IO, NULL);
+
     VALUE result = rbqml_to_ruby(value);
     qmlbind_value_release(value);
 

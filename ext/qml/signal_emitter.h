@@ -1,7 +1,6 @@
 #pragma once
 
-#include <ruby/ruby.h>
-#include <qmlbind.h>
+#include "qml.h"
 
 extern VALUE rbqml_cSignalEmitter;
 

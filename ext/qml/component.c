@@ -11,7 +11,7 @@ typedef struct {
 
 static void component_free(void *p) {
     component_t *data = (component_t *)p;
-    qmlbind_component_release(data->component);
+    rb_thread_call_without_gvl((void *(*)(void *))&qmlbind_component_release, data->component, RUBY_UBF_IO, NULL);
     xfree(data);
 }
 
@@ -70,7 +70,7 @@ static VALUE component_create(VALUE self) {
     component_t *data;
     TypedData_Get_Struct(self, component_t, &data_type, data);
 
-    qmlbind_value obj = qmlbind_component_create(data->component);
+    qmlbind_value obj = rb_thread_call_without_gvl((void *(*)(void *))&qmlbind_component_create, data->component, RUBY_UBF_IO, NULL);
     VALUE result = rbqml_to_ruby(obj);
     qmlbind_value_release(obj);
 

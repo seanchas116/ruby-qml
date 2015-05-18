@@ -58,9 +58,14 @@ static VALUE application_initialize(VALUE self, VALUE args) {
     return self;
 }
 
-static void call_callback(qmlbind_backref proc_data) {
-    VALUE proc = (VALUE)proc_data;
+static void *call_callback_impl(void *data) {
+    VALUE proc = (VALUE)data;
     rb_proc_call(proc, rb_ary_new());
+    return NULL;
+}
+
+static void call_callback(qmlbind_backref proc_data) {
+    rb_thread_call_with_gvl(&call_callback_impl, proc_data);
 }
 
 /*
@@ -90,7 +95,9 @@ static VALUE application_next_tick(int argc, VALUE *argv, VALUE self) {
  * This method never returns until the application quits.
  */
 static VALUE application_exec(VALUE self) {
-    return INT2NUM(qmlbind_application_exec(rbqml_get_application(self)));
+    qmlbind_application app = rbqml_get_application(self);
+    int ret = (int)rb_thread_call_without_gvl((void *(*)(void *))&qmlbind_application_exec, app, RUBY_UBF_IO, NULL);
+    return INT2NUM(ret);
 }
 
 /*
@@ -98,7 +105,7 @@ static VALUE application_exec(VALUE self) {
  * This method is useful when you are combining an external event loop like EventMachine.
  */
 static VALUE application_process_events(VALUE application) {
-    qmlbind_process_events();
+    rb_thread_call_without_gvl((void *(*)(void *))&qmlbind_process_events, NULL, RUBY_UBF_IO, NULL);
     return Qnil;
 }
 

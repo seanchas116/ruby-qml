@@ -8,6 +8,30 @@ typedef enum {
     CallFunction, CallMethod, CallConstructor
 } CallType;
 
+typedef struct {
+    qmlbind_value func;
+    qmlbind_value instance;
+    int argc;
+    qmlbind_value *argv;
+    CallType type;
+} function_call_data;
+
+static void *function_call_impl(void *p) {
+    function_call_data *data = p;
+
+    switch (data->type) {
+    case CallFunction:
+        return qmlbind_value_call(data->func, data->argc, data->argv);
+    case CallMethod: {
+        return qmlbind_value_call_with_instance(data->func, data->instance, data->argc, data->argv);
+    }
+    case CallConstructor: {
+        return qmlbind_value_call_constructor(data->func, data->argc, data->argv);
+    }
+    }
+    return NULL;
+}
+
 static VALUE function_call(VALUE self, VALUE thisValue, VALUE args, CallType callType) {
     qmlbind_value func = rbqml_js_object_get(self);
 
@@ -19,23 +43,16 @@ static VALUE function_call(VALUE self, VALUE thisValue, VALUE args, CallType cal
         qmlArgs[i] = value;
     }
 
-    qmlbind_value result;
+    function_call_data data;
+    data.func = func;
+    if (callType == CallMethod) {
+        data.instance = rbqml_js_object_get(thisValue);
+    }
+    data.argc = argc;
+    data.argv = qmlArgs;
+    data.type = callType;
 
-    switch (callType) {
-    case CallFunction:
-        result = qmlbind_value_call(func, argc, qmlArgs);
-        break;
-    case CallMethod: {
-        qmlbind_value qmlThis = rbqml_js_object_get(thisValue);
-        result = qmlbind_value_call_with_instance(func, qmlThis, argc, qmlArgs);
-        qmlbind_value_release(qmlThis);
-        break;
-    }
-    case CallConstructor: {
-        result = qmlbind_value_call_constructor(func, argc, qmlArgs);
-        break;
-    }
-    }
+    qmlbind_value result = rb_thread_call_without_gvl(&function_call_impl, &data, RUBY_UBF_IO, NULL);
 
     bool is_error = qmlbind_value_is_error(result);
     VALUE resultValue = rbqml_to_ruby(result);

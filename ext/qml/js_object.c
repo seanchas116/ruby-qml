@@ -3,6 +3,85 @@
 #include "conversion.h"
 
 typedef struct {
+    qmlbind_value obj;
+    const char *key;
+} get_property_data;
+
+void *get_property_impl(void *p) {
+    get_property_data *data = p;
+    return qmlbind_value_get_property(data->obj, data->key);
+}
+
+qmlbind_value rbqml_get_property(qmlbind_value obj, const char *key) {
+    get_property_data data;
+    data.obj = obj;
+    data.key = key;
+    return rb_thread_call_without_gvl(&get_property_impl, &data, RUBY_UBF_IO, NULL);
+}
+
+typedef struct {
+    qmlbind_value obj;
+    int index;
+} get_array_item_data;
+
+void *get_array_item_impl(void *p) {
+    get_array_item_data *data = p;
+    return qmlbind_value_get_array_item(data->obj, data->index);
+}
+
+qmlbind_value rbqml_get_array_item(qmlbind_value obj, int index) {
+    get_array_item_data data;
+    data.obj = obj;
+    data.index = index;
+    return rb_thread_call_without_gvl(&get_array_item_impl, &data, RUBY_UBF_IO, NULL);
+}
+
+typedef struct {
+    qmlbind_value obj;
+    const char *key;
+    qmlbind_value value;
+} set_property_data;
+
+void *set_property_impl(void *p) {
+    set_property_data *data = p;
+    qmlbind_value_set_property(data->obj, data->key, data->value);
+    return NULL;
+}
+
+void rbqml_set_property(qmlbind_value obj, const char *key, qmlbind_value value) {
+    set_property_data data;
+    data.obj = obj;
+    data.key = key;
+    data.value = value;
+    rb_thread_call_without_gvl(&set_property_impl, &data, RUBY_UBF_IO, NULL);
+}
+
+typedef struct {
+    qmlbind_value obj;
+    int index;
+    qmlbind_value value;
+} set_array_item_data;
+
+void *set_array_item_impl(void *p) {
+    set_array_item_data *data = p;
+    qmlbind_value_set_array_item(data->obj, data->index, data->value);
+    return NULL;
+}
+
+void rbqml_set_array_item(qmlbind_value obj, int index, qmlbind_value value) {
+    set_array_item_data data;
+    data.obj = obj;
+    data.index = index;
+    data.value = value;
+    rb_thread_call_without_gvl(&set_array_item_impl, &data, RUBY_UBF_IO, NULL);
+}
+
+
+qmlbind_value rbqml_get_iterator_value(qmlbind_iterator iter) {
+    return rb_thread_call_without_gvl((void *(*)(void *))&qmlbind_iterator_get_value, iter, RUBY_UBF_IO, NULL);
+}
+
+typedef struct {
     qmlbind_value value;
 } js_object_t;
 
@@ -73,9 +152,9 @@ static VALUE js_object_aref(VALUE self, VALUE key)
     qmlbind_value value;
 
     if (index >= 0) {
-        value = qmlbind_value_get_array_item(obj, index);
+        value = rbqml_get_array_item(obj, index);
     } else {
-        value = qmlbind_value_get_property(obj, keyStr);
+        value = rbqml_get_property(obj, keyStr);
     }
 
     qmlbind_value_release(obj);
@@ -95,9 +174,9 @@ static VALUE js_object_aset(VALUE self, VALUE key, VALUE value)
     get_property_key(key, &index, &keyStr);
 
     if (index >= 0) {
-        qmlbind_value_set_array_item(obj, index, qmlValue);
+        rbqml_set_array_item(obj, index, qmlValue);
     } else {
-        qmlbind_value_set_property(obj, keyStr, qmlValue);
+        rbqml_set_property(obj, keyStr, qmlValue);
     }
 
     qmlbind_value_release(obj);
@@ -111,7 +190,7 @@ static VALUE js_object_each_iterator(VALUE data)
     while (qmlbind_iterator_has_next(it)) {
         qmlbind_iterator_next(it);
 
-        qmlbind_value value = qmlbind_iterator_get_value(it);
+        qmlbind_value value = rbqml_get_iterator_value(it);
         VALUE rubyValue = rb_ensure(&rbqml_to_ruby, (VALUE)value, (VALUE (*)())&qmlbind_value_release, (VALUE)value);
 
         qmlbind_string str = qmlbind_iterator_get_key(it);

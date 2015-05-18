@@ -1,8 +1,7 @@
 #ifndef INTERFACE_H
 #define INTERFACE_H
 
-#include <ruby/ruby.h>
-#include <qmlbind.h>
+#include "qml.h"
 
 extern VALUE rbqml_mInterface;
 qmlbind_interface rbqml_get_interface(void);

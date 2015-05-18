@@ -29,9 +29,22 @@ static VALUE emitter_alloc(VALUE klass) {
     rb_raise(rb_eTypeError, "QML::SignalEmitter cannot be created from Ruby");
 }
 
+typedef struct {
+    qmlbind_signal_emitter emitter;
+    const char *name;
+    int argc;
+    qmlbind_value *argv;
+} emit_data;
+
+static void *emit_impl(void *p) {
+    emit_data *data = p;
+    qmlbind_signal_emitter_emit(data->emitter, data->name, data->argc, data->argv);
+    return NULL;
+}
+
 static VALUE emitter_emit(VALUE self, VALUE name, VALUE args) {
-    emitter_t *data;
-    TypedData_Get_Struct(self, emitter_t, &data_type, data);
+    emitter_t *d;
+    TypedData_Get_Struct(self, emitter_t, &data_type, d);
 
     int argc = RARRAY_LEN(args);
     qmlbind_value *qmlArgs = malloc(argc * sizeof(qmlbind_value));
@@ -41,7 +54,13 @@ static VALUE emitter_emit(VALUE self, VALUE name, VALUE args) {
         qmlArgs[i] = value;
     }
 
-    qmlbind_signal_emitter_emit(data->emitter, rb_id2name(SYM2ID(name)), argc, qmlArgs);
+    emit_data data;
+    data.emitter = d->emitter;
+    data.name = rb_id2name(SYM2ID(name));
+    data.argc = argc;
+    data.argv = qmlArgs;
+
+    rb_thread_call_without_gvl(&emit_impl, &data, RUBY_UBF_IO, NULL);
     return self;
 }
 

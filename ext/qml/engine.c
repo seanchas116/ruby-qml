@@ -82,6 +82,10 @@ static VALUE engine_evaluate(VALUE self, VALUE str, VALUE file, VALUE lineNum) {
     return result;
 }
 
+/*
+ * @paran [Integer] len
+ * @return [QML::JSArray]
+ */
 static VALUE engine_new_array(VALUE self, VALUE len) {
     qmlbind_engine engine = rbqml_get_engine(self);
 
@@ -92,6 +96,9 @@ static VALUE engine_new_array(VALUE self, VALUE len) {
     return value;
 }
 
+/*
+ * @return [QML::JSObject]
+ */
 static VALUE engine_new_object(VALUE self) {
     qmlbind_engine engine = rbqml_get_engine(self);
 
@@ -114,13 +121,15 @@ static VALUE engine_collect_garbage(VALUE self) {
 void rbqml_init_engine() {
     rb_require("qml/errors");
 
-    rbqml_cEngine = rb_define_class_under(rb_path2class("QML"), "Engine", rb_cObject);
+    VALUE mQML = rb_define_module("QML");
+
+    rbqml_cEngine = rb_define_class_under(mQML, "Engine", rb_cObject);
     rb_define_alloc_func(rbqml_cEngine, &engine_alloc);
 
-    rb_define_private_method(rbqml_cEngine, "initialize", &engine_initialize, 0);
-    rb_define_method(rbqml_cEngine, "add_import_path", &engine_add_import_path, 1);
-    rb_define_method(rbqml_cEngine, "evaluate_impl", &engine_evaluate, 3);
-    rb_define_method(rbqml_cEngine, "new_array", &engine_new_array, 1);
-    rb_define_method(rbqml_cEngine, "new_object", &engine_new_object, 0);
-    rb_define_method(rbqml_cEngine, "collect_garbage", &engine_collect_garbage, 0);
+    rb_define_private_method(rbqml_cEngine, "initialize", engine_initialize, 0);
+    rb_define_method(rbqml_cEngine, "add_import_path", engine_add_import_path, 1);
+    rb_define_private_method(rbqml_cEngine, "evaluate_impl", engine_evaluate, 3);
+    rb_define_method(rbqml_cEngine, "new_array", engine_new_array, 1);
+    rb_define_method(rbqml_cEngine, "new_object", engine_new_object, 0);
+    rb_define_method(rbqml_cEngine, "collect_garbage", engine_collect_garbage, 0);
 }

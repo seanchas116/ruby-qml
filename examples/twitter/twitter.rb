@@ -2,7 +2,6 @@ $LOAD_PATH.unshift File.expand_path('../../../lib', __FILE__)
 require 'qml'
 require 'twitter'
 require 'yaml'
-require 'celluloid'
 
 module Examples
   module Twitter

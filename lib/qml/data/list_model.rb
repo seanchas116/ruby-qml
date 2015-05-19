@@ -12,6 +12,7 @@ module QML
     def initialize(*columns)
       @columns = columns
       @access = ListModelAccess.create(self)
+      @qml_model = QML::Plugins.rubyqml.createListModel(@access)
     end
 
     # Iterates each item.
@@ -44,7 +45,7 @@ module QML
 
     # @return [QML::JSValue]
     def to_qml
-      QML::Plugins.rubyqml.createListModel(@access)
+      @qml_model
     end
 
     protected

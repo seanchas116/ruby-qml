@@ -39,6 +39,10 @@ static VALUE plugin_loader_init(VALUE self, VALUE path) {
     return self;
 }
 
+/*
+ * Loads the plugin and returns the instance of the plugin.
+ * @return [QML::JSObject]
+ */
 static VALUE plugin_loader_instance(VALUE self) {
     qmlbind_plugin plugin = rbqml_get_plugin(self);
 
@@ -58,9 +62,10 @@ static VALUE plugin_loader_instance(VALUE self) {
 void rbqml_init_plugin_loader(void) {
     cPluginError = rb_path2class("QML::PluginError");
 
-    rbqml_cPluginLoader = rb_define_class_under(rb_path2class("QML"), "PluginLoader", rb_cObject);
+    VALUE mQML = rb_define_module("QML");
+    rbqml_cPluginLoader = rb_define_class_under(mQML, "PluginLoader", rb_cObject);
     rb_define_alloc_func(rbqml_cPluginLoader, &plugin_loader_alloc);
 
-    rb_define_private_method(rbqml_cPluginLoader, "initialize_impl", &plugin_loader_init, 1);
-    rb_define_method(rbqml_cPluginLoader, "instance", &plugin_loader_instance, 0);
+    rb_define_private_method(rbqml_cPluginLoader, "initialize_impl", plugin_loader_init, 1);
+    rb_define_method(rbqml_cPluginLoader, "instance", plugin_loader_instance, 0);
 }

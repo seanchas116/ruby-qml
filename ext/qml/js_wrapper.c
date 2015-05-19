@@ -10,6 +10,7 @@ static VALUE js_wrapper_unwrap(VALUE self) {
 }
 
 void rbqml_init_js_wrapper(void) {
-    rbqml_cJSWrapper = rb_define_class_under(rb_path2class("QML"), "JSWrapper", rbqml_cJSObject);
-    rb_define_method(rbqml_cJSWrapper, "unwrap", &js_wrapper_unwrap, 0);
+    VALUE mQML = rb_define_module("QML");
+    rbqml_cJSWrapper = rb_define_class_under(mQML, "JSWrapper", rbqml_cJSObject);
+    rb_define_method(rbqml_cJSWrapper, "unwrap", js_wrapper_unwrap, 0);
 }

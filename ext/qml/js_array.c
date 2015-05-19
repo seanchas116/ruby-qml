@@ -36,8 +36,9 @@ static VALUE js_array_each(VALUE self)
 
 void rbqml_init_js_array(void)
 {
-    rbqml_cJSArray = rb_define_class_under(rb_path2class("QML"), "JSArray", rbqml_cJSObject);
+    VALUE mQML = rb_define_module("QML");
+    rbqml_cJSArray = rb_define_class_under(mQML, "JSArray", rbqml_cJSObject);
 
-    rb_define_method(rbqml_cJSArray, "length", &js_array_length, 0);
-    rb_define_method(rbqml_cJSArray, "each", &js_array_each, 0);
+    rb_define_method(rbqml_cJSArray, "length", js_array_length, 0);
+    rb_define_method(rbqml_cJSArray, "each", js_array_each, 0);
 }

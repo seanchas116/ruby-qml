@@ -82,9 +82,10 @@ static VALUE js_function_call_with_instance(int argc, VALUE *argv, VALUE self) {
 }
 
 void rbqml_init_js_function(void) {
-    rbqml_cJSFunction = rb_define_class_under(rb_path2class("QML"), "JSFunction", rbqml_cJSObject);
+    VALUE mQML = rb_define_module("QML");
+    rbqml_cJSFunction = rb_define_class_under(mQML, "JSFunction", rbqml_cJSObject);
 
-    rb_define_method(rbqml_cJSFunction, "call", &js_function_call, -2);
-    rb_define_method(rbqml_cJSFunction, "new", &js_function_new, -2);
-    rb_define_method(rbqml_cJSFunction, "call_with_instance", &js_function_call_with_instance, -1);
+    rb_define_method(rbqml_cJSFunction, "call", js_function_call, -2);
+    rb_define_method(rbqml_cJSFunction, "new", js_function_new, -2);
+    rb_define_method(rbqml_cJSFunction, "call_with_instance", js_function_call_with_instance, -1);
 }

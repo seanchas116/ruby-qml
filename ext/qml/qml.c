@@ -17,8 +17,7 @@ VALUE rbqml_application = Qnil;
 VALUE rbqml_engine = Qnil;
 
 /*
- * Initializes ruby-qml.
- * @param [Array<String>] args Arguments to pass to the application
+ * @api private
  */
 static VALUE qml_init(VALUE module, VALUE args) {
     if (!NIL_P(rbqml_application)) {
@@ -74,7 +73,7 @@ void Init_qml(void)
     rbqml_init_plugin_loader();
     rbqml_init_dispatcher();
 
-    rb_define_module_function(rbqml_mQML, "init_impl", &qml_init, 1);
-    rb_define_module_function(rbqml_mQML, "application", &qml_application, 0);
-    rb_define_module_function(rbqml_mQML, "engine", &qml_engine, 0);
+    rb_define_module_function(rbqml_mQML, "init_impl", qml_init, 1);
+    rb_define_module_function(rbqml_mQML, "application", qml_application, 0);
+    rb_define_module_function(rbqml_mQML, "engine", qml_engine, 0);
 }

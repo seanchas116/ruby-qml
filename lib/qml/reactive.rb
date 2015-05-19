@@ -45,6 +45,14 @@ module QML
 
     module ClassMethods
 
+      # @api public
+      # Defines a signal.
+      # @example
+      #  class Button
+      #    include QML::Reactive::Object
+      #    signal :pressed, [:pos]
+      #    ...
+      #  end
       def signal(name, params = [])
         name = name.to_sym
         signal_infos(false)[name] = SignalInfo.new.tap do |info|
@@ -77,6 +85,13 @@ module QML
         end
       end
 
+      # Defines a property.
+      # @example
+      #   class Foo
+      #     include QML::Access
+      #     property(:name) { 'hogehoge' }
+      #     ...
+      #   end
       def property(name, &block)
         name = name.to_sym
         signal(:"#{name}_changed", [:"new_#{name}"])

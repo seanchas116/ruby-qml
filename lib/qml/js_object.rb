@@ -1,4 +1,5 @@
 module QML
+  # The JSObject represents JavaScript objects.
   class JSObject
 
     alias_method :each, :each_pair
@@ -31,6 +32,7 @@ module QML
       has_key?(method) || super
     end
 
+    # Gets or sets a JS property, or call it as a method if it is a function.
     def method_missing(method, *args)
       if method[-1] == '='
         # setter

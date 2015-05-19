@@ -47,12 +47,14 @@ module QML
     end
 
     # Instantiates a object from the QML file.
-    # @return [QtObjectBase] The created Qt object
+    # @return [QML::JSObject] The created object
     def create
       check_error_string do
         create_impl
       end
     end
+
+    private
 
     def check_error_string
       yield.tap do

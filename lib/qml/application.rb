@@ -50,6 +50,8 @@ module QML
     end
   end
 
+  # Initializes ruby-qml.
+  # @param [Array<String>] args Arguments to pass to the application
   def init(args = [])
     init_impl(args)
   end

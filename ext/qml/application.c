@@ -78,10 +78,11 @@ static VALUE application_process_events(VALUE application) {
 }
 
 void rbqml_init_application(void) {
-    rbqml_cApplication = rb_define_class_under(rb_path2class("QML"), "Application", rb_cObject);
-    rb_define_alloc_func(rbqml_cApplication, &application_alloc);
+    VALUE mQML = rb_define_module("QML");
+    rbqml_cApplication = rb_define_class_under(mQML, "Application", rb_cObject);
+    rb_define_alloc_func(rbqml_cApplication, application_alloc);
 
-    rb_define_private_method(rbqml_cApplication, "initialize", &application_initialize, 1);
-    rb_define_method(rbqml_cApplication, "exec", &application_exec, 0);
-    rb_define_method(rbqml_cApplication, "process_events", &application_process_events, 0);
+    rb_define_private_method(rbqml_cApplication, "initialize", application_initialize, 1);
+    rb_define_method(rbqml_cApplication, "exec", application_exec, 0);
+    rb_define_method(rbqml_cApplication, "process_events", application_process_events, 0);
 }

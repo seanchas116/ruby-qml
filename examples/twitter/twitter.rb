@@ -41,9 +41,8 @@ module Examples
 
     class TwitterController
       include QML::Access
-      register_to_qml
 
-      property :model, QML::Data::ArrayModel.new(:tweet_text, :user_name, :user_icon)
+      property(:model) { QML::ArrayModel.new(:tweet_text, :user_name, :user_icon) }
       property :word
 
       def initialize
@@ -64,10 +63,15 @@ module Examples
         word = self.word
         @thread = Thread.new do
           TweetFetcher.new.start(word) do |tweet|
-            later.add_tweet(tweet)
+            QML.next_tick do
+              add_tweet(tweet)
+            end
           end
         end
+        nil
       end
+
+      register_to_qml
     end
   end
 end

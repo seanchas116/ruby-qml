@@ -6,13 +6,18 @@ require '../../lib/qml/platform'
 
 qmake = with_config('qmake') || find_executable('qmake')
 debug_enabled = enable_config('debug')
+clean_enabled = enable_config('clean')
+qmake_opts = debug_enabled ? 'CONFIG+=debug' : ''
 
 # build libqmlbind
 
 qmlbind_dir = Pathname.pwd + 'lib/libqmlbind/qmlbind'
 
 Dir.chdir(qmlbind_dir) do
-  system "#{qmake} && make" or fail "Failed to make libqmlbind"
+  puts "  >>> building libqmlbind..."
+  system "#{qmake} #{qmake_opts}"
+  system "make clean" if clean_enabled
+  system "make -j4" or abort "ERROR: Failed to build libqmlbind"
 end
 
 case
@@ -28,11 +33,13 @@ end
 # build plugin
 
 Dir.chdir "rubyqml-plugin" do
-  qmake_opts = debug_enabled ? 'CONFIG+=debug' : ''
-  system "#{qmake} #{qmake_opts}" or fail "failed to configurate plugin"
-  system "make clean" if enable_config('clean-plugin', false)
-  system "make" or fail "failed to build plugin"
+  puts "  >>> building rubyqml-plugin..."
+  system "#{qmake} #{qmake_opts}"
+  system "make clean" if clean_enabled
+  system "make -j4" or abort "ERROR: Failed to build plugin"
 end
+
+puts "  >>> configuring..."
 
 # create makefile
 

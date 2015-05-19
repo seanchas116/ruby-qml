@@ -489,6 +489,13 @@ end
 
 ## Contributing
 
+### Init submodules
+
+```
+$ git submodule init
+$ git submodule update
+```
+
 ### Install dependencies
 
 ```
@@ -502,7 +509,7 @@ To build it, run the following commands:
 
 ```
 $ cd ext/qml
-$ bundle exec ruby extconf.rb --with-qt-dir=/path/to/qt --with-libffi-dir=/path/to/libffi
+$ bundle exec ruby extconf.rb --with-qmake=/path/to/qmake
 $ make -j4
 ```
 

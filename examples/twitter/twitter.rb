@@ -40,6 +40,7 @@ module Examples
 
     class TwitterController
       include QML::Access
+      register_to_qml
 
       property(:model) { QML::ArrayModel.new(:tweet_text, :user_name, :user_icon) }
       property :word
@@ -69,8 +70,6 @@ module Examples
         end
         nil
       end
-
-      register_to_qml
     end
   end
 end

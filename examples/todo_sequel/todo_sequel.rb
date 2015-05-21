@@ -34,6 +34,7 @@ module Examples
 
     class TodoController
       include QML::Access
+      register_to_qml
 
       def initialize
         super
@@ -56,8 +57,6 @@ module Examples
         model.dataset = @todo_dataset.order(order_by.to_sym)
         model.update
       end
-
-      register_to_qml
     end
   end
 end

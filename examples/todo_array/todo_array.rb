@@ -8,6 +8,7 @@ module Examples
 
     class TodoController
       include QML::Access
+      register_to_qml
 
       property(:title) { '' }
       property(:description) { '' }
@@ -23,8 +24,6 @@ module Examples
         p item
         model << item
       end
-
-      register_to_qml
     end
   end
 end

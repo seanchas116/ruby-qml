@@ -8,6 +8,7 @@ module Examples
 
     class FizzBuzz
       include QML::Access
+      register_to_qml
 
       property(:input) { '0' }
       property(:result) { '' }
@@ -32,8 +33,6 @@ module Examples
         puts "quitting..."
         QML.application.quit
       end
-
-      register_to_qml
     end
   end
 end

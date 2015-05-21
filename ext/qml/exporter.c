@@ -3,6 +3,7 @@
 #include "application.h"
 #include "interface.h"
 #include "engine.h"
+#include "meta_object.h"
 
 static VALUE referenced_objects;
 VALUE rbqml_cExporter;
@@ -14,7 +15,8 @@ typedef struct {
 
 static void exporter_free(void *p) {
     exporter *data = (exporter *)p;
-    qmlbind_exporter_release(data->exporter);
+
+    rb_thread_call_without_gvl((void *(*)(void *))&qmlbind_exporter_release, data->exporter, RUBY_UBF_IO, NULL);
     xfree(data);
 }
 
@@ -71,27 +73,21 @@ static VALUE exporter_add_property(VALUE self, VALUE name, VALUE notifier) {
     return Qnil;
 }
 
-static VALUE exporter_register(VALUE self, VALUE uri, VALUE versionMajor, VALUE versionMinor, VALUE qmlName) {
+static VALUE exporter_to_metaobject(VALUE self) {
     qmlbind_exporter exporter = rbqml_get_exporter(self);
-
     qmlbind_metaobject metaobj = qmlbind_metaobject_new(exporter);
-    qmlbind_register_type(
-        metaobj,
-        rb_string_value_cstr(&uri),
-        NUM2INT(versionMajor), NUM2INT(versionMinor),
-        rb_string_value_cstr(&qmlName));
-
-    return Qnil;
+    return rbqml_metaobject_new(metaobj);
 }
 
 void rbqml_init_exporter() {
-    rbqml_cExporter = rb_define_class_under(rb_path2class("QML"), "Exporter", rb_cObject);
+    VALUE mQML = rb_define_module("QML");
+    rbqml_cExporter = rb_define_class_under(mQML, "Exporter", rb_cObject);
 
     rb_define_alloc_func(rbqml_cExporter, &exporter_alloc);
 
-    rb_define_private_method(rbqml_cExporter, "initialize", &exporter_initialize, 2);
-    rb_define_method(rbqml_cExporter, "add_method", &exporter_add_method, 2);
-    rb_define_method(rbqml_cExporter, "add_signal", &exporter_add_signal, 2);
-    rb_define_method(rbqml_cExporter, "add_property", &exporter_add_property, 2);
-    rb_define_method(rbqml_cExporter, "register", &exporter_register, 4);
+    rb_define_private_method(rbqml_cExporter, "initialize", exporter_initialize, 2);
+    rb_define_method(rbqml_cExporter, "add_method", exporter_add_method, 2);
+    rb_define_method(rbqml_cExporter, "add_signal", exporter_add_signal, 2);
+    rb_define_method(rbqml_cExporter, "add_property", exporter_add_property, 2);
+    rb_define_method(rbqml_cExporter, "to_meta_object", exporter_to_metaobject, 0);
 }

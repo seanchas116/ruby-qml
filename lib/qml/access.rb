@@ -22,10 +22,45 @@ module QML
       end
     end
 
+    def to_qml
+      @qml_value ||= self.class.meta_object.wrap(self)
+    end
+
     # allowed name patterns for exposed method names
     ALLOWED_PATTERN = /^[a-zA-Z_]\w*$/
 
     module ClassMethods
+
+      def meta_object
+        @meta_object ||= begin
+          exporter = Exporter.new(self, name)
+
+          signals = self.signals.grep(ALLOWED_PATTERN)
+          properties = self.properties.grep(ALLOWED_PATTERN)
+
+          signals.each do |signal|
+            exporter.add_signal(signal, signal_infos[signal].params)
+          end
+
+          properties.each do |prop|
+            exporter.add_property(prop, :"#{prop}_changed")
+          end
+
+          methods = ancestors.take_while { |k| k.include?(Access) }
+            .map { |k| k.instance_methods(false) }.inject(&:|)
+            .grep(ALLOWED_PATTERN)
+          ignored_methods = signals | properties.flat_map { |p| [p, :"#{p}=", :"#{p}_changed"] }
+
+          (methods - ignored_methods).each do |method|
+            instance_method = self.instance_method(method)
+            # ignore variadic methods
+            if instance_method.arity >= 0
+              exporter.add_method(method, instance_method.arity)
+            end
+          end
+          exporter.to_meta_object
+        end
+      end
 
       # Registers the class as a QML type.
       # @param opts [Hash]
@@ -40,35 +75,8 @@ module QML
 
       def register_to_qml_impl(opts)
         metadata = guess_metadata(opts)
-        classname = "RubyQml::Access::#{name}"
 
-        exporter = Exporter.new(self, classname)
-
-        signals = self.signals.grep(ALLOWED_PATTERN)
-        properties = self.properties.grep(ALLOWED_PATTERN)
-
-        signals.each do |signal|
-          exporter.add_signal(signal, signal_infos[signal].params)
-        end
-
-        properties.each do |prop|
-          exporter.add_property(prop, :"#{prop}_changed")
-        end
-
-        methods = ancestors.take_while { |k| k.include?(Access) }
-          .map { |k| k.instance_methods(false) }.inject(&:|)
-          .grep(ALLOWED_PATTERN)
-        ignored_methods = signals | properties.flat_map { |p| [p, :"#{p}=", :"#{p}_changed"] }
-
-        (methods - ignored_methods).each do |method|
-          instance_method = self.instance_method(method)
-          # ignore variadic methods
-          if instance_method.arity >= 0
-            exporter.add_method(method, instance_method.arity)
-          end
-        end
-
-        exporter.register(
+        meta_object.register(
           metadata[:under],
           metadata[:versions][0],
           metadata[:versions][1],

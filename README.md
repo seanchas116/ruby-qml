@@ -361,8 +361,6 @@ obj[:value] #=> 11
 
 `PluginLoader` loads Qt C++ plugins.
 It enables you to use your Qt C++ codes from Ruby easily.
-The instance will be a `QML::JSObject` which represents the plugin Qt object.
-
 
 ```c++
 // C++ - plugin example
@@ -384,6 +382,8 @@ public slots:
 
 ```ruby
 # Ruby
+
+# The instance will be a `QML::JSObject` which represents the plugin Qt object
 plugin = QML::PluginLoader.new(directory, "myplugin").instance
 
 # Connect to signal (see http://doc.qt.io/qt-5/qtqml-syntax-signals.html#connecting-signals-to-methods-and-signals)

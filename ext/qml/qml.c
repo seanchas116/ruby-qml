@@ -11,6 +11,7 @@
 #include "signal_emitter.h"
 #include "plugin_loader.h"
 #include "dispatcher.h"
+#include "meta_object.h"
 
 VALUE rbqml_mQML;
 VALUE rbqml_application = Qnil;
@@ -85,6 +86,7 @@ void Init_qml(void)
     rbqml_init_signal_emitter();
     rbqml_init_plugin_loader();
     rbqml_init_dispatcher();
+    rbqml_init_meta_object();
 
     rb_define_module_function(rbqml_mQML, "initialized?", qml_initialized_p, 0);
     rb_define_module_function(rbqml_mQML, "init_impl", qml_init, 1);

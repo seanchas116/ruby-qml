@@ -56,4 +56,12 @@ describe '#to_qml' do
       expect(jsarray.to_time).to eq time
     end
   end
+
+  describe 'Access#to_qml' do
+    it 'converts access to QML value' do
+      access = AccessExample.new
+      obj = through.call(access)
+      expect(obj.some_method(1, 2)).to eq(3)
+    end
+  end
 end

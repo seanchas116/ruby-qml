@@ -309,21 +309,23 @@ HeavyTaskController {
 |Array           |Array                           |
 |Hash            |plain Object                    |
 |Time            |Date                            |
+|QML::Access     |Object(QObject derived)         |
 |QML::ListModel  |Object(QAbstractListModel)      |
 
 You can customize this by implementing `#to_qml` method.
 
 #### QML to Ruby
 
-|QML/JavaScript  |Ruby            |
-|----------------|----------------|
-|null/undefined  |nil             |
-|boolean         |true/false      |
-|number          |Float           |
-|string          |String          |
-|Array           |QML::JSArray    |
-|Function        |QML::JSFunction |
-|Object          |QML::JSObject   |
+|QML/JavaScript                  |Ruby            |
+|--------------------------------|----------------|
+|null/undefined                  |nil             |
+|boolean                         |true/false      |
+|number                          |Float           |
+|string                          |String          |
+|Array                           |QML::JSArray    |
+|Function                        |QML::JSFunction |
+|Object                          |QML::JSObject   |
+|Object wrapping QML::Access     |QML::JSWrapper  |
 
 You can convert Objects further through QML::JSObject methods.
 

@@ -4,6 +4,9 @@
 
 VALUE rbqml_cJSArray;
 
+/*
+ * @return [Integer]
+ */
 static VALUE js_array_length(VALUE self)
 {
     qmlbind_value array = rbqml_js_object_get(self);

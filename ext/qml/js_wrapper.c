@@ -2,6 +2,9 @@
 
 VALUE rbqml_cJSWrapper;
 
+/*
+ * @return [QML::Access]
+ */
 static VALUE js_wrapper_unwrap(VALUE self) {
     qmlbind_value wrapper = rbqml_js_object_get(self);
     VALUE unwrapped = (VALUE)qmlbind_value_get_backref(wrapper);

@@ -4,14 +4,17 @@ module QML
 
     alias_method :each, :each_pair
 
+    # @return [Array<String>]
     def keys
       each.map { |k, v| k }
     end
 
+    # @return [Array]
     def values
       each.map { |k, v| v }
     end
 
+    # @return [Hash]
     def to_hash
       {}.tap do |hash|
         each do |k, v|
@@ -20,10 +23,12 @@ module QML
       end
     end
 
+    # @return [Time]
     def to_time
       Time.at(getTime.to_i / 1000r).getlocal(-getTimezoneOffset * 60)
     end
 
+    # @return [QML::QMLError]
     def to_error
       QMLError.new(self['message'])
     end
@@ -56,6 +61,7 @@ module QML
       end
     end
 
+    # @return [QML::JSObject] self
     def to_qml
       self
     end

@@ -43,7 +43,7 @@ module QML
       fail ::NotImplementedError
     end
 
-    # @return [QML::JSValue]
+    # @return [QML::JSObject]
     def to_qml
       @qml_model
     end

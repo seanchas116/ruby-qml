@@ -50,12 +50,19 @@ module QML
     end
   end
 
+  INIT_BLOCKS = []
+
+  module_function
+
+  def on_init(&block)
+    INIT_BLOCKS << block
+  end
+
   # Initializes ruby-qml.
   # @param [Array<String>] args Arguments to pass to the application
   def init(args = [])
     init_impl(args)
   end
-  module_function :init
 
   # Creates an {Application}, yields it and then call {QML::Application#exec}.
   # @return [Application]
@@ -70,5 +77,4 @@ module QML
       app.exec
     end
   end
-  module_function :run
 end

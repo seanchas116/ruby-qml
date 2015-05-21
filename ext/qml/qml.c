@@ -30,7 +30,20 @@ static VALUE qml_init(VALUE module, VALUE args) {
     rb_gc_register_address(&rbqml_application);
     rb_gc_register_address(&rbqml_engine);
 
+    VALUE blocks = rb_const_get(module, rb_intern("INIT_BLOCKS"));
+    for (int i = 0; i < RARRAY_LEN(blocks); ++i) {
+        rb_proc_call(RARRAY_AREF(blocks, i), rb_ary_new());
+    }
+
     return module;
+}
+
+static VALUE qml_initialized_p(VALUE module) {
+    if (NIL_P(rbqml_application)) {
+        return Qfalse;
+    } else {
+        return Qtrue;
+    }
 }
 
 /*
@@ -73,6 +86,7 @@ void Init_qml(void)
     rbqml_init_plugin_loader();
     rbqml_init_dispatcher();
 
+    rb_define_module_function(rbqml_mQML, "initialized?", qml_initialized_p, 0);
     rb_define_module_function(rbqml_mQML, "init_impl", qml_init, 1);
     rb_define_module_function(rbqml_mQML, "application", qml_application, 0);
     rb_define_module_function(rbqml_mQML, "engine", qml_engine, 0);

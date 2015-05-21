@@ -33,6 +33,12 @@ module QML
       # @option opts [String] :version the version of the type. Defaults to VERSION constant of the encapsulating module / class of the class.
       # @option opts [String] :name the name of the type. Defaults to the name of the class.
       def register_to_qml(opts = {})
+        QML.on_init do
+          register_to_qml_impl(opts)
+        end
+      end
+
+      def register_to_qml_impl(opts)
         metadata = guess_metadata(opts)
         classname = "RubyQml::Access::#{name}"
 

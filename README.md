@@ -28,27 +28,24 @@ It provides bindings between QML and Ruby and enables you to use Qt Quick-based 
 
 ### Requirements
 
-* **Ruby 1.9 or later**
+* **Ruby 2.1 or later**
 * **OS X or Linux**
-* pkg-config
-* libffi
 * Qt 5.2 or later
 
 ### OS X with Homebrew
 
 To install ruby-qml on OS X with Homebrew, run the following commands:
 
-    $ brew install pkg-config libffi qt5
-    $ gem install qml -- --with-libffi-dir=$(brew --prefix libffi) --with-qt-dir=$(brew --prefix qt5)
+    $ brew install qt5
+    $ gem install qml -- --with-qmake=$(brew --prefix qt5)/bin/qmake
 
 Both libffi and Qt5 are keg-only in Homebrew, so you must specify their paths explicitly (or force linking).
 
 If you use [official Qt installation](http://qt-project.org/downloads), for example:
 
-    $ brew install pkg-config libffi
-    $ gem install qml -- --with-libffi-dir=$(brew --prefix libffi) --with-qt-dir=$HOME/Qt/5.3/clang_64
+    $ gem install qml -- --with-qmake=$HOME/Qt/5.4/clang_64/bin/qmake
 
-The Qt installation path (`$HOME/Qt/5.3/clang_64` in this example) depends on your Qt installation configuration and Qt version.
+The Qt installation path (`$HOME/Qt/5.4/clang_64` in this example) depends on your Qt installation configuration and Qt version.
 
 ### General (OSX and Linux)
 
@@ -56,10 +53,8 @@ The Qt installation path (`$HOME/Qt/5.3/clang_64` in this example) depends on yo
 
 #### Options
 
-* `--with-libffi-dir=[dir]`
-  * libffi installation directory (optional).
-* `--with-qt-dir=[dir]`
-  * Qt installation directory (optional).
+* `--with-qmake=[dir]`
+  * Qt qmake executable path (optional).
 
 ### Use Gemfile
 
@@ -74,7 +69,7 @@ And then execute:
 To pass build options, use `bundle config`.
 For example:
 
-    $ bundle config build.qml --with-libffi-dir=$(brew --prefix libffi) --with-qt-dir=$(brew --prefix qt5)
+    $ bundle config build.qml --with-qmake=$(brew --prefix qt5)/bin/qmake
 
 The configuration will be saved in `~/.bundle/config`.
 

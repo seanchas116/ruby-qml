@@ -15,7 +15,7 @@ It provides bindings between QML and Ruby and enables you to use Qt Quick-based 
 
 ## What you can do with ruby-qml
 
-* Develop desktop GUI applications only with Ruby and QML
+* Develop desktop GUI applications only with Ruby and QML / JavaScript
 * Easily combine codes written in C++ and Qt with your Ruby code
 
 ## Gallery
@@ -117,8 +117,8 @@ class FizzBuzz
   include QML::Access
   register_to_qml under: "Example", version: "1.0"
 
-  property :input, '0'
-  property :result , ''
+  property(:input) { '0' }
+  property(:result) { '' }
   signal :inputWasFizzBuzz, []
 
   on_changed :input do
@@ -199,32 +199,15 @@ module Example
 end
 ```
 
-If the Ruby object is singleton, you can use the root context to make it available to QML.
-In this case, you don't have to use `register_to_qml`.
-
-```ruby
-class Foo
-  include QML::Access
-  def foo
-    puts "foo"
-  end
-end
-
-QML.run do |app|
-  app.context[:foo] = Foo.new
-  app.load_path Pathname(__FILE__) + '../main.qml'
-end
-```
-
 ### Pass data to QML ListModels
 
 To bind list data between QML ListView and Ruby, you can use ListModels.
 
-* `QML::Data::ListModel` - the base class for ruby-qml list models.
+* `QML::ListModel` - the base class for ruby-qml list models.
 
-* `QML::Data::ArrayModel` - provides a simple list model implementation using Array.
+* `QML::ArrayModel` - provides a simple list model implementation using Array.
 
-* `QML::Data::QueryModel` - for databases (like ActiveRecord, Sequel or something)
+* `QML::QueryModel` - for databases (like ActiveRecord, Sequel or something)
 
 This example uses `ArrayModel` to provide list data for a QML ListView.
 When the content of the ArrayModel is changed, the list view is also automatically updated.
@@ -239,7 +222,7 @@ class TodoController
   include QML::Access
   register_to_qml under: "Example", version: "1.0"
 
-  property :model, QML::Data::ArrayModel.new(:title, :description, :due_date)
+  property(:model) { QML::ArrayModel.new(:title, :description, :due_date) }
 
   def add(title, description, due_date)
     # Items of list models must be "Hash-like" (have #[] method to get columns)
@@ -270,7 +253,7 @@ TodoController {
 ### Combile asynchronous operations
 
 In QML, all UI-related operations are done synchronously in the event loop.
-To set result of asynchronous operations to the UI, use `QML.later` or `QML::Dispatchable#later`.
+To set result of asynchronous operations to the UI, use `QML.next_tick`.
 
 #### Examples
 
@@ -279,11 +262,10 @@ To set result of asynchronous operations to the UI, use `QML.later` or `QML::Dis
 ```ruby
 # Ruby
 class HeavyTaskController
-  # QML::Access includes QML::Dispathable
   include QML::Access
   register_to_qml under: "Example", version: "1.0"
 
-  property :result, ''
+  property(:result) { '' }
 
   def set_result(result)
     self.result = result
@@ -291,9 +273,7 @@ class HeavyTaskController
 
   def start_heavy_task
     Thread.new do
-      self.later.set_result do_heavy_task() # #set_result is called in the main thread in the next event loop
-      # or
-      QML.later do
+      QML.next_tick do
         set_result do_heavy_task()
       end
     end
@@ -315,62 +295,73 @@ HeavyTaskController {
 }
 ```
 
-### Use Qt objects in Ruby
+### Value conversions between Ruby and QML JavaScript
 
-In ruby-qml, Qt objects (QObject-derived C++ objects and QML objects) can be accessed from Ruby via the meta-object system of Qt.
 
-You can access:
+#### Ruby to QML
 
-* Properties
-* Signals
-* Slots (as methods), Q_INVOKAVLE methods, QML methods
+|Ruby            |QML/JavaScript                  |
+|----------------|--------------------------------|
+|nil             |null                            |
+|true/false      |boolean                         |
+|Numeric         |number                          |
+|String/Symbol   |string                          |
+|Array           |Array                           |
+|Hash            |plain Object                    |
+|Time            |Date                            |
+|QML::ListModel  |Object(QAbstractListModel)      |
 
-You cannot access:
+You can customize this by implementing `#to_qml` method.
 
-* Normal C++ member functions
+#### QML to Ruby
 
-If their names are camelCase in Qt, ruby-qml aliases them as underscore_case.
+|QML/JavaScript  |Ruby            |
+|----------------|----------------|
+|null/undefined  |nil             |
+|boolean         |true/false      |
+|number          |Float           |
+|string          |String          |
+|Array           |QML::JSArray    |
+|Function        |QML::JSFunction |
+|Object          |QML::JSObject   |
+
+You can convert Objects further through QML::JSObject methods.
+
+
+### QML::JSObject usage
+
+`QML::JSObject` is the wrapper class for JavaScript objects.
 
 ```ruby
-# QML::Application is a wrapper for QApplication
-app = QML.application
+obj = QML.engine.evaluate <<-JS
+  ({
+    value: 1,
+    add: function(d) {
+      this.value += d;
+    }
+  })
+JS
 
-# set property
-app.applicationName = "Test"
-app.application_name = "Test" # aliased version
+# Getter
+obj.value #=> 1
 
-# connect to signal
-app.aboutToQuit.connect do # "about_to_quit" is also OK
-  puts "quitting..."
-end
+# Setter
+obj.value = 2
+obj.vaue #=> 2
 
-# call method (slot)
-app.quit
+# Call method if the property is a function
+obj.add(10)
+obj.value #=> 11
+
+# Subscription
+obj[:value] #=> 11
 ```
-
-### Value conversions
-
-The following types are automatically converted between Ruby and QML:
-
-* Integer
-* Double
-* String
-* Time
-* Date
-* DateTime
-* Array
-* Hash
-* QML::Geometry::Point (QPoint, QPointF)
-* QML::Geometry::Size (QSize, QSizeF)
-* QML::Geometry::Rectangle (QRect, QRectF)
-* QML::QtObjectBase (Qt objects)
-* QML::Access
-* QML::Data::ListModel
 
 ### Load and use Qt C++ plugins
 
 `PluginLoader` loads Qt C++ plugins.
 It enables you to use your Qt C++ codes from Ruby easily.
+The instance will be a `QML::JSObject` which represents the plugin Qt object.
 
 
 ```c++
@@ -395,38 +386,12 @@ public slots:
 # Ruby
 plugin = QML::PluginLoader.new(directory, "myplugin").instance
 
-plugin.added.connect do |value|
+# Connect to signal (see http://doc.qt.io/qt-5/qtqml-syntax-signals.html#connecting-signals-to-methods-and-signals)
+plugin[:added].connect do |value|
   puts "added value: #{value}"
 end
 
 plugin.add(1, 2) #=> 3
-```
-
-### Garbage collection
-
-To support garbage collection of Qt objects used in ruby-qml,
-`#managed?` attribute of each Qt object wrappr determines its memory management status.
-
-#### Managed objects
-
-*Manged objects* are managed by Ruby and QML and garbage collected when no longer reachable.
-All objects created inside QML and objects returned from C++ methods will be *managed* by default.
-
-#### Unmanaged objects
-
-*Unmanaged* objects are not managed and never garbage collected.
-Objects that have parents or that obtained from properties of other Qt objects will be *unmanaged* by default.
-
-#### Specify management status explicitly
-
-The `#managed?` method returns whether the object is managed or not.
-The `#prefer_managed` methods sets management status safely
-(e.g., objects that are created by QML will remain managed and objects that have parents will remain unmanaged).
-
-```ruby
-plugin = PluginLoader.new(path).instance
-obj = plugin.create_object
-obj.prefer_managed false
 ```
 
 ### Use with EventMachine
@@ -459,7 +424,7 @@ require 'em-http-request'
 
 class Controller
   include QML::Access
-  property :result, ''
+  property(:result) { '' }
 
   def get
     EM.synchrony do

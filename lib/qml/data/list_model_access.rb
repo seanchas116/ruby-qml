@@ -1,4 +1,5 @@
 module QML
+  # @api private
   class ListModelAccess
     include Access
 

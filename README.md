@@ -231,7 +231,6 @@ class TodoController
       description: description,
       due_date: due_date
     }
-    p item
     model << item
   end
 end
@@ -357,6 +356,7 @@ obj.value #=> 11
 
 # Subscription
 obj[:value] #=> 11
+obj[:add] #=> #<QML::JSFunction:...>
 ```
 
 ### Load and use Qt C++ plugins

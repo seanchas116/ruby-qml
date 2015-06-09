@@ -62,3 +62,9 @@ class Time
     end
   end
 end
+
+class Proc
+  def to_qml
+    QML::ProcAccess.wrap_proc(self)
+  end
+end

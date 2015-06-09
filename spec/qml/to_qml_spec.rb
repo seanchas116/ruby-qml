@@ -64,4 +64,13 @@ describe '#to_qml' do
       expect(obj.some_method(1, 2)).to eq(3)
     end
   end
+
+  describe 'Proc#to_qml' do
+    it 'converts Proc into JS function' do
+      proc = -> (hoge) { hoge * 2 }
+      func = through.call(proc)
+      expect(func).to be_a(QML::JSFunction)
+      expect(func.call(2)).to eq(4)
+    end
+  end
 end

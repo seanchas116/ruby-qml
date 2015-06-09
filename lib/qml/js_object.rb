@@ -38,7 +38,7 @@ module QML
     end
 
     # Gets or sets a JS property, or call it as a method if it is a function.
-    def method_missing(method, *args)
+    def method_missing(method, *args, &block)
       if method[-1] == '='
         # setter
         key = method.slice(0...-1).to_sym
@@ -54,7 +54,7 @@ module QML
 
         prop = self[method]
         if prop.is_a? JSFunction
-          prop.call_with_instance(self, *args)
+          prop.call_with_instance(self, *args, &block)
         else
           prop
         end

@@ -13,7 +13,7 @@ typedef struct {
 static void engine_free(void *p) {
     engine_t *data = (engine_t *)p;
 
-    rb_thread_call_without_gvl((void *(*)(void *))&qmlbind_engine_release, data->engine, RUBY_UBF_IO, NULL);
+    //rb_thread_call_without_gvl((void *(*)(void *))&qmlbind_engine_release, data->engine, RUBY_UBF_IO, NULL);
     xfree(data);
 }
 

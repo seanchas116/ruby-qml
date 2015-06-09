@@ -307,6 +307,7 @@ HeavyTaskController {
 |String/Symbol   |string                          |
 |Array           |Array                           |
 |Hash            |plain Object                    |
+|Proc            |Function                        |
 |Time            |Date                            |
 |QML::Access     |Object(QObject derived)         |
 |QML::ListModel  |Object(QAbstractListModel)      |

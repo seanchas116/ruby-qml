@@ -65,19 +65,37 @@ static VALUE function_call(VALUE self, VALUE thisValue, VALUE args, CallType cal
     return resultValue;
 }
 
-static VALUE js_function_call(VALUE self, VALUE args) {
+static VALUE js_function_call(int argc, VALUE *argv, VALUE self) {
+    VALUE args;
+    VALUE block;
+    rb_scan_args(argc, argv, "*&", &args, &block);
+    if (!NIL_P(block)) {
+        args = rb_ary_concat(args, rb_ary_new_from_args(1, block));
+    }
+
     return function_call(self, Qnil, args, CallFunction);
 }
 
-static VALUE js_function_new(VALUE self, VALUE args) {
+static VALUE js_function_new(int argc, VALUE *argv, VALUE self) {
+    VALUE args;
+    VALUE block;
+    rb_scan_args(argc, argv, "*&", &args, &block);
+    if (!NIL_P(block)) {
+        args = rb_ary_concat(args, rb_ary_new_from_args(1, block));
+    }
+
     return function_call(self, Qnil, args, CallConstructor);
 }
 
 static VALUE js_function_call_with_instance(int argc, VALUE *argv, VALUE self) {
     VALUE thisValue;
     VALUE args;
+    VALUE block;
+    rb_scan_args(argc, argv, "1*&", &thisValue, &args, &block);
+    if (!NIL_P(block)) {
+        args = rb_ary_concat(args, rb_ary_new_from_args(1, block));
+    }
 
-    rb_scan_args(argc, argv, "1*", &thisValue, &args);
     return function_call(self, thisValue, args, CallMethod);
 }
 
@@ -85,7 +103,7 @@ void rbqml_init_js_function(void) {
     VALUE mQML = rb_define_module("QML");
     rbqml_cJSFunction = rb_define_class_under(mQML, "JSFunction", rbqml_cJSObject);
 
-    rb_define_method(rbqml_cJSFunction, "call", js_function_call, -2);
-    rb_define_method(rbqml_cJSFunction, "new", js_function_new, -2);
+    rb_define_method(rbqml_cJSFunction, "call", js_function_call, -1);
+    rb_define_method(rbqml_cJSFunction, "new", js_function_new, -1);
     rb_define_method(rbqml_cJSFunction, "call_with_instance", js_function_call_with_instance, -1);
 }

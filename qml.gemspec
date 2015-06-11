@@ -13,7 +13,14 @@ Gem::Specification.new do |spec|
   spec.homepage      = "http://seanchas116.github.io/ruby-qml/"
   spec.license       = "MIT"
 
-  spec.files         = `git ls-files -z`.split("\x0")
+  qmlbind_dir = "ext/qml/lib/libqmlbind"
+  qmlbind_files = Dir.chdir(qmlbind_dir) do
+    `git ls-files -z`
+      .split("\x0")
+      .map { |file| "#{qmlbind_dir}/#{file}" }
+  end
+
+  spec.files         = `git ls-files -z`.split("\x0") + qmlbind_files
   spec.executables   = spec.files.grep(%r{^bin/}) { |f| File.basename(f) }
   spec.test_files    = spec.files.grep(%r{^(test|spec|features)/})
   spec.require_paths = ["lib"]

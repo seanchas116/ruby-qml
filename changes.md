@@ -1,3 +1,8 @@
+## 1.0.0 (2015-06-16)
+
+* A lot of changes (see examples and docs)
+* Now uses [libqmlbind](https://github.com/seanchas116/libqmlbind)
+
 ## 0.0.7 (2014-12-25)
 
 * Support Ruby 2.2 (rc1) and Qt 5.4

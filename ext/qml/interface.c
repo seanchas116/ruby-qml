@@ -5,7 +5,7 @@
 
 VALUE rbqml_mInterface;
 static qmlbind_interface interface;
-static VALUE referenced_objects;
+VALUE rbqml_referenced_objects;
 
 qmlbind_interface rbqml_get_interface(void) {
     return interface;
@@ -24,7 +24,7 @@ static void *new_object_impl(void *p) {
     VALUE emitterValue = rbqml_signal_emitter_new(data->emitter);
     rb_funcall(obj, rb_intern("set_signal_emitter"), 1, emitterValue);
 
-    rb_hash_aset(referenced_objects, obj, Qnil);
+    rb_hash_aset(rbqml_referenced_objects, obj, Qnil);
     return (void *)obj;
 }
 
@@ -37,7 +37,7 @@ static qmlbind_backref new_object(qmlbind_backref class_handle, qmlbind_signal_e
 }
 
 static void *delete_object_impl(void *data) {
-    rb_hash_delete(referenced_objects, (VALUE)data);
+    rb_hash_delete(rbqml_referenced_objects, (VALUE)data);
     return NULL;
 }
 
@@ -151,6 +151,6 @@ void rbqml_init_interface(void) {
     rb_require("qml/interface");
     rbqml_mInterface = rb_path2class("QML::Interface");
     interface = qmlbind_interface_new(handlers);
-    referenced_objects = rb_hash_new();
-    rb_gc_register_address(&referenced_objects);
+    rbqml_referenced_objects = rb_hash_new();
+    rb_gc_register_address(&rbqml_referenced_objects);
 }

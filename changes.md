@@ -1,3 +1,7 @@
+## 1.0.1 (2015-06-20)
+
+* Fixes 100% CPU usage (#21)
+
 ## 1.0.0 (2015-06-16)
 
 * A lot of changes (see examples and docs)

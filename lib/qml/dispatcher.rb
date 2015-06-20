@@ -16,7 +16,7 @@ module QML
 
     def add_task(&task)
       synchronize do
-        callback_enabled = true if @tasks.empty?
+        enable_callback
         @tasks << task
       end
     end
@@ -36,7 +36,7 @@ module QML
           task = @tasks.shift
           task.call
         end
-        callback_enabled = false if @tasks.empty?
+        disable_callback if @tasks.empty?
       end
     end
   end

@@ -4,6 +4,7 @@
 #include "qml.h"
 
 extern VALUE rbqml_mInterface;
+extern VALUE rbqml_referenced_objects;
 qmlbind_interface rbqml_get_interface(void);
 
 void rbqml_init_interface(void);

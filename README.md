@@ -30,7 +30,7 @@ It provides bindings between QML and Ruby and enables you to use Qt Quick-based 
 
 * **Ruby 2.1 or later**
 * **OS X or Linux**
-* Qt 5.2 or later
+* Qt 5.4 or later
 
 ### OS X with Homebrew
 

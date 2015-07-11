@@ -1,3 +1,7 @@
+## 1.0.2 (2015-07-11)
+
+* Fixes error when calling `next_tick` from Ruby threads (#24)
+
 ## 1.0.1 (2015-06-20)
 
 * Fixes 100% CPU usage (#21)

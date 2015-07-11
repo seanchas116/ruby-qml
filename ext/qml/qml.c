@@ -68,11 +68,17 @@ static VALUE qml_engine(VALUE module) {
     return rbqml_engine;
 }
 
-static void nextTickCallback(void *data)
+static void *nextTickCallbackImpl(void *data)
 {
     VALUE block = (VALUE)data;
     rb_proc_call(block, rb_ary_new());
     rb_hash_delete(rbqml_referenced_objects, block);
+    return NULL;
+}
+
+static void nextTickCallback(void *data)
+{
+    rb_thread_call_with_gvl(nextTickCallbackImpl, data);
 }
 
 static VALUE qml_next_tick(int argc, VALUE *argv, VALUE module) {

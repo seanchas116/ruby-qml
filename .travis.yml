@@ -1,13 +1,13 @@
 language: ruby
 rvm:
-  - 2.2.2
-  - 2.1.6
+  - 2.3
+  - 2.2
 before_install:
-  - sudo apt-add-repository -y ppa:beineri/opt-qt541
+  - sudo apt-add-repository -y ppa:beineri/opt-qt56
   - sudo apt-get update
-  - sudo apt-get install -y qt54base qt54declarative
+  - sudo apt-get install -y qt56base qt56declarative
 before_script:
-  - source /opt/qt54/bin/qt54-env.sh
+  - source /opt/qt56/bin/qt56-env.sh
   - cd ext/qml
   - bundle exec ruby extconf.rb
   - make

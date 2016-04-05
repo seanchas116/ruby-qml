@@ -4,16 +4,16 @@
 #include "interface.h"
 
 VALUE rbqml_mInterface;
-static qmlbind_interface interface;
+static qmlbind_interface *interface;
 VALUE rbqml_referenced_objects;
 
-qmlbind_interface rbqml_get_interface(void) {
+qmlbind_interface *rbqml_get_interface(void) {
     return interface;
 }
 
 typedef struct {
-    qmlbind_backref class_handle;
-    qmlbind_signal_emitter emitter;
+    qmlbind_backref *class_handle;
+    qmlbind_signal_emitter *emitter;
 } new_object_data;
 
 static void *new_object_impl(void *p) {
@@ -28,7 +28,7 @@ static void *new_object_impl(void *p) {
     return (void *)obj;
 }
 
-static qmlbind_backref new_object(qmlbind_backref class_handle, qmlbind_signal_emitter emitter) {
+static qmlbind_backref *new_object(qmlbind_backref *class_handle, qmlbind_signal_emitter *emitter) {
     new_object_data data;
     data.class_handle = class_handle;
     data.emitter = emitter;
@@ -41,15 +41,15 @@ static void *delete_object_impl(void *data) {
     return NULL;
 }
 
-static void delete_object(qmlbind_backref handle) {
+static void delete_object(qmlbind_backref *handle) {
     rb_thread_call_with_gvl(&delete_object_impl, handle);
 }
 
 typedef struct {
-    qmlbind_backref backref;
+    qmlbind_backref *backref;
     const char *name;
     int argc;
-    qmlbind_value *argv;
+    const qmlbind_value *const *argv;
 } call_method_data;
 
 static void *call_method_impl(void *p) {
@@ -69,10 +69,10 @@ static void *call_method_impl(void *p) {
     return rbqml_to_qml(result);
 }
 
-static qmlbind_value call_method(
-    qmlbind_engine engine,
-    qmlbind_backref object_backref, const char *name,
-    int argc, qmlbind_value *argv) {
+static qmlbind_value *call_method(
+    qmlbind_engine *engine,
+    qmlbind_backref *object_backref, const char *name,
+    int argc, const qmlbind_value *const *argv) {
 
     call_method_data data;
     data.backref = object_backref;
@@ -84,7 +84,7 @@ static qmlbind_value call_method(
 }
 
 typedef struct {
-    qmlbind_backref backref;
+    qmlbind_backref *backref;
     const char *name;
 } get_property_data;
 
@@ -100,9 +100,9 @@ static void *get_property_impl(void *p) {
     return rbqml_to_qml(result);
 }
 
-static qmlbind_value get_property(
-    qmlbind_engine engine,
-    qmlbind_backref object_backref, const char *name) {
+static qmlbind_value *get_property(
+    qmlbind_engine *engine,
+    qmlbind_backref *object_backref, const char *name) {
 
     get_property_data data;
     data.backref = object_backref;
@@ -112,9 +112,9 @@ static qmlbind_value get_property(
 }
 
 typedef struct {
-    qmlbind_backref backref;
+    qmlbind_backref *backref;
     const char *name;
-    qmlbind_value value;
+    const qmlbind_value *value;
 } set_property_data;
 
 static void *set_property_impl(void *p) {
@@ -132,8 +132,8 @@ static void *set_property_impl(void *p) {
 }
 
 static void set_property(
-    qmlbind_engine engine,
-    qmlbind_backref object_backref, const char *name, qmlbind_value value) {
+    qmlbind_engine *engine,
+    qmlbind_backref *object_backref, const char *name, const qmlbind_value *value) {
 
     set_property_data data;
     data.backref = object_backref;

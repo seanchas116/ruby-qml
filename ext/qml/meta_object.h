@@ -4,5 +4,5 @@
 
 extern VALUE rbqml_mMetaObject;
 
-VALUE rbqml_metaobject_new(qmlbind_metaobject metaobj);
+VALUE rbqml_metaobject_new(qmlbind_metaobject *metaobj);
 void rbqml_init_meta_object(void);

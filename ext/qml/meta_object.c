@@ -5,7 +5,7 @@
 VALUE rbqml_cMetaObject;
 
 typedef struct {
-    qmlbind_metaobject metaobject;
+    qmlbind_metaobject *metaobject;
 } metaobject;
 
 static void metaobject_free(void *p) {
@@ -20,7 +20,7 @@ static const rb_data_type_t data_type = {
     { NULL, metaobject_free }
 };
 
-qmlbind_metaobject rbqml_get_metaobject(VALUE self) {
+qmlbind_metaobject *rbqml_get_metaobject(VALUE self) {
     metaobject *data;
     TypedData_Get_Struct(self, metaobject, &data_type, data);
     return data->metaobject;
@@ -32,7 +32,7 @@ static VALUE metaobject_alloc(VALUE klass) {
     return TypedData_Wrap_Struct(klass, &data_type, data);
 }
 
-VALUE rbqml_metaobject_new(qmlbind_metaobject metaobj) {
+VALUE rbqml_metaobject_new(qmlbind_metaobject *metaobj) {
     VALUE self = metaobject_alloc(rbqml_cMetaObject);
     metaobject *data;
     TypedData_Get_Struct(self, metaobject, &data_type, data);
@@ -41,9 +41,9 @@ VALUE rbqml_metaobject_new(qmlbind_metaobject metaobj) {
 }
 
 typedef struct {
-    qmlbind_engine engine;
-    qmlbind_metaobject metaobject;
-    qmlbind_backref backref;
+    qmlbind_engine *engine;
+    qmlbind_metaobject *metaobject;
+    qmlbind_backref *backref;
 } wrap_data;
 
 void *wrap_impl(void *p) {
@@ -55,14 +55,16 @@ VALUE metaobject_wrap(VALUE self, VALUE access) {
     wrap_data data;
     data.engine = rbqml_get_engine(rbqml_engine);
     data.metaobject = rbqml_get_metaobject(self);
-    data.backref = (qmlbind_backref)access;
+    data.backref = (qmlbind_backref *)access;
 
-    qmlbind_value wrapped = rb_thread_call_without_gvl(wrap_impl, &data, RUBY_UBF_IO, NULL);
-    return rbqml_to_ruby(wrapped);
+    qmlbind_value *wrapped = rb_thread_call_without_gvl(wrap_impl, &data, RUBY_UBF_IO, NULL);
+    VALUE ret = rbqml_to_ruby(wrapped);
+    qmlbind_value_release(wrapped);
+    return ret;
 }
 
 static VALUE metaobject_register(VALUE self, VALUE uri, VALUE versionMajor, VALUE versionMinor, VALUE qmlName) {
-    qmlbind_metaobject metaobj = rbqml_get_metaobject(self);
+    qmlbind_metaobject *metaobj = rbqml_get_metaobject(self);
     qmlbind_register_type(
         metaobj,
         rb_string_value_cstr(&uri),

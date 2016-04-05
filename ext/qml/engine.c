@@ -7,7 +7,7 @@
 VALUE rbqml_cEngine;
 
 typedef struct {
-    qmlbind_engine engine;
+    qmlbind_engine *engine;
 } engine_t;
 
 static void engine_free(void *p) {
@@ -22,7 +22,7 @@ static const rb_data_type_t data_type = {
     { NULL, &engine_free }
 };
 
-qmlbind_engine rbqml_get_engine(VALUE self) {
+qmlbind_engine *rbqml_get_engine(VALUE self) {
     engine_t *data;
     TypedData_Get_Struct(self, engine_t, &data_type, data);
     return data->engine;
@@ -47,14 +47,14 @@ static VALUE engine_initialize(VALUE self) {
  * @see http://doc.qt.io/qt-5/qtqml-syntax-imports.html#qml-import-path
  */
 static VALUE engine_add_import_path(VALUE self, VALUE path) {
-    qmlbind_engine engine = rbqml_get_engine(self);
+    qmlbind_engine *engine = rbqml_get_engine(self);
     path = rb_funcall(path, rb_intern("to_s"), 0);
     qmlbind_engine_add_import_path(engine, rb_string_value_cstr(&path));
     return self;
 }
 
 typedef struct {
-    qmlbind_engine engine;
+    qmlbind_engine *engine;
     const char *str;
     const char *file;
     int lineNum;
@@ -66,7 +66,7 @@ static void *evaluate_impl(void *p) {
 }
 
 static VALUE engine_evaluate(VALUE self, VALUE str, VALUE file, VALUE lineNum) {
-    qmlbind_engine engine = rbqml_get_engine(self);
+    qmlbind_engine *engine = rbqml_get_engine(self);
 
     evaluate_data data;
     data.engine = engine;
@@ -74,7 +74,7 @@ static VALUE engine_evaluate(VALUE self, VALUE str, VALUE file, VALUE lineNum) {
     data.file = rb_string_value_cstr(&file);
     data.lineNum = NUM2INT(lineNum);
 
-    qmlbind_value value = rb_thread_call_without_gvl(&evaluate_impl, &data, RUBY_UBF_IO, NULL);
+    qmlbind_value *value = rb_thread_call_without_gvl(&evaluate_impl, &data, RUBY_UBF_IO, NULL);
 
     VALUE result = rbqml_to_ruby(value);
     qmlbind_value_release(value);
@@ -87,9 +87,9 @@ static VALUE engine_evaluate(VALUE self, VALUE str, VALUE file, VALUE lineNum) {
  * @return [QML::JSArray]
  */
 static VALUE engine_new_array(VALUE self, VALUE len) {
-    qmlbind_engine engine = rbqml_get_engine(self);
+    qmlbind_engine *engine = rbqml_get_engine(self);
 
-    qmlbind_value array = qmlbind_engine_new_array(engine, NUM2INT(len));
+    qmlbind_value *array = qmlbind_engine_new_array(engine, NUM2INT(len));
     VALUE value = rbqml_js_object_new(rbqml_cJSArray, array);
     qmlbind_value_release(array);
 
@@ -100,9 +100,9 @@ static VALUE engine_new_array(VALUE self, VALUE len) {
  * @return [QML::JSObject]
  */
 static VALUE engine_new_object(VALUE self) {
-    qmlbind_engine engine = rbqml_get_engine(self);
+    qmlbind_engine *engine = rbqml_get_engine(self);
 
-    qmlbind_value obj = qmlbind_engine_new_object(engine);
+    qmlbind_value *obj = qmlbind_engine_new_object(engine);
     VALUE value = rbqml_js_object_new(rbqml_cJSObject, obj);
     qmlbind_value_release(obj);
 
@@ -113,7 +113,7 @@ static VALUE engine_new_object(VALUE self) {
  * Starts garbage collection on the {Engine}.
  */
 static VALUE engine_collect_garbage(VALUE self) {
-    qmlbind_engine engine = rbqml_get_engine(self);
+    qmlbind_engine *engine = rbqml_get_engine(self);
     qmlbind_engine_collect_garbage(engine);
     return self;
 }

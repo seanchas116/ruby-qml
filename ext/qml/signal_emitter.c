@@ -5,7 +5,7 @@
 VALUE rbqml_cSignalEmitter;
 
 typedef struct {
-    qmlbind_signal_emitter emitter;
+    qmlbind_signal_emitter *emitter;
 } emitter_t;
 
 static void emitter_free(void *p) {
@@ -19,7 +19,7 @@ static const rb_data_type_t data_type = {
     { NULL, &emitter_free }
 };
 
-VALUE rbqml_signal_emitter_new(qmlbind_signal_emitter emitter) {
+VALUE rbqml_signal_emitter_new(qmlbind_signal_emitter *emitter) {
     emitter_t *data = ALLOC(emitter_t);
     data->emitter = emitter;
     return TypedData_Wrap_Struct(rbqml_cSignalEmitter, &data_type, data);
@@ -30,10 +30,10 @@ static VALUE emitter_alloc(VALUE klass) {
 }
 
 typedef struct {
-    qmlbind_signal_emitter emitter;
+    qmlbind_signal_emitter *emitter;
     const char *name;
     int argc;
-    qmlbind_value *argv;
+    const qmlbind_value *const *argv;
 } emit_data;
 
 static void *emit_impl(void *p) {
@@ -47,10 +47,10 @@ static VALUE emitter_emit(VALUE self, VALUE name, VALUE args) {
     TypedData_Get_Struct(self, emitter_t, &data_type, d);
 
     int argc = RARRAY_LEN(args);
-    qmlbind_value *qmlArgs = malloc(argc * sizeof(qmlbind_value));
+    const qmlbind_value **qmlArgs = malloc(argc * sizeof(qmlbind_value *));
 
     for (int i = 0; i < argc; ++i) {
-        qmlbind_value value = rbqml_to_qml(RARRAY_AREF(args, i));
+        qmlbind_value *value = rbqml_to_qml(RARRAY_AREF(args, i));
         qmlArgs[i] = value;
     }
 

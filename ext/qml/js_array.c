@@ -9,9 +9,9 @@ VALUE rbqml_cJSArray;
  */
 static VALUE js_array_length(VALUE self)
 {
-    qmlbind_value array = rbqml_js_object_get(self);
+    qmlbind_value *array = rbqml_js_object_get(self);
 
-    qmlbind_value lenValue = qmlbind_value_get_property(array, "length");
+    qmlbind_value *lenValue = qmlbind_value_get_property(array, "length");
     int len = qmlbind_value_get_number(lenValue);
     qmlbind_value_release(lenValue);
 
@@ -22,14 +22,14 @@ static VALUE js_array_each(VALUE self)
 {
     RETURN_SIZED_ENUMERATOR(self, 0, 0, &js_array_length);
 
-    qmlbind_value array = rbqml_js_object_get(self);
+    qmlbind_value *array = rbqml_js_object_get(self);
 
-    qmlbind_value lenValue = qmlbind_value_get_property(array, "length");
+    qmlbind_value *lenValue = qmlbind_value_get_property(array, "length");
     int len = qmlbind_value_get_number(lenValue);
     qmlbind_value_release(lenValue);
 
     for (int i = 0; i < len; ++i) {
-        qmlbind_value elem = qmlbind_value_get_array_item(array, i);
+        qmlbind_value *elem = qmlbind_value_get_array_item(array, i);
         VALUE rubyElem = rb_ensure(&rbqml_to_ruby, (VALUE)elem, (VALUE (*)())&qmlbind_value_release, (VALUE)elem);
         rb_yield(rubyElem);
     }

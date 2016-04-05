@@ -5,7 +5,7 @@
 #include "js_function.h"
 #include "js_wrapper.h"
 
-VALUE rbqml_to_ruby(qmlbind_value value)
+VALUE rbqml_to_ruby(const qmlbind_value *value)
 {
     if (qmlbind_value_is_undefined(value) || qmlbind_value_is_null(value)) {
         return Qnil;
@@ -18,8 +18,10 @@ VALUE rbqml_to_ruby(qmlbind_value value)
         return rb_float_new(num);
     }
     if (qmlbind_value_is_string(value)) {
-        qmlbind_string str = qmlbind_value_get_string(value);
-        return rb_enc_str_new(qmlbind_string_get_chars(str), qmlbind_string_get_length(str), rb_utf8_encoding());
+        qmlbind_string *str = qmlbind_value_get_string(value);
+        VALUE ruby_str = rb_enc_str_new(qmlbind_string_get_chars(str), qmlbind_string_get_length(str), rb_utf8_encoding());
+        qmlbind_string_release(str);
+        return ruby_str;
     }
 
     VALUE klass;
@@ -34,10 +36,10 @@ VALUE rbqml_to_ruby(qmlbind_value value)
         klass = rbqml_cJSObject;
     }
 
-    return rbqml_js_object_new(klass, value);
+    return rbqml_js_object_new(klass, qmlbind_value_clone(value));
 }
 
-qmlbind_value rbqml_to_qml(VALUE value)
+qmlbind_value *rbqml_to_qml(VALUE value)
 {
     value = rb_funcall(value, rb_intern("to_qml"), 0);
 

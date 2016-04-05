@@ -9,10 +9,10 @@ typedef enum {
 } CallType;
 
 typedef struct {
-    qmlbind_value func;
-    qmlbind_value instance;
+    qmlbind_value *func;
+    qmlbind_value *instance;
     int argc;
-    qmlbind_value *argv;
+    const qmlbind_value *const *argv;
     CallType type;
 } function_call_data;
 
@@ -33,13 +33,13 @@ static void *function_call_impl(void *p) {
 }
 
 static VALUE function_call(VALUE self, VALUE thisValue, VALUE args, CallType callType) {
-    qmlbind_value func = rbqml_js_object_get(self);
+    qmlbind_value *func = rbqml_js_object_get(self);
 
     int argc = RARRAY_LEN(args);
-    qmlbind_value *qmlArgs = malloc(argc * sizeof(qmlbind_value));
+    const qmlbind_value **qmlArgs = malloc(argc * sizeof(qmlbind_value *));
 
     for (int i = 0; i < argc; ++i) {
-        qmlbind_value value = rbqml_to_qml(RARRAY_AREF(args, i));
+        qmlbind_value *value = rbqml_to_qml(RARRAY_AREF(args, i));
         qmlArgs[i] = value;
     }
 
@@ -52,7 +52,7 @@ static VALUE function_call(VALUE self, VALUE thisValue, VALUE args, CallType cal
     data.argv = qmlArgs;
     data.type = callType;
 
-    qmlbind_value result = rb_thread_call_without_gvl(&function_call_impl, &data, RUBY_UBF_IO, NULL);
+    qmlbind_value *result = rb_thread_call_without_gvl(&function_call_impl, &data, RUBY_UBF_IO, NULL);
 
     bool is_error = qmlbind_value_is_error(result);
     VALUE resultValue = rbqml_to_ruby(result);

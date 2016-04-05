@@ -10,7 +10,7 @@ VALUE rbqml_cExporter;
 
 
 typedef struct {
-    qmlbind_exporter exporter;
+    qmlbind_exporter *exporter;
 } exporter;
 
 static void exporter_free(void *p) {
@@ -25,7 +25,7 @@ static const rb_data_type_t data_type = {
     { NULL, &exporter_free }
 };
 
-qmlbind_exporter rbqml_get_exporter(VALUE self) {
+qmlbind_exporter *rbqml_get_exporter(VALUE self) {
     exporter *data;
     TypedData_Get_Struct(self, exporter, &data_type, data);
     return data->exporter;
@@ -42,19 +42,19 @@ static VALUE exporter_alloc(VALUE klass) {
 static VALUE exporter_initialize(VALUE self, VALUE klass, VALUE name) {
     exporter *data;
     TypedData_Get_Struct(self, exporter, &data_type, data);
-    data->exporter = qmlbind_exporter_new((qmlbind_backref)klass, rb_string_value_cstr(&name), rbqml_get_interface());
+    data->exporter = qmlbind_exporter_new((qmlbind_backref *)klass, rb_string_value_cstr(&name), rbqml_get_interface());
 
     return self;
 }
 
 static VALUE exporter_add_method(VALUE self, VALUE name, VALUE arity) {
-    qmlbind_exporter exporter = rbqml_get_exporter(self);
+    qmlbind_exporter *exporter = rbqml_get_exporter(self);
     qmlbind_exporter_add_method(exporter, rb_id2name(SYM2ID(name)), NUM2INT(arity));
     return Qnil;
 }
 
 static VALUE exporter_add_signal(VALUE self, VALUE name, VALUE params) {
-    qmlbind_exporter exporter = rbqml_get_exporter(self);
+    qmlbind_exporter *exporter = rbqml_get_exporter(self);
 
     int arity = RARRAY_LEN(params);
 
@@ -68,14 +68,14 @@ static VALUE exporter_add_signal(VALUE self, VALUE name, VALUE params) {
 }
 
 static VALUE exporter_add_property(VALUE self, VALUE name, VALUE notifier) {
-    qmlbind_exporter exporter = rbqml_get_exporter(self);
+    qmlbind_exporter *exporter = rbqml_get_exporter(self);
     qmlbind_exporter_add_property(exporter, rb_id2name(SYM2ID(name)), rb_id2name(SYM2ID(notifier)));
     return Qnil;
 }
 
 static VALUE exporter_to_metaobject(VALUE self) {
-    qmlbind_exporter exporter = rbqml_get_exporter(self);
-    qmlbind_metaobject metaobj = qmlbind_metaobject_new(exporter);
+    qmlbind_exporter *exporter = rbqml_get_exporter(self);
+    qmlbind_metaobject *metaobj = qmlbind_metaobject_new(exporter);
     return rbqml_metaobject_new(metaobj);
 }
 

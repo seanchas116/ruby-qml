@@ -4,7 +4,7 @@
 VALUE rbqml_cApplication = Qnil;
 
 typedef struct {
-    qmlbind_application application;
+    qmlbind_application *application;
 } application_t;
 
 static void application_free(void *p) {
@@ -19,7 +19,7 @@ static const rb_data_type_t data_type = {
     { NULL, &application_free }
 };
 
-qmlbind_application rbqml_get_application(VALUE self) {
+qmlbind_application *rbqml_get_application(VALUE self) {
     application_t *data;
     TypedData_Get_Struct(self, application_t, &data_type, data);
     return data->application;
@@ -46,7 +46,7 @@ static VALUE application_initialize(VALUE self, VALUE args) {
     args = rb_ary_concat(rb_ary_new_from_args(1, rb_argv0), args);
 
     int argc = RARRAY_LEN(args);
-    char **argv = malloc(argc * sizeof(char *));
+    const char **argv = malloc(argc * sizeof(char *));
 
     for (int i = 0; i < argc; ++i) {
         VALUE arg = RARRAY_AREF(args, i);
@@ -63,7 +63,7 @@ static VALUE application_initialize(VALUE self, VALUE args) {
  * This method never returns until the application quits.
  */
 static VALUE application_exec(VALUE self) {
-    qmlbind_application app = rbqml_get_application(self);
+    qmlbind_application *app = rbqml_get_application(self);
     int ret = (int)rb_thread_call_without_gvl((void *(*)(void *))&qmlbind_application_exec, app, RUBY_UBF_IO, NULL);
     return INT2NUM(ret);
 }

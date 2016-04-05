@@ -6,7 +6,7 @@ static VALUE cPluginError;
 VALUE rbqml_cPluginLoader;
 
 typedef struct {
-    qmlbind_plugin plugin;
+    qmlbind_plugin *plugin;
 } plugin_loader_t;
 
 static void plugin_loader_free(void *p) {
@@ -20,7 +20,7 @@ static const rb_data_type_t data_type = {
     { NULL, &plugin_loader_free }
 };
 
-qmlbind_plugin rbqml_get_plugin(VALUE self) {
+qmlbind_plugin *rbqml_get_plugin(VALUE self) {
     plugin_loader_t *data;
     TypedData_Get_Struct(self, plugin_loader_t, &data_type, data);
     return data->plugin;
@@ -44,9 +44,9 @@ static VALUE plugin_loader_init(VALUE self, VALUE path) {
  * @return [QML::JSObject]
  */
 static VALUE plugin_loader_instance(VALUE self) {
-    qmlbind_plugin plugin = rbqml_get_plugin(self);
+    qmlbind_plugin *plugin = rbqml_get_plugin(self);
 
-    qmlbind_string qmlerror = qmlbind_plugin_get_error_string(plugin);
+    qmlbind_string *qmlerror = qmlbind_plugin_get_error_string(plugin);
     if (qmlerror) {
         VALUE errorStr = rb_enc_str_new(qmlbind_string_get_chars(qmlerror), qmlbind_string_get_length(qmlerror), rb_utf8_encoding());
         qmlbind_string_release(qmlerror);
@@ -55,8 +55,10 @@ static VALUE plugin_loader_instance(VALUE self) {
         rb_exc_raise(error);
     }
 
-    qmlbind_value loaded = qmlbind_plugin_get_instance(plugin, rbqml_get_engine(rbqml_engine));
-    return rbqml_to_ruby(loaded);
+    qmlbind_value *loaded = qmlbind_plugin_get_instance(plugin, rbqml_get_engine(rbqml_engine));
+    VALUE ret = rbqml_to_ruby(loaded);
+    qmlbind_value_release(loaded);
+    return ret;
 }
 
 void rbqml_init_plugin_loader(void) {

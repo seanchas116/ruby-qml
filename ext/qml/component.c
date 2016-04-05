@@ -6,7 +6,7 @@
 VALUE rbqml_cComponent;
 
 typedef struct {
-    qmlbind_component component;
+    qmlbind_component *component;
 } component_t;
 
 static void component_free(void *p) {
@@ -20,7 +20,7 @@ static const rb_data_type_t data_type = {
     { NULL, &component_free }
 };
 
-qmlbind_component rbqml_get_component(VALUE self) {
+qmlbind_component *rbqml_get_component(VALUE self) {
     component_t *data;
     TypedData_Get_Struct(self, component_t, &data_type, data);
     return data->component;
@@ -41,22 +41,22 @@ static VALUE component_initialize(VALUE self) {
 }
 
 static VALUE component_load_path(VALUE self, VALUE path) {
-    qmlbind_component component = rbqml_get_component(self);
+    qmlbind_component *component = rbqml_get_component(self);
     qmlbind_component_load_path(component, rb_string_value_cstr(&path));
 
     return self;
 }
 
 static VALUE component_load_data(VALUE self, VALUE data, VALUE path) {
-    qmlbind_component component = rbqml_get_component(self);
+    qmlbind_component *component = rbqml_get_component(self);
     qmlbind_component_set_data(component, rb_string_value_cstr(&data), rb_string_value_cstr(&path));
 
     return self;
 }
 
 static VALUE component_error_string(VALUE self) {
-    qmlbind_component component = rbqml_get_component(self);
-    qmlbind_string error = qmlbind_component_get_error_string(component);
+    qmlbind_component *component = rbqml_get_component(self);
+    qmlbind_string *error = qmlbind_component_get_error_string(component);
     if (error) {
         VALUE str = rb_enc_str_new(qmlbind_string_get_chars(error), qmlbind_string_get_length(error), rb_utf8_encoding());
         qmlbind_string_release(error);
@@ -70,7 +70,7 @@ static VALUE component_create(VALUE self) {
     component_t *data;
     TypedData_Get_Struct(self, component_t, &data_type, data);
 
-    qmlbind_value obj = rb_thread_call_without_gvl((void *(*)(void *))&qmlbind_component_create, data->component, RUBY_UBF_IO, NULL);
+    qmlbind_value *obj = rb_thread_call_without_gvl((void *(*)(void *))&qmlbind_component_create, data->component, RUBY_UBF_IO, NULL);
     VALUE result = rbqml_to_ruby(obj);
     qmlbind_value_release(obj);
 

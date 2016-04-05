@@ -6,6 +6,8 @@ before_install:
   - sudo apt-add-repository -y ppa:beineri/opt-qt56
   - sudo apt-get update
   - sudo apt-get install -y qt56base qt56declarative
+  - gem update --system
+  - gem update bundler
 before_script:
   - source /opt/qt56/bin/qt56-env.sh
   - cd ext/qml

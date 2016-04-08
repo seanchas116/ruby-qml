@@ -4,4 +4,4 @@
 #include <qmlbind.h>
 #include <stdbool.h>
 
-void rbqml_init_exporter();
+void rbqml_init_meta_class();

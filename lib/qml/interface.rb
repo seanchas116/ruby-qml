@@ -1,5 +1,5 @@
 module QML
-  class Interface
+  module Interface
 
     def self.call_method(obj, name, args)
       begin

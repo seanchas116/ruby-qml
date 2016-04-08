@@ -48,7 +48,8 @@ $CPPFLAGS << " -I#{qmlbind_dir + 'include'}"
 
 $CPPFLAGS << " -g" if debug_enabled
 
-$CPPFLAGS << " -std=c99"
+$CFLAGS << " -std=c99"
+$CXXFLAGS << " -std=c++11"
 
 # create makefile
 

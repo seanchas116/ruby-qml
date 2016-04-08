@@ -1,5 +1,4 @@
 #include "application.h"
-#include "interface.h"
 
 VALUE rbqml_cApplication = Qnil;
 

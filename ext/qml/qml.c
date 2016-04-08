@@ -2,15 +2,14 @@
 #include "application.h"
 #include "component.h"
 #include "engine.h"
-#include "exporter.h"
-#include "interface.h"
+#include "meta_class.h"
 #include "js_object.h"
 #include "js_array.h"
 #include "js_function.h"
 #include "js_wrapper.h"
 #include "signal_emitter.h"
 #include "plugin_loader.h"
-#include "meta_object.h"
+#include "refcounter.h"
 
 VALUE rbqml_mQML;
 VALUE rbqml_application = Qnil;
@@ -72,7 +71,7 @@ static void *nextTickCallbackImpl(void *data)
 {
     VALUE block = (VALUE)data;
     rb_proc_call(block, rb_ary_new());
-    rb_hash_delete(rbqml_referenced_objects, block);
+    rbqml_release_value(block);
     return NULL;
 }
 
@@ -84,7 +83,7 @@ static void nextTickCallback(void *data)
 static VALUE qml_next_tick(int argc, VALUE *argv, VALUE module) {
     VALUE block;
     rb_scan_args(argc, argv, "&", &block);
-    rb_hash_aset(rbqml_referenced_objects, block, Qnil);
+    rbqml_retain_value(block);
 
     qmlbind_next_tick(nextTickCallback, (void *)block);
     return block;
@@ -94,18 +93,17 @@ void Init_qml(void)
 {
     rbqml_mQML = rb_define_module("QML");
 
+    rbqml_init_refcounter();
     rbqml_init_application();
     rbqml_init_engine();
     rbqml_init_component();
-    rbqml_init_interface();
-    rbqml_init_exporter();
+    rbqml_init_meta_class();
     rbqml_init_js_object();
     rbqml_init_js_array();
     rbqml_init_js_function();
     rbqml_init_js_wrapper();
     rbqml_init_signal_emitter();
     rbqml_init_plugin_loader();
-    rbqml_init_meta_object();
 
     rb_define_module_function(rbqml_mQML, "initialized?", qml_initialized_p, 0);
     rb_define_module_function(rbqml_mQML, "init_impl", qml_init, 1);

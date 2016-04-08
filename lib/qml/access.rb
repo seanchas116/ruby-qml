@@ -23,7 +23,7 @@ module QML
     end
 
     def to_qml
-      @qml_value ||= self.class.meta_object.wrap(self)
+      @qml_value ||= self.class.meta_class.wrap(self)
     end
 
     # allowed name patterns for exposed method names
@@ -31,19 +31,19 @@ module QML
 
     module ClassMethods
 
-      def meta_object
-        @meta_object ||= begin
-          exporter = Exporter.new(self, name)
+      def meta_class
+        @meta_class ||= begin
+          meta_class = MetaClass.new(self, name)
 
           signals = self.signals.grep(ALLOWED_PATTERN)
           properties = self.properties.grep(ALLOWED_PATTERN)
 
           signals.each do |signal|
-            exporter.add_signal(signal, signal_infos[signal].params)
+            meta_class.add_signal(signal, signal_infos[signal].params)
           end
 
           properties.each do |prop|
-            exporter.add_property(prop, :"#{prop}_changed")
+            meta_class.add_property(prop, :"#{prop}_changed")
           end
 
           methods = ancestors.take_while { |k| k.include?(Access) }
@@ -55,10 +55,10 @@ module QML
             instance_method = self.instance_method(method)
             # ignore variadic methods
             if instance_method.arity >= 0
-              exporter.add_method(method, instance_method.arity)
+              meta_class.add_method(method, instance_method.arity)
             end
           end
-          exporter.to_meta_object
+          meta_class
         end
       end
 
@@ -76,7 +76,7 @@ module QML
       def register_to_qml_impl(opts)
         metadata = guess_metadata(opts)
 
-        meta_object.register(
+        meta_class.register(
           metadata[:under],
           metadata[:versions][0],
           metadata[:versions][1],

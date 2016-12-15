@@ -42,7 +42,7 @@ module Examples
       include QML::Access
       register_to_qml
 
-      property(:model) { QML::ArrayModel.new(:tweet_text, :user_name, :user_icon) }
+      property(:model) { QML::Data::ArrayModel.new(:tweet_text, :user_name, :user_icon) }
       property :word
 
       def initialize

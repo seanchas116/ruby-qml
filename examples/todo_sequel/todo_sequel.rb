@@ -15,7 +15,7 @@ module Examples
       Time :due_date
     end
 
-    class SequelModel < QML::QueryModel
+    class SequelModel < QML::Data::QueryModel
       attr_accessor :dataset
 
       def initialize(dataset)

@@ -30,6 +30,51 @@ static VALUE application_alloc(VALUE klass) {
     return TypedData_Wrap_Struct(klass, &data_type, data);
 }
 
+static VALUE application_name(VALUE self, VALUE name) {
+    application_t *data;
+
+   	Check_Type(name, T_STRING);
+    TypedData_Get_Struct(self, application_t, &data_type, data);
+    if (data->application) {
+    	qmlbind_application_setapplicationname(RSTRING_PTR(name));
+    }
+	return self;
+}
+
+static VALUE application_organization(VALUE self, VALUE name) {
+    application_t *data;
+
+   	Check_Type(name, T_STRING);
+    TypedData_Get_Struct(self, application_t, &data_type, data);
+    if (data->application) {
+    	qmlbind_application_setorganizationname(RSTRING_PTR(name));
+    }
+	return self;
+}
+
+static VALUE application_domain(VALUE self, VALUE name) {
+    application_t *data;
+
+   	Check_Type(name, T_STRING);
+    TypedData_Get_Struct(self, application_t, &data_type, data);
+    if (data->application) {
+    	qmlbind_application_setorganizationdomain(RSTRING_PTR(name));
+    }
+	return self;
+}
+
+static VALUE application_seticon(VALUE self, VALUE filename) {
+    application_t *data;
+
+   	Check_Type(filename, T_STRING);
+    TypedData_Get_Struct(self, application_t, &data_type, data);
+    if (data->application) {
+    	qmlbind_application_seticon(RSTRING_PTR(filename));
+    }
+	return self;
+}
+
+
 static VALUE application_initialize(VALUE self, VALUE args) {
     if (rb_thread_main() != rb_thread_current()) {
         rb_raise(rb_eThreadError, "Initializing QML::Application outside the main thread");
@@ -84,4 +129,8 @@ void rbqml_init_application(void) {
     rb_define_private_method(rbqml_cApplication, "initialize", application_initialize, 1);
     rb_define_method(rbqml_cApplication, "exec", application_exec, 0);
     rb_define_method(rbqml_cApplication, "process_events", application_process_events, 0);
+    rb_define_method(rbqml_cApplication, "name=", application_name, 1);
+    rb_define_method(rbqml_cApplication, "organization=", application_organization, 1);
+    rb_define_method(rbqml_cApplication, "domain=", application_domain, 1);
+    rb_define_method(rbqml_cApplication, "icon=", application_seticon, 1);
 }

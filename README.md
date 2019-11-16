@@ -47,6 +47,11 @@ If you use [official Qt installation](http://qt-project.org/downloads), for exam
 
 The Qt installation path (`$HOME/Qt/5.4/clang_64` in this example) depends on your Qt installation configuration and Qt version.
 
+### Ubuntu
+
+    $ sudo apt install ruby ruby-dev build-essentials qt5-default qtdeclarative5-dev qtbase5-private-dev
+    $ sudo gem install qml
+
 ### General (OSX and Linux)
 
     $ gem install qml
